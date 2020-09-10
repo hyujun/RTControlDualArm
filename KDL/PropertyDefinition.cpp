@@ -1,19 +1,23 @@
 #include "PropertyDefinition.h"
 
-#define ENC_OFFSET_J1 -51476200
-#define ENC_OFFSET_J2 16350230
-#define ENC_OFFSET_J3 104515000
-#define ENC_OFFSET_J4 506119020
-#define ENC_OFFSET_J5 14598364
-#define ENC_OFFSET_J6 10983523
-#define ENC_OFFSET_J7 -6860733
-#define ENC_OFFSET_J8 -59420800
-#define ENC_OFFSET_J9 185495795
-#define ENC_OFFSET_J10 11226000
-#define ENC_OFFSET_J11 -11773634
-#define ENC_OFFSET_J12 12912330
-#define ENC_OFFSET_J13 19522733
-#define ENC_OFFSET_J14 37893089
+#define ENC_OFFSET_J1 6434393
+#define ENC_OFFSET_J2 16421600
+#define ENC_OFFSET_J3 104454976
+#define ENC_OFFSET_J4 506083805
+#define ENC_OFFSET_J5 14399894
+#define ENC_OFFSET_J6 10801285
+#define ENC_OFFSET_J7 -12525517
+#define ENC_OFFSET_J8 -49482190
+
+#define ENC_OFFSET_J9 185787856
+#define ENC_OFFSET_J10 11739287
+#define ENC_OFFSET_J11 -14866250
+#define ENC_OFFSET_J12 12812683
+#define ENC_OFFSET_J13 19996194
+#define ENC_OFFSET_J14 45845425
+
+#define ENC_OFFSET_WRIST1 -56659968
+#define ENC_OFFSET_WRIST2 100815317
 
 #define ENC_OFFSET_WRIST 44619175
 
@@ -70,6 +74,10 @@ robot_kinematic_info serial_Kinematic_info[] = {
 				0.0, -325.0e-3, 245.0e-3,
 				0.0, -325.0e-3, 235.0e-3},		// 8
 
+		{0,1,0,
+				0.0, -325.0e-3, 179.0e-3,
+				0.0, -325.0e-3, 122.19e-3},  	// wrist1
+
 #endif
 //Left hand
 		{0, 0, -1,
@@ -96,6 +104,9 @@ robot_kinematic_info serial_Kinematic_info[] = {
 				0.0, 325.0e-3, 245.0e-3,
 				0.0, 325.0e-3, 235.0e-3},		// 14
 #endif
+		{0, -1, 0,
+				0.0, 325.0e-3, 179.0e-3,
+				0.0, 325.0e-3, 122.19e-3},		// wrist2
 };
 
 //{MASS,
@@ -137,6 +148,10 @@ robot_dynamic_info serial_Dynamic_info[] = {
 		{1.29,
 				0.0005, 0.0005, 0.0005, 0.0, 0.0, 0.0,
 				0.0e-3, -299.5e-3, 130.1e-3},			// 8
+
+		{1.29,
+				0.0005, 0.0005, 0.0005, 0.0, 0.0, 0.0,
+				0.0e-3, -299.5e-3, 130.1e-3},			// wrist1
 #endif
 //Left
 		{3.35,
@@ -163,6 +178,9 @@ robot_dynamic_info serial_Dynamic_info[] = {
 				0.0005, 0.0005, 0.0005, 0.0, 0.0, 0.0,
 				0.0e-3, 299.5e-3, 130.1e-3},			// 8
 #endif
+		{1.29,
+				0.0005, 0.0005, 0.0005, 0.0, 0.0, 0.0,
+				0.0e-3, 299.5e-3, 130.1e-3},			// wrist2
 };
 
 // {HarmonicRatio, EncoderResolution, MaximumContinuousCurrent, TorqueConstant, AbsolutePositionOffset}
@@ -176,6 +194,7 @@ robot_motor_info serial_Motor_info[] = {
 		{HARMONIC_100, ABS_ENC_19, MAX_CURRENT_TYPE2, TORQUE_CONST_TYPE2, ENC_OFFSET_J6},
 		{HARMONIC_100, ABS_ENC_19, MAX_CURRENT_TYPE3, TORQUE_CONST_TYPE3, ENC_OFFSET_J7},
 		{HARMONIC_100, ABS_ENC_19, MAX_CURRENT_TYPE3, TORQUE_CONST_TYPE3, ENC_OFFSET_J8},
+		{HARMONIC_100, ABS_ENC_19, MAX_CURRENT_WRIST, TORQUE_CONST_WRIST, ENC_OFFSET_WRIST1},
 
 		{HARMONIC_100, ABS_ENC_19, MAX_CURRENT_TYPE1, TORQUE_CONST_TYPE1, ENC_OFFSET_J9},
 		{HARMONIC_100, ABS_ENC_19, MAX_CURRENT_TYPE1, TORQUE_CONST_TYPE1, ENC_OFFSET_J10},
@@ -183,6 +202,7 @@ robot_motor_info serial_Motor_info[] = {
 		{HARMONIC_100, ABS_ENC_19, MAX_CURRENT_TYPE2, TORQUE_CONST_TYPE2, ENC_OFFSET_J12},
 		{HARMONIC_100, ABS_ENC_19, MAX_CURRENT_TYPE3, TORQUE_CONST_TYPE3, ENC_OFFSET_J13},
 		{HARMONIC_100, ABS_ENC_19, MAX_CURRENT_TYPE3, TORQUE_CONST_TYPE3, ENC_OFFSET_J14},
+		{HARMONIC_100, ABS_ENC_19, MAX_CURRENT_WRIST, TORQUE_CONST_WRIST, ENC_OFFSET_WRIST2},
 };
 
 FrictionMap frictionmap[] ={
@@ -214,6 +234,7 @@ FrictionTanh frictiontanh[] = {
 		{151.3, 16.42, 17.26, 4.56, 14.47, 0.05998}, 		//6
 		{2.444, 3.931, 159.1, 3.963, 77.64, 0.0543}, 		//7
 		{2.444, 3.931, 159.1, 3.963, 77.64, 0.0543}, 		//8
+		{2.444, 3.931, 159.1, 3.963, 77.64, 0.0543}, 		//wrist1
 
 		{1.287, 1.641, 165.9, 7.541, 19.43, 0.1302}, 		//9
 		{19.99, 35.09, 64.18, 17.6, 36.34, 2.398e-7}, 		//10
@@ -221,4 +242,5 @@ FrictionTanh frictiontanh[] = {
 		{325.2, 22, 22.72, 4.02, 28.35, 0.07359}, 			//12
 		{2.444, 3.931, 159.1, 3.963, 77.64, 0.0543}, 		//13
 		{2.444, 3.931, 159.1, 3.963, 77.64, 0.0543}, 		//14
+		{2.444, 3.931, 159.1, 3.963, 77.64, 0.0543}, 		//wrist2
 };

@@ -11,9 +11,10 @@ using namespace Eigen;
 
 typedef Matrix<double, 6, 1> se3;		/**<Size definition of se3(vector)*/
 typedef Matrix<double, 4, 4> SE3;		/**<Size definition of SE3(matrix)*/
-typedef Matrix<double, 6, 6> Adjoint;	/**<Size definition of Adjoint operator(twist)*/
-typedef Matrix<double, 6, 6> adjoint;	/**<Size definition of adjoint operator(wrench)*/
+typedef Matrix<double, 6, 6> Adjoint;		/**<Size definition of Adjoint operator(twist)*/
+typedef Matrix<double, 6, 6> adjoint;		/**<Size definition of adjoint operator(wrench)*/
 typedef Matrix3d SO3;
+
 /**
  * @brief Biorobotics Lab Lie-Group Operator
  * @date 2018-08-13

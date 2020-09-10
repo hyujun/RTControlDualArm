@@ -115,7 +115,7 @@ void Master::addSlave(uint16_t alias, uint16_t position, Slave* slave)
 	}
 }
 
-void Master::addSlaveElmo(uint16_t alias, uint16_t position, EcatElmo* slave)
+void Master::addSlaveWithHoming(uint16_t alias, uint16_t position, EcatElmo* slave)
 {
 	slave->setSlaveAlias(alias);
 	slave->setSlavePosition(position);
@@ -129,6 +129,30 @@ void Master::addSlaveElmo(uint16_t alias, uint16_t position, EcatElmo* slave)
 		return;
 	}
 	m_slave_info.push_back(slave_info);
+
+	if(slave->isHomingEnable())
+	{
+		//Homing Precess
+		fprintf(stdout, "\n-- Homming Param Setup-> Alias:%d, Position:%d", alias, position);
+
+		uint8_t* si32_data = new uint8_t[4];
+		EC_WRITE_S32(si32_data, slave->getHomingOffset());
+		SDOwrite(position, INDEX_HOMING_OFFSET, 0, si32_data);
+		delete[] si32_data;
+
+		uint8_t h1_data = slave->getHomingMethod();
+		SDOwrite(position, INDEX_HOMING_METHOD, 0, &h1_data);
+
+		uint8_t *u32_data = new uint8_t[4];
+		EC_WRITE_U32(u32_data, slave->getHomingSpeed());
+		SDOwrite(position, INDEX_HOMING_SPEED, 2, u32_data);
+		delete[] u32_data;
+
+		uint8_t *u16_data = new uint8_t[2];
+		EC_WRITE_U16(u16_data, slave->getHomingCurrentLimit());
+		SDOwrite(position, INDEX_HOMING_CURRENT_LIMIT, 1, u16_data);
+		delete[] u16_data;
+	}
 
 	size_t num_syncs = slave->syncSize();
 	const ec_sync_info_t* syncs = slave->syncs();
@@ -258,12 +282,12 @@ void Master::activateWithDC(uint8_t RefPosition, uint32_t SyncCycleNano)
     {
     	ecrt_slave_config_dc(slave.config, 0x0300, SyncCycleNano, 0, 0, 0 );
     }
-    printf("activeWithDC: ecrt_slave config dc is done\n");
+    fprintf(stdout, "\n-- activeWithDC: ecrt_slave config dc is done");
     int res = ecrt_master_select_reference_clock(p_master, m_slave_info.at(RefPosition).config );  //error point
     if(res < 0) {
-    	printf("ActiveWithDC: Failed to select reference clock:%d\n", res);
+    	fprintf(stdout, "\n-- activeWithDC: Failed to select reference clock:%d", res);
     }
-    printf("activeWithDC: ecrt_slave reference clock is chosen\n");
+    fprintf(stdout, "\n-- activeWithDC: ecrt_slave reference clock is chosen");
 
     bool activate_status = ecrt_master_activate(p_master);
     if (activate_status){
@@ -285,6 +309,9 @@ void Master::activateWithDC(uint8_t RefPosition, uint32_t SyncCycleNano)
 
 void Master::SyncEcatMaster(uint64_t RefTime)
 {
+	struct timespec tp;
+
+	clock_gettime(CLOCK_MONOTONIC, &tp);
 	ecrt_master_application_time(p_master, RefTime);
 	ecrt_master_sync_reference_clock( p_master );
 	ecrt_master_sync_slave_clocks( p_master );

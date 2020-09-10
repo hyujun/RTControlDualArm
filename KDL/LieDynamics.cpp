@@ -189,15 +189,15 @@ void Liedynamics::PrepareDynamics( const double *_q, const double *_qdot )
 	//ad_V_Link(qdot);
 }
 
-/*
-void Liedynamics::C_Matrix( MatrixXd &_C )
+
+void Liedynamics::C_Matrix( MatrixXd &_Cmat )
 {
-	_C.resize(this->m_DoF, this->m_DoF);
-	_C.setZero();
-	_C = -LA_mat.transpose()*(Iner_mat*L_mat*ad_Aqd*Gamma_mat + ad_V.transpose()*Iner_mat)*LA_mat;
+	_Cmat.resize(this->m_DoF, this->m_DoF);
+	_Cmat.setZero();
+	_Cmat = -LA_mat.transpose()*(Iner_mat*L_mat*ad_Aqd*Gamma_mat + ad_V.transpose()*Iner_mat)*LA_mat;
 	return;
 }
-*/
+
 void Liedynamics::G_Matrix( VectorXd &_G )
 {
 	_G.resize(this->m_DoF);

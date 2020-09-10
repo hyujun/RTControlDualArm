@@ -2,9 +2,13 @@
 
 SerialManipulator::SerialManipulator()
 {
-	mChainMat.resize(2,14);
-	mChainMat << 1,1,1,1,1,1,1,1,0,0,0,0,0,0,
-				1,1,0,0,0,0,0,0,1,1,1,1,1,1;
+	mChainMat.resize(2,16);
+	mChainMat << 1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,
+				1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1;
+
+	//mChainMat.resize(2,10);
+	//mChainMat << 1,1,1,1,1,1,1,1,0,0,
+	//			 1,1,0,0,0,0,0,0,1,1;
 
 	this->mDoF_Total = mChainMat.cols();
 	this->mChain_Total = mChainMat.rows();
@@ -38,7 +42,7 @@ void SerialManipulator::StateMachine( double *_q, double *_qdot, VectorXd &_Targ
 	{
 		q -= _Target;
 
-		if((q.cwiseAbs().maxCoeff() <= 1.2*DEGtoRAD) && (qdot.cwiseAbs().maxCoeff() <= 0.5*DEGtoRAD))
+		if((q.cwiseAbs().maxCoeff() <= 1.8*DEGtoRAD) && (qdot.cwiseAbs().maxCoeff() <= 0.1*DEGtoRAD))
 			mState_now = TARGET_ACHIEVED;
 		else
 			mState_now = TARGET_MOVING;

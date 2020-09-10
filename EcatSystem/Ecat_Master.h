@@ -72,7 +72,7 @@ public:
 	 * @param[in] position
 	 * @param[in] slave info of Elmo client
 	 */
-	void addSlaveElmo(uint16_t alias, uint16_t position, EcatElmo* slave);
+	void addSlaveWithHoming(uint16_t alias, uint16_t position, EcatElmo* slave);
 
 	/**
 	 * @brief Start Activate the client

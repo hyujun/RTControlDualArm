@@ -31,6 +31,38 @@ public:
 	Slave(uint32_t vendor_id, uint32_t product_id): m_vendor_id(vendor_id), m_product_id(product_id){}
 	virtual ~Slave(){}
 
+    bool isHomingEnable() const {return homing_flag_;}
+
+    bool setHomingParam(int32_t HomingOffset, int8_t HomingMethod, uint32_t HomingSpeed, uint16_t HomingCurrentLimit  )
+    {
+    	mHomingOffset = HomingOffset;
+    	mHomingMethod = HomingMethod;
+    	mHomingSpeed = HomingSpeed;
+    	mHomingCurrentLimit = HomingCurrentLimit;
+    	homing_flag_ = true;
+    	return homing_flag_;
+    }
+
+    int32_t getHomingOffset(void)
+    {
+    	return mHomingOffset;
+    }
+
+    int8_t getHomingMethod(void)
+    {
+    	return mHomingMethod;
+    }
+
+    uint32_t getHomingSpeed(void)
+    {
+    	return mHomingSpeed;
+    }
+
+    uint16_t getHomingCurrentLimit(void)
+    {
+    	return mHomingCurrentLimit;
+    }
+
 	/**
 	 * @brief base method of PDO processdata
 	 * @param[in] index
@@ -116,6 +148,12 @@ protected:
 	int slave_alias=0; /**<slave alias from slave configuration */
 	int slave_position=0; /**<slave position from slave configuration  */
 
+    bool homing_flag_ = false;
+
+    int32_t mHomingOffset=0;
+    int8_t mHomingMethod=0;
+    uint32_t mHomingSpeed=0;
+    uint16_t mHomingCurrentLimit=0;
 };
 
 }

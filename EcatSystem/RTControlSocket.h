@@ -9,100 +9,121 @@
 #define RTCONTROLSOCKET_H_
 
 #include <iostream>
-#include <cstring>
 
-#include "Poco/Net/TCPServer.h"
-#include "Poco/Net/TCPServerConnection.h"
-#include "Poco/Net/TCPServerConnectionFactory.h"
-#include "Poco/Thread.h"
+#include <Poco/Net/SocketReactor.h>
+#include <Poco/Net/SocketAcceptor.h>
 
-using Poco::Net::ServerSocket;
-using Poco::Net::StreamSocket;
-using Poco::Net::TCPServerConnection;
-using Poco::Net::TCPServerConnectionFactory;
-using Poco::Net::TCPServer;
-using Poco::Timestamp;
-using Poco::Thread;
 
-const Poco::UInt16 SERVER_PORT = 9911;
+const Poco::UInt16 PORT = 32452;
 
-class Session : public TCPServerConnection
-{
+
+class Session {
 public:
-	enum {
-		SIZE_HEADER = 52,
-		SIZE_COMMAND = 4,
-		SIZE_HEADER_COMMAND = 56,
-		SIZE_DATA_MAX = 200,
-		SIZE_DATA_ASCII_MAX = 32
-	};
-	Session(const StreamSocket &socket) :TCPServerConnection(socket)
+	Session(Poco::Net::StreamSocket& socket, Poco::Net::SocketReactor& reactor) :
+		m_Socket(socket),
+		m_Reactor(reactor)
 	{
-		j=0;
-		//cout << "Session Object Construct" << endl;
-	}
-	virtual ~Session() {
-		//cout << "Session Object Destruct" << endl;
-	}
-	union Data
-	{
-		unsigned char byte[SIZE_DATA_MAX];
-		double double6dArr[6];
-	};
-	Data data_rev;
-	Data data;
+		m_PeerAddress = socket.peerAddress().toString();
 
-	virtual void run()
-	{
-		unsigned char readBuff[1024];
-		unsigned char writeBuff[1024];
+		std::cout << "connection from " << m_PeerAddress << " ..." << std::endl;
 
-		try
+		m_Reactor.addEventHandler(m_Socket,
+			Poco::Observer<Session, Poco::Net::ReadableNotification>(*this, &Session::onReadable));
+
+		m_Reactor.addEventHandler(m_Socket,
+			Poco::Observer<Session, Poco::Net::ShutdownNotification>(*this, &Session::onShutdown));
+
+		m_Reactor.addEventHandler(m_Socket,
+			Poco::Observer<Session, Poco::Net::ErrorNotification>(*this, &Session::onError));
+
+		m_Reactor.addEventHandler(m_Socket,
+			Poco::Observer<Session, Poco::Net::IdleNotification>(*this, &Session::onIdle));
+
+		m_Reactor.addEventHandler(m_Socket,
+			Poco::Observer<Session, Poco::Net::TimeoutNotification>(*this, &Session::onTimeout));
+
+	}
+
+	~Session()
+	{
+		std::cout << m_PeerAddress << " disconnected ..." << std::endl;
+
+		m_Reactor.removeEventHandler(m_Socket,
+			Poco::Observer<Session, Poco::Net::ReadableNotification>(*this, &Session::onReadable)
+			);
+
+		m_Reactor.removeEventHandler(m_Socket,
+			Poco::Observer<Session, Poco::Net::ShutdownNotification>(*this, &Session::onShutdown)
+			);
+
+		m_Reactor.removeEventHandler(m_Socket,
+			Poco::Observer<Session, Poco::Net::ErrorNotification>(*this, &Session::onError)
+			);
+
+		m_Reactor.removeEventHandler(m_Socket,
+			Poco::Observer<Session, Poco::Net::IdleNotification>(*this, &Session::onIdle)
+			);
+
+		m_Reactor.removeEventHandler(m_Socket,
+			Poco::Observer<Session, Poco::Net::TimeoutNotification>(*this, &Session::onTimeout)
+			);
+	}
+
+	void onReadable(Poco::Net::ReadableNotification* pNf)
+	{
+		pNf->release();
+
+		char buffer[256] = { 0, };
+		int n = m_Socket.receiveBytes(buffer, sizeof(buffer));
+		if (n > 0)
 		{
-			int recvSize = 0;
-			do
-			{
-				memcpy(writeBuff, data.byte, SIZE_HEADER_COMMAND);
+			std::cout << "Recieved Msg: " << buffer << std::endl;
 
-				Timestamp now;
-				recvSize = socket().receiveBytes(readBuff, 1024);
+			char szSendMessage[256] = { 0, };
+			//sprintf_s(szSendMessage, 256 - 1, "Re:%s", buffer);
+			//int nMsgLen = (int)strnlen_s(szSendMessage, 256 - 1);
 
-				memcpy(data_rev.byte, readBuff, SIZE_HEADER_COMMAND);
-
-				received_Data[0] = data_rev.double6dArr[0];   //x
-				received_Data[1] = data_rev.double6dArr[1];   //y
-				received_Data[2] = data_rev.double6dArr[2];   //z
-				received_Data[3] = data_rev.double6dArr[4];   //Q
-				received_Data[4] = data_rev.double6dArr[3];   //angle
-
-				data_rev.double6dArr[5] = 1;
-				memcpy(writeBuff, data_rev.byte, SIZE_HEADER_COMMAND);
-
-				socket().sendBytes(writeBuff, 1024);
-			} while (recvSize > 0);
-			//cout << "Client Disconnected." << endl;
+			//m_Socket.sendBytes(szSendMessage, nMsgLen);
 		}
-		catch (Poco::Exception& exc)
+		else
 		{
-			std::cout << "Session: " << exc.displayText() << std::endl;
+			m_Socket.shutdownSend();
+			delete this;
 		}
-
 	}
+
+	void onShutdown(Poco::Net::ShutdownNotification* pNf)
+	{
+		pNf->release();
+
+		std::cout << "onShutdown ERROR" << std::endl;
+	}
+
+	void onError(Poco::Net::ErrorNotification* pNf)
+	{
+		pNf->release();
+
+		std::cout << "onError ERROR" << std::endl;
+	}
+
+	void onTimeout(Poco::Net::TimeoutNotification* pNf)
+	{
+		pNf->release();
+
+		std::cout << "onTimeout ERROR" << std::endl;
+	}
+
+	void onIdle(Poco::Net::IdleNotification* pNf)
+	{
+		pNf->release();
+
+		std::cout << "onIdle ERROR" << std::endl;
+	}
+
 private:
-	double received_Data[6];
-	int j;
-};
-
-class SessionFactory :public TCPServerConnectionFactory
-{
-public:
-	SessionFactory() {}
-	virtual ~SessionFactory() {}
-
-	virtual TCPServerConnection* createConnection(const StreamSocket &socket)
-	{
-		return new Session(socket);
-	}
+	Poco::Net::StreamSocket   m_Socket;
+	std::string m_PeerAddress;
+	Poco::Net::SocketReactor& m_Reactor;
 };
 
 

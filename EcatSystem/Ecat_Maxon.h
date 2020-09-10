@@ -148,6 +148,7 @@ public:
 			break;
 		default:
 			std::cout << "WARNING. Maxon Epos4 pdo index out of range." << std::endl;
+			break;
 		}
 
 		// CHECK FOR STATE CHANGE

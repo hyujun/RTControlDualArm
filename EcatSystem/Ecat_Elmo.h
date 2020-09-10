@@ -22,8 +22,7 @@ namespace hyuEcat{
 class EcatElmo : public Slave
 {
 public:
-public:
-	EcatElmo() : Slave(Elmo_VendorID, Elmo_ProductCode) {}
+    EcatElmo() : Slave(Elmo_VendorID, Elmo_ProductCode) {}
     virtual ~EcatElmo() {}
 
     /**
@@ -60,6 +59,14 @@ public:
     {
     	target_velocity_ = velocity;
     }
+
+    void writePosition(int32_t &position)
+    {
+    	this->target_position_ = position;
+    }
+
+
+
     /**
      * @brief Define a TPDO & RPDO process
      * @param[in] index
@@ -94,9 +101,6 @@ public:
 		case 5:
 			EC_WRITE_S8(domain_address, mode_of_operation_);
 			break;
-//		case 6:
-//			EC_WRITE_S8(domain_address, dummy);
-//			break;
 		//TxPDO
 		case 6:
 			velocity_ = EC_READ_S32(domain_address);
@@ -120,6 +124,7 @@ public:
 
 		default:
 			std::cout << "WARNING. Elmo Gold Whistle pdo index out of range." << std::endl;
+			break;
 		}
 
 		// CHECK FOR STATE CHANGE
@@ -131,11 +136,19 @@ public:
 					std::cout << "ElMO_POS: " << slave_position << " " << ", ELMO_STATE: " << device_state_str_[state_] << std::endl;
 #endif
 			}
+
 			if ((state_ == STATE_OPERATION_ENABLED) && (last_state_ == STATE_OPERATION_ENABLED)){
 				initialized_ = true;
 			}
 			else {
-				initialized_ = false;
+				if(this->mode_of_operation_display_ == MODE_HOMING)
+				{
+					initialized_ = true;
+				}
+				else
+				{
+					initialized_ = false;
+				}
 			}
 			if ((state_ == STATE_HOMING_NOT_START) && (last_state_ == STATE_HOMING_NOT_START)){
 				homing_ready_ = true;
@@ -158,31 +171,31 @@ public:
 	 * @return address of Elmo_syncs[0]
 	 * @see PDOConfig.h
 	 */
-    virtual const ec_sync_info_t* syncs() { return &Elmo_syncs[0]; }
+	virtual const ec_sync_info_t* syncs() { return &Elmo_syncs[0]; }
 
-    /**
-     * @brief size of sync
-     * @return normalized size of Elmo_sync
-     * @see PDOConfig.h
-     */
-    virtual size_t syncSize() {
-        return sizeof(Elmo_syncs)/sizeof(ec_sync_info_t);
-    }
+	/**
+	 * @brief size of sync
+	 * @return normalized size of Elmo_sync
+	 * @see PDOConfig.h
+	 */
+	virtual size_t syncSize() {
+	    return sizeof(Elmo_syncs)/sizeof(ec_sync_info_t);
+	}
 
 
-    virtual const ec_pdo_entry_info_t* channels() {
-        return Elmo_pdo_entries;
-    }
+	virtual const ec_pdo_entry_info_t* channels() {
+	    return Elmo_pdo_entries;
+	}
 
-    virtual void domains(DomainMap& domains) const {
-        domains = domains_;
-    }
+	virtual void domains(DomainMap& domains) const {
+	    domains = domains_;
+	}
 
-    int32_t  target_position_           = 0; 						/**<write*/
-    int32_t  target_velocity_           = 0; 						/**<write*/
-    int16_t  target_torque_             = 0; 						/**<write (max torque (max current) = 1000)*/
-    uint16_t max_torque_                = 1300; 					/**<write (max current = 1000, as set in Elmo Motion Studio)*/
-    uint16_t control_word_              = 0; 						/**<write*/
+    int32_t  target_position_           = 0; 		/**<write*/
+    int32_t  target_velocity_           = 0; 		/**<write*/
+    int16_t  target_torque_             = 0; 		/**<write (max torque (max current) = 1000)*/
+    uint16_t max_torque_                = 1300; 	/**<write (max current = 1000, as set in Elmo Motion Studio)*/
+    uint16_t control_word_              = 0; 		/**<write*/
     int8_t   mode_of_operation_         = MODE_CYCLIC_SYNC_TORQUE; 	/**<write (use enum ModeOfOperation for convenience)*/
 
     int32_t  position_                  = 0; 		/**<read*/
@@ -247,21 +260,21 @@ private:
     };
 
     std::map<DeviceState,std::string> device_state_str_ = {
-         {STATE_START,                  		"Start"},
-         {STATE_NOT_READY_TO_SWITCH_ON, 		"Not Ready to Switch On"},
-         {STATE_SWITCH_ON_DISABLED,     		"Switch on Disabled"},
-         {STATE_READY_TO_SWITCH_ON,     		"Ready to Switch On"},
-         {STATE_SWITCH_ON,              		"Switch On"},
-         {STATE_OPERATION_ENABLED,      		"Operation Enabled"},
-         {STATE_QUICK_STOP_ACTIVE,      		"Quick Stop Active"},
-         {STATE_FAULT_REACTION_ACTIVE,  		"Fault Reaction Active"},
-         {STATE_FAULT,                  		"Fault"},
-		 {STATE_HOMING_PROGRESS,        		"Homing Progress"},
-		 {STATE_HOMING_NOT_START,       		"Homing Not Start"},
-		 {STATE_HOMING_ATTAINED_NOT_REACHED, 	"Homing Attained not reached"},
-		 {STATE_HOMING_COMPLITE,        		"Homing Finished"},
-		 {STATE_HOMING_ERROR,           		"Homing Error"},
-		 {STATE_HOMING_UNDIFINED,       		"Homing Undefined"}
+	 {STATE_START,                  		"Start"},
+	 {STATE_NOT_READY_TO_SWITCH_ON, 		"Not Ready to Switch On"},
+	 {STATE_SWITCH_ON_DISABLED,     		"Switch on Disabled"},
+	 {STATE_READY_TO_SWITCH_ON,     		"Ready to Switch On"},
+	 {STATE_SWITCH_ON,              		"Switch On"},
+	 {STATE_OPERATION_ENABLED,      		"Operation Enabled"},
+	 {STATE_QUICK_STOP_ACTIVE,      		"Quick Stop Active"},
+	 {STATE_FAULT_REACTION_ACTIVE,  		"Fault Reaction Active"},
+	 {STATE_FAULT,                  		"Fault"},
+	 {STATE_HOMING_PROGRESS,        		"Homing Progress"},
+	 {STATE_HOMING_NOT_START,       		"Homing Not Start"},
+	 {STATE_HOMING_ATTAINED_NOT_REACHED, 	"Homing Attained not reached"},
+	 {STATE_HOMING_COMPLITE,        		"Homing Finished"},
+	 {STATE_HOMING_ERROR,           		"Homing Error"},
+	 {STATE_HOMING_UNDIFINED,       		"Homing Undefined"}
     };
 
     DeviceState deviceState(uint16_t status_word)

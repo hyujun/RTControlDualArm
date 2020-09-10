@@ -78,6 +78,8 @@ Controller::Controller(SerialManipulator *pManipulator)
 	GainWeightFactor(12) = 9.0;
 	GainWeightFactor(13) = 5.5;
 	GainWeightFactor(14) = 5.5;
+	GainWeightFactor(15) = 5.5;
+
 
 
 	Kp = GainWeightFactor*m_KpBase;

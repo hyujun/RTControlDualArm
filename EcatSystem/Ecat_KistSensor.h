@@ -122,6 +122,7 @@ public:
 
 		default:
 			std::cout << "WARNING. Kist Sensor pdo index out of range." << std::endl;
+			break;
 		}
     }
 

@@ -117,6 +117,7 @@ public:
 
 		default:
 			std::cout << "WARNING. Kist Finger pdo index out of range." << std::endl;
+			break;
 		}
     }
 

@@ -30,7 +30,7 @@ namespace HYUMotionDynamics{
  * @brief [Biorobotics Lab] Dynamics Solver using Lie-Group for Tree-type Manipulator
  * @version 1.2.0
  */
-class Liedynamics :public HYUMotionBase::LieOperator //: public HYUMotionKinematics::PoEKinematics
+class Liedynamics :public HYUMotionBase::LieOperator
 {
 public:
 	Liedynamics();
@@ -151,10 +151,11 @@ public:
 	 */
 	void PrepareDynamics( const double *_q, const double *_qdot);
 
+
 	/**
 	 * @brief Coriolis matrix in Motion of Equation
 	 */
-	void C_Matrix( MatrixXd &_C );
+	void C_Matrix( MatrixXd &_Cmat );
 
 	/**
 	 * @brief Gravity matrix in Motion of Equation

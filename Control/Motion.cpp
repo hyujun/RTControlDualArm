@@ -154,8 +154,8 @@ uint16_t Motion::JointMotion(double *_dq, double *_dqdot, double *_dqddot, Vecto
 		else
 		{
 			TargetPos.setZero();
-			TargetPos(0) = 20.0*DEGtoRAD;
-			TargetPos(1) = -5.0*DEGtoRAD;
+			TargetPos(0) = 2.0*DEGtoRAD;
+			TargetPos(1) = 0.0*DEGtoRAD;
 
 			TargetPos(2) = -20.0*DEGtoRAD;
 			TargetPos(2+6) = -TargetPos(2);

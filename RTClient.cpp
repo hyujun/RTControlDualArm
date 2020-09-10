@@ -21,8 +21,8 @@ std::map<int, int> ElmoHandMap = {
 };
 
 #else
-#define ELMO_TOTAL 12
-#define DUAL_ARM_DOF 12
+#define ELMO_TOTAL 16
+#define DUAL_ARM_DOF 16
 #endif
 
 hyuEcat::Master ecatmaster;
@@ -57,7 +57,6 @@ INT32 	ActualVel[DUAL_ARM_DOF] = {0,};
 INT16 	ActualTor[DUAL_ARM_DOF] = {0,};
 INT8	ModeOfOperationDisplay[DUAL_ARM_DOF] = {0,};
 INT8	DeviceState[DUAL_ARM_DOF] = {0,};
-
 INT16 	TargetTor[DUAL_ARM_DOF] = {0,};		//100.0 persentage
 
 #if defined(_WITH_KIST_HAND_)
@@ -106,7 +105,7 @@ static double Hand_ActualPos_Rad[HAND_DOF] = {0.0,};
 static double Hand_ActualVel_Rad[HAND_DOF] = {0.0,};
 #endif
 
-static double manipulatorpower=0;
+
 static double best_manipulatorpower=0;
 
 #if defined(_ECAT_ON_)
@@ -175,7 +174,7 @@ void RTRArm_run(void *arg)
 
 	DualArm.UpdateManipulatorParam();
 
-	HYUControl::KistHand kisthand;
+	//HYUControl::KistHand kisthand;
 
 	/* Arguments: &task (NULL=self),
 	 *            start time,
@@ -269,7 +268,7 @@ void RTRArm_run(void *arg)
 
 			DualArm.TorqueConvert(TargetToq, TargetTor, MaxTor);
 
-			manipulatorpower = DualArm.PowerComsumption(ActualTor);
+			//manipulatorpower = DualArm.PowerComsumption(ActualTor);
 
 #if defined(_WITH_KIST_HAND_)
 			//write the motor data
@@ -338,8 +337,8 @@ void RTRArm_run(void *arg)
 				if ( worst_time<ethercat_time )
 					worst_time=ethercat_time;
 
-				if(best_manipulatorpower < manipulatorpower)
-					best_manipulatorpower = manipulatorpower;
+				//if(best_manipulatorpower < manipulatorpower)
+				//	best_manipulatorpower = manipulatorpower;
 
 				if( ethercat_time > (unsigned long)cycle_ns )
 				{
@@ -427,7 +426,7 @@ void print_run(void *arg)
 #endif
 				rt_printf("\tActPos(Deg): %0.2lf,", 	ActualPos_Rad[j]*RADtoDEG);
 				//rt_printf("\tTarPos(Deg): %0.2lf,",	TargetPos_Rad[j]*RADtoDEG);
-				//rt_printf("\tActPos(inc): %d,", 		ActualPos[j]);
+				rt_printf("\tActPos(inc): %d,", 		ActualPos[j]);
 				//rt_printf("\n");
 				rt_printf("\tActVel(Deg/s): %0.1lf,", 	ActualVel_Rad[j]*RADtoDEG);
 				//rt_printf("\tTarVel(Deg/s): %0.1lf,",	TargetVel_Rad[j]*RADtoDEG);
@@ -523,21 +522,12 @@ void plot_run(void *arg)
 void tcpip_run(void *arg)
 {
 
-	ServerSocket sock(SERVER_PORT);
-	TCPServer server(new SessionFactory(), sock);
-
-	cout << "Simple TCP Server Application." << endl;
-	cout << "maxConcurrentConnections: " << server.maxConcurrentConnections() << endl;
-
-	int current_Thread=0;
-	server.start();
-
 	rt_task_set_periodic(NULL, TM_NOW, 1e7);
 
 	while(1)
 	{
 		rt_task_wait_period(NULL);
-		current_Thread = server.currentConnections();
+
 	}
 
 }
@@ -586,14 +576,14 @@ int main(int argc, char **argv)
 	signal(SIGQUIT, signal_handler);
 
 	/* Avoids memory swapping for this program */
-	mlockall( MCL_CURRENT|MCL_FUTURE );
+	mlockall( MCL_CURRENT | MCL_FUTURE );
 
 	// TO DO: Specify the cycle period (cycle_ns) here, or use default value
 	//cycle_ns = 250000; // nanosecond -> 4kHz
 	//cycle_ns = 500000; // nanosecond -> 2kHz
 	//cycle_ns = 1000000; // nanosecond -> 1kHz
-	cycle_ns = 1250000; // nanosecond -> 800Hz
-	//cycle_ns = 2e6; // nanosecond -> 500Hz
+	//cycle_ns = 1250000; // nanosecond -> 800Hz
+	cycle_ns = 2e6; // nanosecond -> 500Hz
 	period = ((double) cycle_ns)/((double) NSEC_PER_SEC);	//period in second unit
 
 
@@ -640,7 +630,7 @@ int main(int argc, char **argv)
 #endif
 
 	// RTArm_task: create and start
-	rt_printf("Now running rt task ...\n");
+	rt_printf("\n-- Now running rt task ...\n");
 
 
 #if defined(_PLOT_ON_)
