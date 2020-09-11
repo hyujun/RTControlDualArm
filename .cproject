@@ -98,10 +98,11 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="EcatSystem|hw|include-helper|header-helper|src-helper|KDL|include-core|include|header-core|src|Control" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Network|EcatSystem|hw|include-helper|header-helper|src-helper|KDL|include-core|include|header-core|src|Control" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Control"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="EcatSystem"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="KDL"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Network"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

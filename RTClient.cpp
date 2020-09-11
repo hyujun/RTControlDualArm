@@ -263,7 +263,7 @@ void RTRArm_run(void *arg)
 			//else
 			//{
 				//Control.PDGravController(ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetToq );
-				//Control.InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, float_dt );
+				Control.InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, float_dt );
 			//}
 
 			DualArm.TorqueConvert(TargetToq, TargetTor, MaxTor);
@@ -476,6 +476,11 @@ void print_run(void *arg)
 
 				rt_printf("\nMaster State: %s, AL state: 0x%02X, ConnectedSlaves : %d",
 						ecatmaster.GetEcatMasterLinkState().c_str(), ecatmaster.GetEcatMasterState(), ecatmaster.GetConnectedSlaves());
+				if(ecatmaster.GetConnectedSlaves() < ELMO_TOTAL)
+				{
+					signal_handler(SIGTERM);
+					exit(0);
+				}
 				for(int i=0; i<((int)ecatmaster.GetConnectedSlaves()-1); i++)
 				{
 					rt_printf("\nID: %d , SlaveState: 0x%02X, SlaveConnection: %s, SlaveNMT: %s ", i,
