@@ -263,7 +263,7 @@ void RTRArm_run(void *arg)
 			//else
 			//{
 				//Control.PDGravController(ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetToq );
-				Control.InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, float_dt );
+				//Control.InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, float_dt );
 			//}
 
 			DualArm.TorqueConvert(TargetToq, TargetTor, MaxTor);
@@ -408,6 +408,8 @@ void print_run(void *arg)
 			count=0;
 		}
 
+
+
 		if ( system_ready )
 		{
 			rt_printf("Time=%0.2fs\n", double_gt);
@@ -519,17 +521,30 @@ void plot_run(void *arg)
 	}
 }
 
+
 void tcpip_run(void *arg)
 {
+	Poco::Net::ServerSocket sock(SERVER_PORT);
+	auto pParams = new Poco::Net::TCPServerParams;
+	pParams->setMaxThreads(3);
+	pParams->setMaxQueued(3);
 
-	rt_task_set_periodic(NULL, TM_NOW, 1e7);
+	static Poco::Net::TCPServer server(new SessionFactory(), sock, pParams);
+
+
+	std::cout << "\n-- DualArm TCP Server Application." << std::endl;
+	//std::cout << "maxThreads: " << server.maxThreads() << std::endl;
+	std::cout << "-- maxConcurrentConnections: " << server.maxConcurrentConnections() << std::endl;
+
+	server.start();
+
+	rt_task_set_periodic(NULL, TM_NOW, 1000e6);
 
 	while(1)
 	{
 		rt_task_wait_period(NULL);
-
+		PrintServerStatus(server);
 	}
-
 }
 
 /****************************************************************************/

@@ -36,15 +36,18 @@
 #include "EcatDataSocket.h"
 #include "EcatControlSocket.h"
 
-#include "EcatSystem/RTControlSocket.h"
 #include "EcatSystem/Ecat_Master.h"
 #include "EcatSystem/Ecat_Elmo.h"
 #include "EcatSystem/Ecat_KistFinger.h"
 #include "EcatSystem/Ecat_KistSensor.h"
 #include "Control/Controller.h"
 #include "Control/Motion.h"
+
 #include "KDL/SerialManipulator.h"
+
 #include "Control/KistHand.h"
+
+#include "Network/SocketHandler.h"
 
 #define WAKEUP_TIME				(5)				/**<Initial waiting time*/
 #define NSEC_PER_SEC 			1000000000		/**<Expression of second in nano second*/
