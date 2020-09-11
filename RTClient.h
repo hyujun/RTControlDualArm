@@ -42,11 +42,8 @@
 #include "EcatSystem/Ecat_KistSensor.h"
 #include "Control/Controller.h"
 #include "Control/Motion.h"
-
-#include "KDL/SerialManipulator.h"
-
 #include "Control/KistHand.h"
-
+#include "KDL/SerialManipulator.h"
 #include "Network/SocketHandler.h"
 
 #define WAKEUP_TIME				(5)				/**<Initial waiting time*/

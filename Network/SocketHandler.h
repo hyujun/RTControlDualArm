@@ -34,7 +34,6 @@ public:
 
 			do
 			{
-
 				recvSize = socket().receiveBytes(buffer, sizeof(buffer));
 				std::cout << "Recieved Massage from client " << buffer << std::endl;
 

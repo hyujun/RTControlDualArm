@@ -375,6 +375,11 @@ void RTRArm_run(void *arg)
 		}
 		else
 		{
+			if(ecatmaster.GetConnectedSlaves() < ELMO_TOTAL)
+			{
+				signal_handler(1);
+			}
+
 			system_ready = 0;
 			double_gt = 0;
 			worst_time = 0;
@@ -476,11 +481,6 @@ void print_run(void *arg)
 
 				rt_printf("\nMaster State: %s, AL state: 0x%02X, ConnectedSlaves : %d",
 						ecatmaster.GetEcatMasterLinkState().c_str(), ecatmaster.GetEcatMasterState(), ecatmaster.GetConnectedSlaves());
-				if(ecatmaster.GetConnectedSlaves() < ELMO_TOTAL)
-				{
-					signal_handler(SIGTERM);
-					exit(0);
-				}
 				for(int i=0; i<((int)ecatmaster.GetConnectedSlaves()-1); i++)
 				{
 					rt_printf("\nID: %d , SlaveState: 0x%02X, SlaveConnection: %s, SlaveNMT: %s ", i,
@@ -518,7 +518,9 @@ void plot_run(void *arg)
 		{
 			memcpy(&logBuff, msg, sizeof(LOGGING_PACK));
 
-			datasocket.updateControlData( logBuff.ActualPos, logBuff.DesiredPos, logBuff.ActualVel, logBuff.DesiredVel, logBuff.ActualToq, logBuff.DesiredToq );
+			datasocket.updateControlData( logBuff.ActualPos, logBuff.DesiredPos,
+					logBuff.ActualVel, logBuff.DesiredVel,
+					logBuff.ActualToq, logBuff.DesiredToq );
 			datasocket.update( logBuff.Time );
 
 			rt_queue_free(&msg_plot, msg);
@@ -566,10 +568,6 @@ void signal_handler(int signum)
 	rt_task_delete(&tcpip_task);
 	rt_printf("\nTCPIP RTTask Closing Success....");
 
-	rt_printf("\nConsolPrint RTTask Closing....");
-	rt_task_delete(&print_task);
-	rt_printf("\nConsolPrint RTTask Closing Success....");
-
 #if defined(_ECAT_ON_)
 	rt_printf("\nEtherCAT RTTask Closing....");
 	rt_task_delete(&RTArm_task);
@@ -577,6 +575,10 @@ void signal_handler(int signum)
 #endif
 
 	ecatmaster.deactivate();
+
+	rt_printf("\nConsolPrint RTTask Closing....");
+	rt_task_delete(&print_task);
+	rt_printf("\nConsolPrint RTTask Closing Success....");
 
     rt_printf("\n\n\t !!RT Arm Client System Stopped!! \n");
     exit(signum);
@@ -623,11 +625,19 @@ int main(int argc, char **argv)
 		}
 	}
 #else
+
+	if(ecatmaster.GetConnectedSlaves() < ELMO_TOTAL)
+	{
+		rt_printf("Error: Check Ethercat slave connection!\n");
+		return 1;
+	}
+
 	int SlaveNum;
 	for(SlaveNum=0; SlaveNum < ELMO_TOTAL; SlaveNum++)
 	{
 		ecatmaster.addSlave(0, SlaveNum, &ecat_elmo[SlaveNum]);
 	}
+
 #endif
 
 
