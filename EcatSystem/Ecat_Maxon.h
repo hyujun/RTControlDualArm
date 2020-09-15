@@ -10,7 +10,7 @@
 #define ECATSYSTEM_ECAT_MAXON_H_
 
 #include "Ecat_Slave.h"
-#include "PDOConfig.h"
+
 
 namespace hyuEcat{
 

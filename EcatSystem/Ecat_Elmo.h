@@ -8,7 +8,6 @@
 #define ECATSYSTEM_ECAT_ELMO_H_
 
 #include "Ecat_Slave.h"
-#include "PDOConfig.h"
 
 //#define _ELMO_DEBUG_
 
@@ -64,8 +63,6 @@ public:
     {
     	this->target_position_ = position;
     }
-
-
 
     /**
      * @brief Define a TPDO & RPDO process
@@ -229,7 +226,7 @@ private:
      * @details The number of domains MUST BE EQUAL TO THE SIZE OF PDO process
      */
     DomainMap domains_ = {
-    	{0, {0,1,2,3,4,5,6,7,8,9,10}}
+    	{0, {0,1,2,3,4,5,6,7,8,9,10} }
     };
 
 //========================================================
@@ -259,7 +256,7 @@ private:
 		STATE_HOMING_UNDIFINED
     };
 
-    std::map<DeviceState,std::string> device_state_str_ = {
+    std::map<DeviceState, std::string> device_state_str_ = {
 	 {STATE_START,                  		"Start"},
 	 {STATE_NOT_READY_TO_SWITCH_ON, 		"Not Ready to Switch On"},
 	 {STATE_SWITCH_ON_DISABLED,     		"Switch on Disabled"},

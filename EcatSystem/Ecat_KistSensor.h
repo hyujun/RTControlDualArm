@@ -8,7 +8,6 @@
 #define ECATSYSTEM_ECAT_KIST_SENSOR_H_
 
 #include "Ecat_Slave.h"
-#include "PDOConfig.h"
 
 //#define _ELMO_DEBUG_
 

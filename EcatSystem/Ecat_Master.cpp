@@ -1,12 +1,5 @@
 #include "Ecat_Master.h"
-#include "Ecat_Slave.h"
-#include "Ecat_Elmo.h"
 
-#include <unistd.h>
-#include <iostream>
-#include <sstream>
-#include <sys/resource.h>
-#include <sys/mman.h>
 
 namespace hyuEcat {
 

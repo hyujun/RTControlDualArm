@@ -377,7 +377,7 @@ void RTRArm_run(void *arg)
 		{
 			if(ecatmaster.GetConnectedSlaves() < ELMO_TOTAL)
 			{
-				signal_handler(1);
+				//signal_handler(1);
 			}
 
 			system_ready = 0;
@@ -412,8 +412,6 @@ void print_run(void *arg)
 			++stick;
 			count=0;
 		}
-
-
 
 		if ( system_ready )
 		{
@@ -628,8 +626,8 @@ int main(int argc, char **argv)
 
 	if(ecatmaster.GetConnectedSlaves() < ELMO_TOTAL)
 	{
-		rt_printf("Error: Check Ethercat slave connection!\n");
-		return 1;
+		rt_printf("\nError: Check Ethercat slave connection!\n");
+		//return 1;
 	}
 
 	int SlaveNum;
