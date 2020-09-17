@@ -34,8 +34,44 @@ if(UNIX)
     if(NOT NRMKHW_LIBRARY_DIR)
         message(FATAL_ERROR "NRMK HW: Could not find NRMK HW library directory")
     else()
-        list(APPEND NRMKHW_LIBRARIES ${NRMKHW_LIBRARY_DIR})
+        list(APPEND NRMKHW_LIBRARY_DIR ${NRMKHW_LIBRARY_DIR})
     endif()
 endif()
 
-set(NRMKHW_FOUND true)
+list(APPEND components_nrmkhw
+        ${NRMKHW_FIND_COMPONENTS}
+        "NRMKhw_tp"
+        )
+list(REMOVE_DUPLICATES components_nrmkhw)
+
+foreach(comp ${components_nrmkhw})
+    if(NOT NRMKHW_${comp}_LIBRARY)
+        find_library(
+                NRMKHW_${comp}_LIBRARY
+                NAMES lib${comp}.a lib${comp}.so lib${comp}.la
+                HINTS ${NRMKHW_LIBRARY_DIR}
+                #PATH_SUFFIXES
+                #lib
+        )
+        if(NRMKHW_${comp}_LIBRARY)
+            message(STATUS "Found ${comp}: ${NRMKHW_${comp}_LIBRARY}")
+        endif()
+    endif()
+
+    if(NRMKHW_${comp}_LIBRARY)
+        list(APPEND NRMKHW_LIBRARIES ${NRMKHW_${comp}_LIBRARY} )
+        mark_as_advanced(NRMKHW_${comp}_LIBRARY)
+    endif()
+
+    # mark component as found or handle not finding it
+    if(NRMKHW_${comp}_LIBRARY)
+        set(NRMKHW_${comp}_FOUND TRUE)
+    elseif(NOT NRMKHW_FIND_QUIETLY)
+        message(FATAL_ERROR "Could not find NRMKHW component ${comp}!")
+    endif()
+endforeach()
+
+if(DEFINED NRMKHW_LIBRARIES)
+    set(NRMKHW_FOUND true)
+endif()
+message(STATUS "Found NRMKHW: ${NRMKHW_LIBRARIES}")

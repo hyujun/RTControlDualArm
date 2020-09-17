@@ -17,7 +17,7 @@ if(NOT NRMKhelper_ROOT_DIR)
     if(NOT NRMKhelper_ROOT_DIR)
         message(FATAL_ERROR "NRMK helper: Could not find NRMK helper install directory")
     else()
-        message(STATUS "NRMK helper: NRMK helper install dirctory structure at ${NRMK helper_ROOT_DIR}")
+        message(STATUS "NRMK helper: NRMK helper install dirctory structure at ${NRMKhelper_ROOT_DIR}")
         set(NRMKhelper_INSTALLED true)
     endif()
 endif()
@@ -34,8 +34,44 @@ if(UNIX)
     if(NOT NRMKhelper_LIBRARY_DIR)
         message(FATAL_ERROR "NRMK helper: Could not find NRMK helper library directory")
     else()
-        list(APPEND NRMKhelper_LIBRARIES ${NRMKhelper_LIBRARY_DIR})
+        list(APPEND NRMKhelper_LIBRARY_DIR ${NRMKhelper_LIBRARY_DIR})
     endif()
 endif()
 
-set(NRMKHW_FOUND true)
+list(APPEND components
+        ${NRMKhelper_FIND_COMPONENTS}
+        "NRMKHelperi686"
+        )
+list(REMOVE_DUPLICATES components)
+
+foreach(comp ${components})
+    if(NOT NRMKhelper_${comp}_LIBRARY)
+        find_library(
+                NRMKhelper_${comp}_LIBRARY
+                NAMES lib${comp}.a lib${comp}.so lib${comp}.la
+                HINTS ${NRMKhelper_LIBRARY_DIR}
+                PATH_SUFFIXES
+                lib
+        )
+        if(NRMKhelper_${comp}_LIBRARY)
+            message(STATUS "Found NRMKhelper ${comp}: ${NRMKhelper_${comp}_LIBRARY}")
+        endif()
+    endif()
+
+    if(NRMKhelper_${comp}_LIBRARY)
+        list(APPEND NRMKhelper_LIBRARIES ${NRMKhelper_${comp}_LIBRARY} )
+        mark_as_advanced(NRMKhelper_${comp}_LIBRARY)
+    endif()
+
+    # mark component as found or handle not finding it
+    if(NRMKhelper_${comp}_LIBRARY)
+        set(NRMKhelper_${comp}_FOUND TRUE)
+    elseif(NOT NRMKhelper_FIND_QUIETLY)
+        message(FATAL_ERROR "Could not find NRMKhelper component ${comp}!")
+    endif()
+endforeach()
+
+if(DEFINED NRMKhelper_LIBRARIES)
+    set(NRMKhelper_FOUND true)
+endif()
+message(STATUS "Found NRMKhelper: ${NRMKhelper_LIBRARIES}")

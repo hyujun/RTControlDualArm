@@ -54,10 +54,10 @@ endif()
 
 set(Poco_HINTS
 	/usr
-	$ENV{HOMEBREW_PREFIX}
-	$ENV{CYGWIN_HOME64}/usr
-	${Poco_DIR} 
-	$ENV{Poco_DIR}
+	#$ENV{HOMEBREW_PREFIX}
+	#$ENV{CYGWIN_HOME64}/usr
+	#${Poco_DIR}
+	#$ENV{Poco_DIR}
 )
 
 if(NOT Poco_ROOT_DIR)
