@@ -30,6 +30,7 @@ namespace HYUMotionKinematics {
  */
 class PoEKinematics : public HYUMotionBase::LieOperator {
 public:
+
 	/**
 	 * @brief PoEKinematics class constructor
 	 * @details A chain matrix should be defined.

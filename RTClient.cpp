@@ -28,20 +28,6 @@ std::map<int, int> ElmoHandMap = {
 hyuEcat::Master ecatmaster;
 hyuEcat::EcatElmo ecat_elmo[ELMO_TOTAL];
 
-struct LOGGING_PACK
-{
-	double 	Time;						/**< Global Time*/
-	double 	ActualPos[DUAL_ARM_DOF]; 	/**< Actual Position in Radian*/
-	double 	ActualVel[DUAL_ARM_DOF];	/**< Actual Velocity in Radian/second*/
-	short  	ActualToq[DUAL_ARM_DOF];
-	double 	DesiredPos[DUAL_ARM_DOF];
-	double  DesiredVel[DUAL_ARM_DOF];
-	short  	DesiredToq[DUAL_ARM_DOF];
-};
-
-// NRMKDataSocket for plotting axes data in Data Scope
-EcatDataSocket datasocket;
-
 // When all slaves or drives reach OP mode,
 // system_ready becomes 1.
 int system_ready = 0;
@@ -79,10 +65,8 @@ UINT16	Hand_ControlWord[HAND_DOF] = {0,};
 // Xenomai RT tasks
 RT_TASK RTArm_task;
 RT_TASK print_task;
-RT_TASK plot_task;
 RT_TASK tcpip_task;
 
-RT_QUEUE msg_plot;
 RT_QUEUE msg_tcpip;
 
 void signal_handler(int signum);
@@ -303,7 +287,7 @@ void RTRArm_run(void *arg)
 
 				if(double_gt >= 1.0)
 				{
-					ecat_elmo[j].writeTorque(TargetTor[j]);
+					//ecat_elmo[j].writeTorque(TargetTor[j]);
 				}
 				else
 				{
@@ -346,32 +330,6 @@ void RTRArm_run(void *arg)
 					worst_time=0;
 				}
 			}
-
-#if defined(_PLOT_ON_)
-			if ( (system_ready==1) && datasocket.hasConnection() && (sampling_tick-- == 0) )
-			{
-				sampling_tick = sampling_time - 1; // 'minus one' is necessary for intended operation
-
-				logBuff.Time = double_gt;
-				for(int k=0; k<DUAL_ARM_DOF; k++)
-				{
-					logBuff.ActualPos[k] = ActualPos_Rad[k]*RADtoDEG;
-					logBuff.ActualVel[k] = ActualVel_Rad[k]*RADtoDEG;
-					logBuff.ActualToq[k] = ActualTor[k];
-
-					logBuff.DesiredPos[k] = TargetPos_Rad[k]*RADtoDEG;
-					logBuff.DesiredVel[k] = TargetVel_Rad[k]*RADtoDEG;
-					logBuff.DesiredToq[k] = TargetTor[k];
-				}
-
-				msg = rt_queue_alloc(&msg_plot, len);
-				if(msg == NULL)
-					rt_printf("rt_queue_alloc Failed to allocate, NULL pointer received\n");
-
-				memcpy(msg, &logBuff, len);
-				rt_queue_send(&msg_plot, msg, len, Q_NORMAL);
-			}
-#endif
 		}
 		else
 		{
@@ -495,38 +453,6 @@ void print_run(void *arg)
 }
 
 
-void plot_run(void *arg)
-{
-	ssize_t len;
-	void *msg;
-	LOGGING_PACK logBuff;
-	memset(&logBuff, 0, sizeof(LOGGING_PACK));
-
-	int err = rt_queue_bind(&msg_plot, "PLOT_QUEUE", TM_INFINITE);
-	if(err)
-		fprintf(stderr, "Failed to queue bind, code %d\n", err);
-
-	rt_task_set_periodic(NULL, TM_NOW, 1e7);
-
-	while (1)
-	{
-		rt_task_wait_period(NULL);
-
-		if ( (len = rt_queue_receive(&msg_plot, &msg, TM_INFINITE)) > 0 )
-		{
-			memcpy(&logBuff, msg, sizeof(LOGGING_PACK));
-
-			datasocket.updateControlData( logBuff.ActualPos, logBuff.DesiredPos,
-					logBuff.ActualVel, logBuff.DesiredVel,
-					logBuff.ActualToq, logBuff.DesiredToq );
-			datasocket.update( logBuff.Time );
-
-			rt_queue_free(&msg_plot, msg);
-		}
-	}
-}
-
-
 void tcpip_run(void *arg)
 {
 	Poco::Net::ServerSocket sock(SERVER_PORT);
@@ -556,11 +482,6 @@ void tcpip_run(void *arg)
 void signal_handler(int signum)
 {
 	rt_printf("\nSignal Interrupt: %d", signum);
-#if defined(_PLOT_ON_)
-	rt_queue_unbind(&msg_plot);
-	rt_printf("\nPlotting RTTask Closing....");
-	rt_task_delete(&plot_task);
-#endif
 
 	rt_printf("\nTCPIP RTTask Closing....");
 	rt_task_delete(&tcpip_task);
@@ -585,6 +506,7 @@ void signal_handler(int signum)
 /****************************************************************************/
 int main(int argc, char **argv)
 {
+    Eigen::initParallel();
 	// Perform auto-init of rt_print buffers if the task doesn't do so
     rt_print_auto_init(1);
 
@@ -646,27 +568,9 @@ int main(int argc, char **argv)
 #endif
 #endif
 
-#if defined(_PLOT_ON_)
-	// TO DO: Create data socket server
-	datasocket.setPeriod(period);
-
-	if (datasocket.startServer(SOCK_TCP, NRMK_PORT_DATA))
-		rt_printf("Data server started at IP of : %s on Port: %d\n", datasocket.getAddress(), NRMK_PORT_DATA);
-
-	rt_printf("Waiting for Data Scope to connect...\n");
-	datasocket.waitForConnection(0);
-#endif
 
 	// RTArm_task: create and start
 	rt_printf("\n-- Now running rt task ...\n");
-
-
-#if defined(_PLOT_ON_)
-	rt_queue_create(&msg_plot, "PLOT_QUEUE", sizeof(LOGGING_PACK)*20, 20, Q_FIFO|Q_SHARED);
-
-	rt_task_create(&plot_task, "PLOT_PROC_Task", 0, 80, T_FPU);
-	rt_task_start(&plot_task, &plot_run, NULL);
-#endif
 
 #if defined(_ECAT_ON_)
 	rt_task_create(&RTArm_task, "CONTROL_PROC_Task", 1024*1024*4, 99, T_FPU); // MUST SET at least 4MB stack-size (MAXIMUM Stack-size ; 8192 kbytes)

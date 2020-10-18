@@ -197,7 +197,7 @@ void PoEKinematics::AnalyticJacobian( void )
 
 void PoEKinematics::GetpinvJacobian( MatrixXd &_pinvJacobian )
 {
-	_pinvJacobian = mAnalyticJacobian.completeOrthogonalDecomposition().pseudoInverse();
+	//_pinvJacobian = mAnalyticJacobian.completeOrthogonalDecomposition().pseudoInverse();
 
 	/*
 	Eigen::BDCSVD<MatrixXd> svd(mAnalyticJacobian, Eigen::ComputeThinU | Eigen::ComputeThinV);

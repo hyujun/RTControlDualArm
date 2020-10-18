@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 2.8)
 # Set variables:
 #   * PROJECT_NAME
 #   * PROJECT_VERSION
-project(RTBionicArm_m)
+project(RTControlDualArm)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -25,8 +25,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CMAKE_CXX_STANDARD} -O3" )
 message(STATUS "C++${CMAKE_CXX_STANDARD} support has been enabled by default.")
-set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 
+set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
 
 set(PROJ_INSTALL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/bin/inc)
@@ -37,10 +37,6 @@ set(CTRL_HEADERS_DIR ${PROJECT_SOURCE_DIR}/Control)
 set(ECAT_HEADERS_DIR ${PROJECT_SOURCE_DIR}/EcatSystem)
 set(KDL_HEADERS_DIR ${PROJECT_SOURCE_DIR}/KDL)
 set(NET_HEADERS_DIR ${PROJECT_SOURCE_DIR}/Network)
-
-#include_directories(/usr/include)
-#include_directories(/usr/include/linux)
-#include_directories(/usr/include/c++/4.8.4)
 
 include_directories(${PROJ_INSTALL_INCLUDE_DIR})
 include_directories(
@@ -57,7 +53,6 @@ add_subdirectory(Network)
 
 add_executable(${PROJECT_NAME}
         RTClient.cpp
-        devMouseObject.cpp
 )
 target_link_libraries(${PROJECT_NAME}
         sub::CTRL
@@ -66,13 +61,13 @@ target_link_libraries(${PROJECT_NAME}
         sub::NETWORK
 )
 
-#find_package(Eigen3 CONFIG)
-set( EIGEN3_INCLUDE_DIR /usr/include/eigen3)
-IF( NOT EIGEN3_INCLUDE_DIR )
-    MESSAGE( FATAL_ERROR "Please point the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
+find_package(Eigen 3.0.0)
+IF( NOT Eigen_FOUND )
+    MESSAGE( FATAL_ERROR "Please point the environment variable EIGEN_INCLUDE_DIR to the include directory of your Eigen installation.")
 ENDIF()
-include_directories ( ${EIGEN3_INCLUDE_DIR} )
-message(STATUS "Eigen3 includes : ${EIGEN3_INCLUDE_DIR}" )
+add_definitions(${Eigen_DEFINITIONS})
+include_directories ( ${Eigen_INCLUDE_DIRS} )
+message(STATUS "Eigen includes : ${Eigen_INCLUDE_DIRS}" )
 
 find_package(OpenMP REQUIRED)
 if(OpenMP_CXX_FOUND)

@@ -11,7 +11,7 @@
 #pragma once
 
 #include "Poco/Event.h"
-#include "modules/helper/inc/NRMKSocketBase.h"
+#include "NRMKSocketBase.h"
 
 /**
  * @brief NRMK TCP/IP namespace

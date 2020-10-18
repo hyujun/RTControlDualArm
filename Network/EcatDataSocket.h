@@ -5,7 +5,7 @@
  */
  
 #pragma once
-#include "modules/helper/inc/NRMKDataSocket.h"
+#include "NRMKDataSocket.h"
 
 enum
 {

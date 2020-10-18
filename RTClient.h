@@ -23,8 +23,8 @@
 #include <sys/ioctl.h>
 #include <math.h>
 
-//#include "NRMKsercan_tp.h"  //<Header for the SERCAN API
-//#include "NRMKhw_tp.h"		//<Header for the SERCAN API
+#include "NRMKsercan_tp.h"  //<Header for the SERCAN API
+#include "NRMKhw_tp.h"		//<Header for the SERCAN API
 //-xenomai-///////////////////////////////////////////////////////////////
 #include <native/task.h>
 #include <native/timer.h>
@@ -52,7 +52,6 @@
 #define _DEBUG_ 			/**<Debug Print Parameter*/
 #define _ECAT_ON_ 			/**<EtherCAT device enable Parameter*/
 #define _USE_DC_MODE_		/**<EtherCAT Distributed Clock mode enable Parameter*/
-//#define _PLOT_ON_
 //#define _WITH_KIST_HAND_
 
 typedef unsigned int UINT32;	/**<typedef uint32_t*/
