@@ -331,6 +331,7 @@ void RTRArm_run(void *arg)
 				}
 			}
 		}
+
 		else
 		{
 			if(ecatmaster.GetConnectedSlaves() < ELMO_TOTAL)
@@ -468,9 +469,7 @@ void tcpip_run(void *arg)
 	std::cout << "-- maxConcurrentConnections: " << server.maxConcurrentConnections() << std::endl;
 
 	server.start();
-
 	rt_task_set_periodic(NULL, TM_NOW, 1000e6);
-
 	while(1)
 	{
 		rt_task_wait_period(NULL);

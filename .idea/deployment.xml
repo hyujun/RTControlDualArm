@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" serverName="Remote Host (5f994c5f-28a6-44fd-a1bc-f5268660fd8e)" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="Remote Host (14772c1a-b79c-4c22-b7f0-be442d49c48f)">
+      <paths name="Remote Host (5f994c5f-28a6-44fd-a1bc-f5268660fd8e)">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/tmp.z9iAhvncfb" local="$PROJECT_DIR$" />
+            <mapping deploy="/tmp" local="$PROJECT_DIR$" />
           </mappings>
           <excludedPaths>
-            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
-            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-release" />
-            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-release" />
-            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-release-coverage" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-release-remote-host" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-release-remote-host" />
           </excludedPaths>
         </serverdata>
       </paths>

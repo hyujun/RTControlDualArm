@@ -51,7 +51,6 @@ Controller::Controller(SerialManipulator *pManipulator)
 	eTask.resize(6*pManipulator->GetTotalChain());
 
 	edotTmp.resize(6*pManipulator->GetTotalChain(), 6*pManipulator->GetTotalChain());
-	dexp.resize(6,6);
 
 	ToqOut.resize(m_Jnum);
 	ToqOut.setZero();
@@ -202,6 +201,36 @@ void Controller::InvDynController( double *p_q, double *p_qdot, double *p_dq, do
 	Map<VectorXd>(p_Toq, this->m_Jnum) = ToqOut;
 	return;
 
+}
+
+void Controller::TaskError(double *_dx, double *_dxdot, double *_q, double *_qdot, double *p_Toq)
+{
+    q = Map<VectorXd>(_q, this->m_Jnum);
+    qdot = Map<VectorXd>(_qdot, this->m_Jnum);
+    dx = Map<VectorXd>(_dx, 6*pManipulator->pKin->GetNumChain());
+    dxdot = Map<VectorXd>(_dxdot, 6*pManipulator->pKin->GetNumChain());
+    eTask.setZero();
+    edotTask.setZero();
+
+    MatrixXd AnalyticJac;
+
+    int EndJoint[2] = {9, 16};
+
+    for(int i=0; i<pManipulator->pKin->GetNumChain(); i++)
+    {
+        dSE3.block(0,3,3,1) = dx.segment(3,3);
+        pManipulator->pKin->RollPitchYawtoSO3(dx(6*i), dx(6*i+1), dx(6*i+2), dSO3);
+        dSE3.block(0,0,3,3) = dSO3;
+        eSE3 = pManipulator->pKin->inverse_SE3(dSE3)*pManipulator->pKin->GetForwardKinematicsSE3(EndJoint[i]);
+        pManipulator->pKin->SO3toRollPitchYaw(eSE3.block(0,0,3,3), eOrient);
+        eTask.segment(6*i,3) = eOrient;
+        eTask.segment(6*i+3,3) = eSE3.block(3,3,3,1);
+
+
+    }
+
+    pManipulator->pKin->GetAnalyticJacobian(AnalyticJac);
+    edotTask = dxdot - AnalyticJac*qdot;
 }
 
 void Controller::CLIKTaskController( double *_q, double *_qdot, double *_dq, double *_dqdot, const VectorXd *_dx, const VectorXd *_dxdot, const VectorXd &_dqdotNull, double *p_Toq, float &_dt )

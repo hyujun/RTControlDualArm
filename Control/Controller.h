@@ -67,6 +67,8 @@ public:
 	void PDGravController( double *p_q, double *p_qdot, double *p_dq, double *p_dqdot, double *p_Toq );
 	void InvDynController( double *p_q, double *p_qdot, double *p_dq, double *p_dqdot, double *p_dqddot, double *p_Toq, float &_dt );
 
+	void TaskError(double *_dx, double*_dxdot, double *_q, double *_qdot, double *p_Toq);
+
 	void CLIKTaskController( double *_q, double *_qdot, double *_dq, double *_dqdot, const VectorXd *_dx, const VectorXd *_dxdot, const VectorXd &_dqdotNull, double *p_Toq, float &_dt );
 
 	void FrictionIdentification( double *p_q, double *p_qdot, double *p_dq, double *p_dqdot, double *p_dqddot, double *p_Toq, double &gt );
@@ -89,13 +91,17 @@ private:
 
 	Eigen::VectorXd e, e_dev, e_int, e_int_sat;
 
+
 	SE3 dSE3, eSE3;
+	SO3 dSO3;
 	Eigen::Vector3d  omega;
 	double theta=0;
 
+    Eigen::VectorXd dx, dxdot;
+    Vector3d eOrient;
+
 	Eigen::VectorXd eTask, edotTask;
 	Eigen::MatrixXd edotTmp;
-	Eigen::MatrixXd dexp;
 
 	Eigen::VectorXd ToqOut;
 	Eigen::VectorXd GainWeightFactor;

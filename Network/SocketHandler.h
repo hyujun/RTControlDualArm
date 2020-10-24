@@ -9,11 +9,15 @@
 #define SOCKETHANDLER_H_
 
 #include <iostream>
-#include <cstring>
+#include <string.h>
 #include <mutex>
+#include <stdio.h>
 #include <Poco/Net/TCPServer.h>
 #include <Poco/Net/TCPServerConnection.h>
 #include <Poco/Net/TCPServerConnectionFactory.h>
+
+#include "PacketHandler.h"
+#include "KRISSSensorHandler.h"
 
 const Poco::UInt16 SERVER_PORT = 32452;
 
@@ -24,7 +28,7 @@ public:
 	{
 
 	}
-	virtual ~Session() { }
+	virtual ~Session() {}
 
 	virtual void run()
 	{
@@ -34,13 +38,18 @@ public:
 
 			do
 			{
+                buff_size = sizeof(buffer);
+
 				recvSize = socket().receiveBytes(buffer, sizeof(buffer));
 				std::cout << "Recieved Massage from client " << buffer << std::endl;
 
-				snprintf(szSendMessage, 256 - 1, "Re:%s", buffer);
-				int nMsgLen = (int)strnlen(szSendMessage, 256 - 1);
+                memcpy(TxFrame.data, buffer, sizeof(buffer));
+                mPackethandler.packetlibrary(TxFrame);
 
-				socket().sendBytes(szSendMessage, nMsgLen);
+                RxFrame = TxFrame;
+                RxFrame.info.subindex += 0x01;
+
+				socket().sendBytes(RxFrame.data, sizeof(RxFrame.data));
 			} while (recvSize > 0);
 
 			std::cout << "Disconeected with the client" << std::endl;
@@ -51,8 +60,11 @@ public:
 		}
 	}
 private:
-	char buffer[256] = { 0, };
-	char szSendMessage[256] = { 0, };
+	char buffer[32] = { 0, };
+	char szSendMessage[32] = { 0, };
+    TCP_Packet TxFrame, RxFrame;
+    int buff_size=0;
+    PacketHandler mPackethandler;
 };
 
 class SessionFactory : public Poco::Net::TCPServerConnectionFactory
@@ -88,6 +100,11 @@ void PrintServerStatus(Poco::Net::TCPServer& server)
 
 	printf("queuedConnections:%d, totalConnections:%d\n\n",
 		server.queuedConnections(), server.totalConnections());
+}
+
+void TCP_SetTargetTaskData(Poco::Net::TCPServer &server)
+{
+
 }
 
 #endif /* SOCKETHANDLER_H_ */

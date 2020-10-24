@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
 project(Network)
 
-set(SOURCE_FILES SocketHandler.h EcatDataSocket.h EcatControlSocket.h)
+set(SOURCE_FILES SocketHandler.h PacketHandler.h KRISSSensorHandler.h)
 
 add_library(${PROJECT_NAME} SHARED STATIC
         ${SOURCE_FILES}
         )
+
 add_library(sub::NETWORK ALIAS ${PROJECT_NAME})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)

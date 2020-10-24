@@ -3,19 +3,36 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
       <config projectName="RTControlDualArm" targetName="KDL" />
-      <config projectName="RTControlDualArm" targetName="Network" />
       <config projectName="RTControlDualArm" targetName="RTControlDualArm" />
+      <config projectName="RTControlDualArm" targetName="Network" />
       <config projectName="RTControlDualArm" targetName="EcatSystem" />
       <config projectName="RTControlDualArm" targetName="Control" />
     </generated>
   </component>
   <component name="CMakeSettings">
     <configurations>
-      <configuration PROFILE_NAME="Release" CONFIG_NAME="Release" />
-      <configuration PROFILE_NAME="Release-Coverage" CONFIG_NAME="Release" GENERATION_OPTIONS="-DCMAKE_CXX_FLAGS=--coverage -DCMAKE_C_FLAGS=--coverage" />
+      <configuration PROFILE_NAME="Release-Remote Host" CONFIG_NAME="Release" TOOLCHAIN_NAME="Remote Host" />
     </configurations>
   </component>
   <component name="ChangeListManager">
@@ -56,7 +73,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Release-Coverage" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Release-Remote Host" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -70,6 +87,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -81,30 +99,30 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="dynamic.analysis.tools" />
+    <property name="settings.editor.selected.configurable" value="CPPToolchains" />
   </component>
   <component name="RunManager" selected="CMake Application.RTControlDualArm">
-    <configuration name="Control" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="RTControlDualArm" TARGET_NAME="Control" CONFIG_NAME="Release">
+    <configuration name="Control" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="RTControlDualArm" TARGET_NAME="Control" CONFIG_NAME="Release-Remote Host">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="EcatSystem" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="RTControlDualArm" TARGET_NAME="EcatSystem" CONFIG_NAME="Release">
+    <configuration name="EcatSystem" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="RTControlDualArm" TARGET_NAME="EcatSystem" CONFIG_NAME="Release-Remote Host">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="KDL" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="RTControlDualArm" TARGET_NAME="KDL" CONFIG_NAME="Release">
+    <configuration name="KDL" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="RTControlDualArm" TARGET_NAME="KDL" CONFIG_NAME="Release-Remote Host">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Network" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="RTControlDualArm" TARGET_NAME="Network" CONFIG_NAME="Release">
+    <configuration name="Network" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="RTControlDualArm" TARGET_NAME="Network" CONFIG_NAME="Release-Remote Host">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="RTControlDualArm" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="RTControlDualArm" TARGET_NAME="RTControlDualArm" CONFIG_NAME="Release" RUN_TARGET_PROJECT_NAME="RTControlDualArm" RUN_TARGET_NAME="RTControlDualArm">
+    <configuration name="RTControlDualArm" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="RTControlDualArm" TARGET_NAME="RTControlDualArm" CONFIG_NAME="Release-Remote Host" RUN_TARGET_PROJECT_NAME="RTControlDualArm" RUN_TARGET_NAME="RTControlDualArm">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -143,47 +161,82 @@
       <workItem from="1603002091263" duration="1470000" />
       <workItem from="1603006287664" duration="720000" />
       <workItem from="1603007156230" duration="1881000" />
+      <workItem from="1603016165809" duration="2048000" />
+      <workItem from="1603113139940" duration="5269000" />
+      <workItem from="1603449423813" duration="641000" />
+      <workItem from="1603450079806" duration="2020000" />
+      <workItem from="1603452127424" duration="664000" />
+      <workItem from="1603452806216" duration="405000" />
+      <workItem from="1603453297492" duration="967000" />
+      <workItem from="1603454279776" duration="14707000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="538" y="198" key="#SSH_Configurations" timestamp="1603454004101">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="538" y="198" key="#SSH_Configurations/0.0.1920.1040@0.0.1920.1040" timestamp="1603454004101" />
     <state x="734" y="354" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1603006313991">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="734" y="354" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1603006313991" />
-    <state x="1060" y="454" key="FileChooserDialogImpl" timestamp="1603008000655">
-      <screen x="0" y="0" width="2560" height="1400" />
+    <state x="690" y="266" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1603452707004">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state x="690" y="266" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1603452707004" />
+    <state x="795" y="337" key="FileChooserDialogImpl" timestamp="1603113111910">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="795" y="337" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1603113111910" />
     <state x="1060" y="454" key="FileChooserDialogImpl/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1603008000655" />
-    <state width="1258" height="287" key="GridCell.Tab.0.bottom" timestamp="1603009060028">
-      <screen x="0" y="0" width="2560" height="1400" />
+    <state width="1000" height="242" key="GridCell.Tab.0.bottom" timestamp="1603553619239">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1000" height="242" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1603553619239" />
     <state width="1258" height="287" key="GridCell.Tab.0.bottom/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1603009060028" />
-    <state width="1258" height="287" key="GridCell.Tab.0.center" timestamp="1603009060028">
-      <screen x="0" y="0" width="2560" height="1400" />
+    <state width="1000" height="242" key="GridCell.Tab.0.center" timestamp="1603553619239">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1000" height="242" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1603553619239" />
     <state width="1258" height="287" key="GridCell.Tab.0.center/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1603009060028" />
-    <state width="1258" height="287" key="GridCell.Tab.0.left" timestamp="1603009060027">
-      <screen x="0" y="0" width="2560" height="1400" />
+    <state width="1000" height="242" key="GridCell.Tab.0.left" timestamp="1603553619238">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1000" height="242" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1603553619238" />
     <state width="1258" height="287" key="GridCell.Tab.0.left/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1603009060027" />
-    <state width="1258" height="287" key="GridCell.Tab.0.right" timestamp="1603009060028">
-      <screen x="0" y="0" width="2560" height="1400" />
+    <state width="1000" height="242" key="GridCell.Tab.0.right" timestamp="1603553619239">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1000" height="242" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1603553619239" />
     <state width="1258" height="287" key="GridCell.Tab.0.right/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1603009060028" />
-    <state x="781" y="344" key="SettingsEditor" timestamp="1603008006326">
-      <screen x="0" y="0" width="2560" height="1400" />
+    <state x="463" y="198" key="SettingsEditor" timestamp="1603454004678">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state x="463" y="198" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1603454004678" />
     <state x="781" y="344" key="SettingsEditor/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1603008006326" />
-    <state x="970" y="430" key="ftp.server.browser" timestamp="1603002256422">
-      <screen x="0" y="0" width="2560" height="1400" />
+    <state x="728" y="319" width="427" height="539" key="ftp.server.browser" timestamp="1603453793184">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state x="728" y="319" width="427" height="539" key="ftp.server.browser/0.0.1920.1040@0.0.1920.1040" timestamp="1603453793184" />
     <state x="970" y="430" key="ftp.server.browser/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1603002256422" />
   </component>
   <component name="XDebuggerManager">
