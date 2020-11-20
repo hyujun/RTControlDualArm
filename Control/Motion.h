@@ -50,8 +50,9 @@ private:
 	uint16_t MotionCommandTask_p=0;
 
 	double MotionInitTime=0;
-
 	double TrajectoryTime=0;
+
+	double init_time=0;
 
 	int TotalDoF;
 	int TotalChain;
@@ -59,6 +60,8 @@ private:
 	double _T=0;
 	double _omega=0;
 	double _amp=0;
+
+	int MotionCounter=0;
 
 };
 

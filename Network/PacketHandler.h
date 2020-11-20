@@ -9,6 +9,7 @@
 #include <string.h>
 
 #define INDEX_TASK_TARGET 0x6090
+#define Index_HandCommand_request 0x3333
 
 struct packet_data{
     float index;

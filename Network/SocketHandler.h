@@ -20,6 +20,8 @@
 #include "KRISSSensorHandler.h"
 
 const Poco::UInt16 SERVER_PORT = 32452;
+int TargetHandMotion=0x00;
+int TargetHandState=0x00;
 
 class Session : public Poco::Net::TCPServerConnection
 {
@@ -46,8 +48,18 @@ public:
                 memcpy(TxFrame.data, buffer, sizeof(buffer));
                 mPackethandler.packetlibrary(TxFrame);
 
+                memset(RxFrame.data, 0, sizeof(RxFrame.data));
                 RxFrame = TxFrame;
-                RxFrame.info.subindex += 0x01;
+                if(RxFrame.info.index == Index_HandCommand_request)
+                {
+                    TargetHandState = RxFrame.info.subindex;
+                    RxFrame.info.subindex = TargetHandMotion;
+                }
+                else
+                {
+                    RxFrame.info.subindex += 0x01;
+                }
+
 
 				socket().sendBytes(RxFrame.data, sizeof(RxFrame.data));
 			} while (recvSize > 0);
@@ -59,12 +71,16 @@ public:
 			std::cout << "Session: " << exc.displayText() << std::endl;
 		}
 	}
+
 private:
 	char buffer[32] = { 0, };
 	char szSendMessage[32] = { 0, };
     TCP_Packet TxFrame, RxFrame;
     int buff_size=0;
     PacketHandler mPackethandler;
+
+
+
 };
 
 class SessionFactory : public Poco::Net::TCPServerConnectionFactory
@@ -102,9 +118,10 @@ void PrintServerStatus(Poco::Net::TCPServer& server)
 		server.queuedConnections(), server.totalConnections());
 }
 
-void TCP_SetTargetTaskData(Poco::Net::TCPServer &server)
+void TCP_SetTargetTaskData(int &txdata, int &rxdata)
 {
-
+    TargetHandMotion = txdata;
+    rxdata = TargetHandState;
 }
 
 #endif /* SOCKETHANDLER_H_ */

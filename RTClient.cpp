@@ -84,6 +84,9 @@ static double TargetVel_Rad[DUAL_ARM_DOF] = {0.0,};
 static double TargetAcc_Rad[DUAL_ARM_DOF] = {0.0,};
 static double TargetToq[DUAL_ARM_DOF] = {0.0,};
 
+static int hand_motion;
+static int hand_state;
+
 #if defined(_WITH_KIST_HAND_)
 static double Hand_ActualPos_Rad[HAND_DOF] = {0.0,};
 static double Hand_ActualVel_Rad[HAND_DOF] = {0.0,};
@@ -145,6 +148,8 @@ void RTRArm_run(void *arg)
 	short MaxTor = 1200;
 
 	int k=0;
+
+	hand_motion = 0x00;
 
 	uint16_t ControlMotion = SYSTEM_BEGIN;
 	uint16_t JointState = SYSTEM_BEGIN;
@@ -209,6 +214,8 @@ void RTRArm_run(void *arg)
 			ActualTor[k] = 				ecat_elmo[k].torque_;
 		}
 #endif
+        DualArm.ENCtoRAD(ActualPos, ActualPos_Rad);
+        DualArm.VelocityConvert(ActualVel, ActualVel_Rad);
 
 		if( system_ready )
 		{
@@ -218,19 +225,6 @@ void RTRArm_run(void *arg)
 				once_flag = 1;
 			}
 
-#if defined(_WITH_KIST_HAND_)
-			kisthand.HandEnctoRad(Hand_ActualPos, Hand_ActualPos_Rad);
-			kisthand.HandVelocityConvert(Hand_ActualVel, Hand_ActualVel_Rad);
-
-			if(double_gt >= 1)
-				HandMotion=1;
-
-			kisthand.HandControl(HandMotion, Hand_ActualPos_Rad, Hand_TargetVel, double_gt);
-#endif
-
-			DualArm.ENCtoRAD(ActualPos, ActualPos_Rad);
-			DualArm.VelocityConvert(ActualVel, ActualVel_Rad);
-
 			DualArm.pKin->PrepareJacobian(ActualPos_Rad);
 			DualArm.pDyn->PrepareDynamics(ActualPos_Rad, ActualVel_Rad);
 
@@ -239,6 +233,10 @@ void RTRArm_run(void *arg)
 
 			DualArm.StateMachine( ActualPos_Rad, ActualVel_Rad, finPos, JointState, ControlMotion );
 			motion.JointMotion( TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, finPos, ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlMotion );
+            if(JointState == MOVE_CUSTOMIZE1)
+                hand_motion == 0x11;
+            else if(JointState == MOVE_CUSTOMIZE9)
+                hand_motion == 0x00;
 
 			//if( ControlMotion == MOVE_FRICTION )
 			//	Control.FrictionIdentification( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_gt );
@@ -285,9 +283,9 @@ void RTRArm_run(void *arg)
 			for(int j=0; j < DUAL_ARM_DOF; ++j)
 			{
 
-				if(double_gt >= 1.0)
+				if(double_gt >= 1.0 && JointState != SYSTEM_BEGIN)
 				{
-					//ecat_elmo[j].writeTorque(TargetTor[j]);
+					ecat_elmo[j].writeTorque(TargetTor[j]);
 				}
 				else
 				{
@@ -464,16 +462,18 @@ void tcpip_run(void *arg)
 	static Poco::Net::TCPServer server(new SessionFactory(), sock, pParams);
 
 
+
 	std::cout << "\n-- DualArm TCP Server Application." << std::endl;
 	//std::cout << "maxThreads: " << server.maxThreads() << std::endl;
 	std::cout << "-- maxConcurrentConnections: " << server.maxConcurrentConnections() << std::endl;
 
 	server.start();
-	rt_task_set_periodic(NULL, TM_NOW, 1000e6);
+	rt_task_set_periodic(NULL, TM_NOW, 10e6);
 	while(1)
 	{
 		rt_task_wait_period(NULL);
-		PrintServerStatus(server);
+        TCP_SetTargetTaskData(hand_motion, hand_state);
+        //PrintServerStatus(server);
 	}
 }
 
