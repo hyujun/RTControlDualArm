@@ -200,9 +200,9 @@ void Liedynamics::C_Matrix( MatrixXd &_Cmat )
 
 void Liedynamics::G_Matrix( VectorXd &_G )
 {
-	_G.resize(this->m_DoF);
-	_G.setZero();
-	_G.noalias() += LA_mat.transpose()*Iner_mat*L_mat*VdotBase;
+    _G.resize(this->m_DoF);
+    _G.setZero();
+    _G.noalias() += LA_mat.transpose()*(Iner_mat*(L_mat*VdotBase));
 	return;
 }
 
@@ -215,7 +215,7 @@ void Liedynamics::MG_Mat_Joint( MatrixXd &_M, VectorXd&_G )
 
 	mM_Tmp.resize(this->m_DoF, 6*this->m_DoF);
 	mM_Tmp.setZero();
-	mM_Tmp.noalias() += LA_mat.transpose()*Iner_mat*L_mat;
+	mM_Tmp.noalias() += (LA_mat.transpose()*Iner_mat)*L_mat;
 
 	_M.noalias() += mM_Tmp*A_mat;
 	_G.noalias() += mM_Tmp*VdotBase;

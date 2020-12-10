@@ -21,9 +21,10 @@ include(${PROJECT_SOURCE_DIR}/modules/CMakeFunctions.cmake)
 
 cmake_policy(SET CMP0022 NEW)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CMAKE_CXX_STANDARD} -O3" )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++${CMAKE_CXX_STANDARD} -O2 -fopenmp" )
+message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 message(STATUS "C++${CMAKE_CXX_STANDARD} support has been enabled by default.")
 
 set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/modules)
@@ -85,7 +86,7 @@ if(Xenomai_FOUND)
 
     include_directories(${Xenomai_NATIVE_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME} PUBLIC ${Xenomai_NATIVE_LIBRARY_DIRS} ${Xenomai_NATIVE_LIBRARIES})
-#    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS ${Xenomai_NATIVE_LDFLAGS})
+    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS ${Xenomai_NATIVE_LDFLAGS})
     target_compile_definitions(${PROJECT_NAME} PUBLIC ${Xenomai_NATIVE_DEFINITIONS})
 endif(Xenomai_FOUND)
 

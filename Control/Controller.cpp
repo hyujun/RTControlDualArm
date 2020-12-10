@@ -195,8 +195,9 @@ void Controller::InvDynController( double *p_q, double *p_qdot, double *p_dq, do
 	ToqOut.setZero();
 	//ToqOut = M*( dqddot + Kd.cwiseProduct(e_dev) + Kp.cwiseProduct(e) ) + ( e_dev + Kd.cwiseProduct(e) + Kp.cwiseProduct(e_int) ) + G + FrictionTorque;
 	//ToqOut = M.diagonal().cwiseProduct(dqddot) + Kp.cwiseProduct(e) + Kd.cwiseProduct(e_dev) + G + FrictionTorque;
-	ToqOut = Kp.cwiseProduct(e) + Kd.cwiseProduct(e_dev) + G + FrictionTorque;
+	//ToqOut = Kp.cwiseProduct(e) + Kd.cwiseProduct(e_dev) + G + FrictionTorque;
 	//ToqOut = G + FrictionTorque;
+    ToqOut = G;
 
 	Map<VectorXd>(p_Toq, this->m_Jnum) = ToqOut;
 	return;

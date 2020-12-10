@@ -31,7 +31,7 @@ hyuEcat::EcatElmo ecat_elmo[ELMO_TOTAL];
 // When all slaves or drives reach OP mode,
 // system_ready becomes 1.
 int system_ready = 0;
-
+int break_flag = 0;
 // Global time (beginning from zero)
 double double_gt=0; //real global time
 float float_dt=0;
@@ -144,7 +144,6 @@ void RTRArm_run(void *arg)
 	RTIME p1 = 0;
 	RTIME p3 = 0;
 
-	int once_flag = 0;
 	short MaxTor = 1200;
 
 	int k=0;
@@ -174,6 +173,8 @@ void RTRArm_run(void *arg)
 	while (1)
 	{
 		rt_task_wait_period(NULL); 	//wait for next cycle
+        if(break_flag == 1)
+            break;
 
 		previous = rt_timer_read();
 
@@ -219,12 +220,6 @@ void RTRArm_run(void *arg)
 
 		if( system_ready )
 		{
-			if( once_flag == 0)
-			{
-				//DualArm.ENCtoRAD(ActualPos, TargetPos_Rad);
-				once_flag = 1;
-			}
-
 			DualArm.pKin->PrepareJacobian(ActualPos_Rad);
 			DualArm.pDyn->PrepareDynamics(ActualPos_Rad, ActualVel_Rad);
 
@@ -233,10 +228,10 @@ void RTRArm_run(void *arg)
 
 			DualArm.StateMachine( ActualPos_Rad, ActualVel_Rad, finPos, JointState, ControlMotion );
 			motion.JointMotion( TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, finPos, ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlMotion );
-            if(JointState == MOVE_CUSTOMIZE1)
-                hand_motion == 0x11;
-            else if(JointState == MOVE_CUSTOMIZE9)
-                hand_motion == 0x00;
+            //if(JointState == MOVE_CUSTOMIZE1)
+            //    hand_motion == 0x11;
+            //else if(JointState == MOVE_CUSTOMIZE9)
+            //    hand_motion == 0x00;
 
 			//if( ControlMotion == MOVE_FRICTION )
 			//	Control.FrictionIdentification( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_gt );
@@ -244,7 +239,6 @@ void RTRArm_run(void *arg)
 			//	Control.CLIKTaskController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetPos_Task, TargetVel_Task, nullMotion, TargetToq, float_dt );
 			//else
 			//{
-				//Control.PDGravController(ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetToq );
 				Control.InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, float_dt );
 			//}
 
@@ -285,7 +279,7 @@ void RTRArm_run(void *arg)
 
 				if(double_gt >= 1.0 && JointState != SYSTEM_BEGIN)
 				{
-					ecat_elmo[j].writeTorque(TargetTor[j]);
+					//ecat_elmo[j].writeTorque(TargetTor[j]);
 				}
 				else
 				{
@@ -363,6 +357,8 @@ void print_run(void *arg)
 	while (1)
 	{
 		rt_task_wait_period(NULL); //wait for next cycle
+        if(break_flag==1)
+            break;
 
 		if ( ++count >= roundl(NSEC_PER_SEC/PrintPeriod) )
 		{
@@ -461,8 +457,6 @@ void tcpip_run(void *arg)
 
 	static Poco::Net::TCPServer server(new SessionFactory(), sock, pParams);
 
-
-
 	std::cout << "\n-- DualArm TCP Server Application." << std::endl;
 	//std::cout << "maxThreads: " << server.maxThreads() << std::endl;
 	std::cout << "-- maxConcurrentConnections: " << server.maxConcurrentConnections() << std::endl;
@@ -472,6 +466,8 @@ void tcpip_run(void *arg)
 	while(1)
 	{
 		rt_task_wait_period(NULL);
+		if(break_flag==1)
+		    break;
         TCP_SetTargetTaskData(hand_motion, hand_state);
         //PrintServerStatus(server);
 	}
@@ -481,18 +477,19 @@ void tcpip_run(void *arg)
 void signal_handler(int signum)
 {
 	rt_printf("\nSignal Interrupt: %d", signum);
+    break_flag=1;
 
 	rt_printf("\nTCPIP RTTask Closing....");
 	rt_task_delete(&tcpip_task);
 	rt_printf("\nTCPIP RTTask Closing Success....");
 
 #if defined(_ECAT_ON_)
+    ecatmaster.deactivate();
+
 	rt_printf("\nEtherCAT RTTask Closing....");
 	rt_task_delete(&RTArm_task);
 	rt_printf("\nEtherCAT RTTask Closing Success....");
 #endif
-
-	ecatmaster.deactivate();
 
 	rt_printf("\nConsolPrint RTTask Closing....");
 	rt_task_delete(&print_task);
@@ -506,15 +503,20 @@ void signal_handler(int signum)
 int main(int argc, char **argv)
 {
     Eigen::initParallel();
+    Eigen::setNbThreads(3);
+    std::cout << "Eigen Multithreading: " << Eigen::nbThreads() << std::endl;
+
 	// Perform auto-init of rt_print buffers if the task doesn't do so
     rt_print_auto_init(1);
 
     signal(SIGHUP, signal_handler);
 	signal(SIGINT, signal_handler);
+    signal(SIGQUIT, signal_handler);
+    signal(SIGIOT, signal_handler);
+    signal(SIGFPE, signal_handler);
+    signal(SIGKILL, signal_handler);
+    signal(SIGSEGV, signal_handler);
 	signal(SIGTERM, signal_handler);
-	signal(SIGKILL, signal_handler);
-	signal(SIGFPE, signal_handler);
-	signal(SIGQUIT, signal_handler);
 
 	/* Avoids memory swapping for this program */
 	mlockall( MCL_CURRENT | MCL_FUTURE );
@@ -524,7 +526,8 @@ int main(int argc, char **argv)
 	//cycle_ns = 500000; // nanosecond -> 2kHz
 	//cycle_ns = 1000000; // nanosecond -> 1kHz
 	//cycle_ns = 1250000; // nanosecond -> 800Hz
-	cycle_ns = 2e6; // nanosecond -> 500Hz
+	//cycle_ns = 2e6; // nanosecond -> 500Hz
+    cycle_ns = 10e6;
 	period = ((double) cycle_ns)/((double) NSEC_PER_SEC);	//period in second unit
 
 
@@ -544,13 +547,6 @@ int main(int argc, char **argv)
 		}
 	}
 #else
-
-	if(ecatmaster.GetConnectedSlaves() < ELMO_TOTAL)
-	{
-		rt_printf("\nError: Check Ethercat slave connection!\n");
-		//return 1;
-	}
-
 	int SlaveNum;
 	for(SlaveNum=0; SlaveNum < ELMO_TOTAL; SlaveNum++)
 	{
@@ -559,29 +555,26 @@ int main(int argc, char **argv)
 
 #endif
 
-
 #if defined(_USE_DC_MODE_)
-	ecatmaster.activateWithDC(0, cycle_ns);  //is a first arg DC location of MotorDriver?
+	ecatmaster.activateWithDC(1, cycle_ns);
 #else
 	ecatmaster.activate();
 #endif
 #endif
 
-
 	// RTArm_task: create and start
 	rt_printf("\n-- Now running rt task ...\n");
 
 #if defined(_ECAT_ON_)
-	rt_task_create(&RTArm_task, "CONTROL_PROC_Task", 1024*1024*4, 99, T_FPU); // MUST SET at least 4MB stack-size (MAXIMUM Stack-size ; 8192 kbytes)
+	rt_task_create(&RTArm_task, "CONTROL_PROC_Task", 1024*1024*4, 99, 0); // MUST SET at least 4MB stack-size (MAXIMUM Stack-size ; 8192 kbytes)
 	rt_task_start(&RTArm_task, &RTRArm_run, NULL);
 #endif
 
-	rt_task_create(&print_task, "CONSOLE_PROC_Task", 0, 70, T_FPU);
+	rt_task_create(&print_task, "CONSOLE_PROC_Task", 0, 70, 0);
 	rt_task_start(&print_task, &print_run, NULL);
 
-	rt_task_create(&tcpip_task, "TCPIP_PROC_Task", 0, 80, T_FPU);
+	rt_task_create(&tcpip_task, "TCPIP_PROC_Task", 0, 80, 0);
 	rt_task_start(&tcpip_task, &tcpip_run, NULL);
-
 
 	// Must pause here
 	pause();
@@ -591,6 +584,3 @@ int main(int argc, char **argv)
 
     return 0;
 }
-
-
-
