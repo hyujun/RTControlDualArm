@@ -115,10 +115,9 @@ public:
 		case 10:
 			mode_of_operation_display_= EC_READ_S8(domain_address);
 			break;
-//		case 11:
-//			dummy = EC_READ_S8(domain_address);
-//			break;
-
+        case 11:
+            dummy= EC_READ_S8(domain_address);
+            break;
 		default:
 			std::cout << "WARNING. Elmo Gold Whistle pdo index out of range." << std::endl;
 			break;
@@ -226,7 +225,7 @@ private:
      * @details The number of domains MUST BE EQUAL TO THE SIZE OF PDO process
      */
     DomainMap domains_ = {
-    	{0, {0,1,2,3,4,5,6,7,8,9,10} }
+    	{0, {0,1,2,3,4,5,6,7,8,9,10,11} }
     };
 
 //========================================================

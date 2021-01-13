@@ -21,6 +21,12 @@
 #include "Ecat_Slave.h"
 #include "Ecat_Elmo.h"
 
+#define CLOCK_TO_USE CLOCK_REALTIME
+#define NSEC_PER_SEC (1000000000L)
+#define PERIOD_NS (NSEC_PER_SEC / FREQUENCY)
+#define DIFF_NS(A, B) (((B).tv_sec - (A).tv_sec) * NSEC_PER_SEC + (B).tv_nsec - (A).tv_nsec)
+#define TIMESPEC2NS(T) ((uint64_t) (T).tv_sec * NSEC_PER_SEC + (T).tv_nsec)
+
 //#define _ECAT_MASTER_DEBUG_
 /**
  * @brief EherCAT namespace for EtherLAB API

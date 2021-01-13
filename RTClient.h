@@ -47,7 +47,7 @@
 #include "Network/SocketHandler.h"
 
 #define WAKEUP_TIME				(5)				/**<Initial waiting time*/
-#define NSEC_PER_SEC 			1000000000		/**<Expression of second in nano second*/
+#define NSEC_PER_SEC            (1000000000L)	/**<Expression of second in nano second*/
 
 #define _DEBUG_ 			/**<Debug Print Parameter*/
 #define _ECAT_ON_ 			/**<EtherCAT device enable Parameter*/

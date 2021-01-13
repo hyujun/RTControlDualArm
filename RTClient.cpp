@@ -144,6 +144,8 @@ void RTRArm_run(void *arg)
 	RTIME p1 = 0;
 	RTIME p3 = 0;
 
+    MatrixXd pInvJacobian;
+
 	short MaxTor = 1200;
 
 	int k=0;
@@ -221,6 +223,8 @@ void RTRArm_run(void *arg)
 		if( system_ready )
 		{
 			DualArm.pKin->PrepareJacobian(ActualPos_Rad);
+
+			DualArm.pKin->GetpinvJacobian(pInvJacobian);
 			DualArm.pDyn->PrepareDynamics(ActualPos_Rad, ActualVel_Rad);
 
 			//DualArm.pKin->GetManipulability( TaskCondNumber, OrientCondNumber );
@@ -402,7 +406,6 @@ void print_run(void *arg)
 				rt_printf("\n Num:%d: x:%0.3lf, y:%0.3lf, z:%0.3lf, u:%0.3lf, v:%0.3lf, w:%0.3lf ",cNum, ForwardPos[cNum](0), ForwardPos[cNum](1), ForwardPos[cNum](2),
 						ForwardOri[cNum](0)*RADtoDEG, ForwardOri[cNum](1)*RADtoDEG, ForwardOri[cNum](2)*RADtoDEG);
 				//rt_printf("\n Manipulability: Task:%0.2lf, Orient:%0.2lf", TaskCondNumber[cNum], OrientCondNumber[cNum]);
-				rt_printf("\n");
 			}
 
 #if defined(_WITH_KIST_HAND_)
@@ -422,6 +425,7 @@ void print_run(void *arg)
 				}
 			}
 #endif
+
 			rt_printf("\n");
 		}
 		else
@@ -484,11 +488,11 @@ void signal_handler(int signum)
 	rt_printf("\nTCPIP RTTask Closing Success....");
 
 #if defined(_ECAT_ON_)
-    ecatmaster.deactivate();
-
 	rt_printf("\nEtherCAT RTTask Closing....");
 	rt_task_delete(&RTArm_task);
 	rt_printf("\nEtherCAT RTTask Closing Success....");
+
+    ecatmaster.deactivate();
 #endif
 
 	rt_printf("\nConsolPrint RTTask Closing....");
@@ -573,8 +577,8 @@ int main(int argc, char **argv)
 	rt_task_create(&print_task, "CONSOLE_PROC_Task", 0, 70, 0);
 	rt_task_start(&print_task, &print_run, NULL);
 
-	rt_task_create(&tcpip_task, "TCPIP_PROC_Task", 0, 80, 0);
-	rt_task_start(&tcpip_task, &tcpip_run, NULL);
+	//rt_task_create(&tcpip_task, "TCPIP_PROC_Task", 0, 80, 0);
+	//rt_task_start(&tcpip_task, &tcpip_run, NULL);
 
 	// Must pause here
 	pause();

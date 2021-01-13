@@ -23,39 +23,33 @@
   </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
+<<<<<<< Updated upstream
       <config projectName="RTControlDualArm" targetName="KDL" />
       <config projectName="RTControlDualArm" targetName="RTControlDualArm" />
       <config projectName="RTControlDualArm" targetName="Network" />
       <config projectName="RTControlDualArm" targetName="EcatSystem" />
+=======
+      <config projectName="RTControlDualArm" targetName="Network" />
+      <config projectName="RTControlDualArm" targetName="KDL" />
+      <config projectName="RTControlDualArm" targetName="RTControlDualArm" />
+>>>>>>> Stashed changes
       <config projectName="RTControlDualArm" targetName="Control" />
+      <config projectName="RTControlDualArm" targetName="EcatSystem" />
     </generated>
   </component>
   <component name="CMakeSettings">
     <configurations>
       <configuration PROFILE_NAME="Release-Remote Host" CONFIG_NAME="Release" TOOLCHAIN_NAME="Remote Host" />
+<<<<<<< Updated upstream
+=======
+      <configuration PROFILE_NAME="Release-Coverage" CONFIG_NAME="Release" GENERATION_OPTIONS="-DCMAKE_CXX_FLAGS=--coverage -DCMAKE_C_FLAGS=--coverage" />
+>>>>>>> Stashed changes
     </configurations>
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7df56d7d-8b2c-43e3-a268-cd109cbef8b1" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Control/CMakeLists.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/EcatSystem/CMakeLists.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/KDL/CMakeLists.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Network/CMakeLists.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Network/EcatControlSocket.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Network/EcatDataSocket.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Network/EcatDataSocket.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modules/FindEigen.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.settings/language.settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.settings/language.settings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EcatControlSocket.h" beforeDir="false" afterPath="$PROJECT_DIR$/EcatControlSocket.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EcatDataSocket.h" beforeDir="false" afterPath="$PROJECT_DIR$/EcatDataSocket.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KDL/PoEKinematics.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/KDL/PoEKinematics.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KDL/PoEKinematics.h" beforeDir="false" afterPath="$PROJECT_DIR$/KDL/PoEKinematics.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RTClient.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/RTClient.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RTClient.h" beforeDir="false" afterPath="$PROJECT_DIR$/RTClient.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Release/Control/subdir.mk" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Release/EcatSystem/subdir.mk" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Release/KDL/subdir.mk" beforeDir="false" />
@@ -99,7 +93,11 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
+<<<<<<< Updated upstream
     <property name="settings.editor.selected.configurable" value="CPPToolchains" />
+=======
+    <property name="settings.editor.selected.configurable" value="web.server" />
+>>>>>>> Stashed changes
   </component>
   <component name="RunManager" selected="CMake Application.RTControlDualArm">
     <configuration name="Control" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="RTControlDualArm" TARGET_NAME="Control" CONFIG_NAME="Release-Remote Host">
@@ -127,22 +125,17 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <list>
-      <item itemvalue="CMake Application.RTControlDualArm" />
       <item itemvalue="CMake Application.Control" />
       <item itemvalue="CMake Application.EcatSystem" />
       <item itemvalue="CMake Application.KDL" />
       <item itemvalue="CMake Application.Network" />
+      <item itemvalue="CMake Application.RTControlDualArm" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -161,6 +154,7 @@
       <workItem from="1603002091263" duration="1470000" />
       <workItem from="1603006287664" duration="720000" />
       <workItem from="1603007156230" duration="1881000" />
+<<<<<<< Updated upstream
       <workItem from="1603016165809" duration="2048000" />
       <workItem from="1603113139940" duration="5269000" />
       <workItem from="1603449423813" duration="641000" />
@@ -169,6 +163,9 @@
       <workItem from="1603452806216" duration="405000" />
       <workItem from="1603453297492" duration="967000" />
       <workItem from="1603454279776" duration="14707000" />
+=======
+      <workItem from="1603080565340" duration="227000" />
+>>>>>>> Stashed changes
     </task>
     <servers />
   </component>
@@ -228,6 +225,7 @@
     </state>
     <state width="1000" height="242" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1603553619239" />
     <state width="1258" height="287" key="GridCell.Tab.0.right/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1603009060028" />
+<<<<<<< Updated upstream
     <state x="463" y="198" key="SettingsEditor" timestamp="1603454004678">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -235,6 +233,14 @@
     <state x="781" y="344" key="SettingsEditor/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1603008006326" />
     <state x="728" y="319" width="427" height="539" key="ftp.server.browser" timestamp="1603453793184">
       <screen x="0" y="0" width="1920" height="1040" />
+=======
+    <state x="781" y="344" key="SettingsEditor" timestamp="1603080789079">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="781" y="344" key="SettingsEditor/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1603080789079" />
+    <state x="970" y="430" key="ftp.server.browser" timestamp="1603002256422">
+      <screen x="0" y="0" width="2560" height="1400" />
+>>>>>>> Stashed changes
     </state>
     <state x="728" y="319" width="427" height="539" key="ftp.server.browser/0.0.1920.1040@0.0.1920.1040" timestamp="1603453793184" />
     <state x="970" y="430" key="ftp.server.browser/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1603002256422" />

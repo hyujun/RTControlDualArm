@@ -7,7 +7,6 @@ ec_pdo_entry_info_t Elmo_pdo_entries[] = {
 	    {0x6072, 0x00, 16}, 	/* Maximal torque */
 	    {0x6040, 0x00, 16}, 	/* Controlword */
 	    {0x6060, 0x00, 8}, 		/* Modes of operation */
-//	    {0x0000, 0x00, 8}, 		/* Gap */
 
 	    {0x6069, 0x00, 32}, 	/* Velocity sensor actual value */
 
@@ -28,7 +27,7 @@ ec_pdo_info_t Elmo_pdos[] = {
 ec_sync_info_t Elmo_syncs[5] = {
     {0, EC_DIR_OUTPUT, 	0, NULL, EC_WD_DISABLE},
     {1, EC_DIR_INPUT, 	0, NULL, EC_WD_DISABLE},
-    {2, EC_DIR_OUTPUT, 	1, Elmo_pdos + 0, EC_WD_ENABLE},
+    {2, EC_DIR_OUTPUT, 	1, Elmo_pdos + 0, EC_WD_DISABLE},
 	{3, EC_DIR_INPUT, 	2, Elmo_pdos + 1, EC_WD_DISABLE},
     {0xff}
 };
@@ -65,7 +64,7 @@ ec_pdo_info_t KistHand_pdos[] = {
 ec_sync_info_t KistHand_syncs[5] = {
     {0, EC_DIR_OUTPUT, 0, NULL, EC_WD_DISABLE},
     {1, EC_DIR_INPUT, 0, NULL, EC_WD_DISABLE},
-    {2, EC_DIR_OUTPUT, 1, KistHand_pdos + 0, EC_WD_ENABLE},
+    {2, EC_DIR_OUTPUT, 1, KistHand_pdos + 0, EC_WD_DISABLE},
     {3, EC_DIR_INPUT, 1, KistHand_pdos + 1, EC_WD_DISABLE},
     {0xff}
 };

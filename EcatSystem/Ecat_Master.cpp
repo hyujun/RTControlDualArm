@@ -303,9 +303,8 @@ void Master::activateWithDC(uint8_t RefPosition, uint32_t SyncCycleNano)
 void Master::SyncEcatMaster(uint64_t RefTime)
 {
 	struct timespec tp;
-
-	clock_gettime(CLOCK_MONOTONIC, &tp);
-	ecrt_master_application_time(p_master, RefTime);
+	clock_gettime(CLOCK_TO_USE, &tp);
+	ecrt_master_application_time(p_master, TIMESPEC2NS(tp));
 	ecrt_master_sync_reference_clock( p_master );
 	ecrt_master_sync_slave_clocks( p_master );
 	return;
