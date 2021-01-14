@@ -120,6 +120,7 @@ public:
 
 	void GetManipulability( double *_TaskEigen, double *_OrientEigen );
 
+	double GetManipulabilityMeasure(void);
 	/**
 	 * @brief forward kinematics of serial robot
 	 * @return end-effector position x, y, z. not orientation(Working)

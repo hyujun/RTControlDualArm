@@ -12,7 +12,6 @@ project(RTControlDualArm)
 
 set(CMAKE_BUILD_TYPE Release)
 
-
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include(FindPkgConfig)

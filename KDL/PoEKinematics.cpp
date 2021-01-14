@@ -172,7 +172,9 @@ void PoEKinematics::AnalyticJacobian( void )
 {
 	Mat_Tmp.resize(6*this->m_NumChain, 6*this->m_NumChain);
 	Mat_Tmp.setZero();
+
     mAnalyticJacobian.setZero(6*m_NumChain, m_DoF);
+
 	for(int i=0; i < this->m_NumChain; i++)
 	{
 		LogSO3(T[0][JointEndNum[i]].block(0,0,3,3), Omega, Theta);
@@ -187,7 +189,9 @@ void PoEKinematics::AnalyticJacobian( void )
 			//Mat_Tmp.block(6*i,6*i,3,3) += 1/2*LieOperator::SkewMatrix(r);
 			//Mat_Tmp.block(6*i,6*i,3,3) += ((1/pow(Theta,2) - (1-cos(Theta)/(2*Theta*sin(Theta))))*LieOperator::SkewMatrixSquare(r));
 		}
+
 		Mat_Tmp.block((6*i+3),(6*i+3),3,3) = T[0][JointEndNum[i]].block(0,0,3,3);
+
 		mAnalyticJacobian.block(6*i, 0, 3, m_DoF) += mSpaceJacobian.block(6*i, 0, 3, m_DoF);
 		mAnalyticJacobian.block(6*i+3, 0, 3, m_DoF) = T[0][JointEndNum[i]].block(0,0,3,3)*mBodyJacobian.block(6*i+3, 0, 3, m_DoF);
 	}
@@ -244,6 +248,11 @@ void PoEKinematics::GetManipulability( double *_TaskEigen, double *_OrientEigen 
 		_TaskEigen[i] = SVDsolver.singularValues().maxCoeff() / SVDsolver.singularValues().minCoeff();
 	}
 	return;
+}
+
+void PoEKinematics::GetManipulabilityMeasure(void)
+{
+    return sqrt((mAnalyticJacobian*mAnalyticJacobian.transpose()).determinant());
 }
 
 void PoEKinematics::GetTaskVelocity( double *_qdot, VectorXd *_TaskVelocity, int &_size )

@@ -14,13 +14,14 @@
 #include "../KDL/SerialManipulator.h"
 #include "../KDL/LieOperator.h"
 
-#define KpBase 		100    	/**<Inital value of Kp*/
-#define KdBase 		8		/**<Inital value of Kd*/
+#define KpBase 		20    	/**<Inital value of Kp*/
+#define KdBase 		1		/**<Inital value of Kd*/
+#define KiBase 		100		/**<Inital value of Ki*/
 #define HinfBase 	5		/**<Inital value of H-infinity Gain*/
 
 /**
  * @brief control and trajecotry namespace for manipulator
- * @version 1.0.0
+ * @version 2.0.0
  */
 namespace HYUControl {
 
@@ -54,7 +55,9 @@ public:
 	 * @param[in] JointNum number of joint
 	 */
 	void SetPIDGain(double &_Kp, double &_Kd, double &_Ki, int &_JointNum);
+    void SetPIDGain(VectorXd &_Kp, VectorXd &_Kd, VectorXd &_Ki, VectorXd &_Kinf);
 	void GetPIDGain(double *_Kp, double *_Kd, double *_Ki, int &_JointNum);
+	void GetPIDGain(VectorXd &_Kp, VectorXd &_Kd, VectorXd &_Ki);
 	/**
 	 * @brief simple pd controller
 	 * @param[in] q current joint position
@@ -66,6 +69,10 @@ public:
 	void PDController( double *p_q, double *p_qdot, double *p_dq, double *p_dqdot, double *p_Toq, float &_dt );
 	void PDGravController( double *p_q, double *p_qdot, double *p_dq, double *p_dqdot, double *p_Toq );
 	void InvDynController( double *p_q, double *p_qdot, double *p_dq, double *p_dqdot, double *p_dqddot, double *p_Toq, float &_dt );
+	void TaskInvDynController(double *p_dx, double *p_dxdot, double *p_q, double *p_qdot, double *p_Toq, double &_dt);
+
+    void simInvDynController( VectorXd &_q, VectorXd &_qdot, VectorXd &_dq, VectorXd &_dqdot, VectorXd &_dqddot, double *p_Toq, double &_dt );
+	void simTaskInvDynController(VectorXd &_dx, VectorXd &_dxdot, VectorXd &_q, VectorXd &_qdot, double *p_Toq, double &_dt);
 
 	void TaskError(double *_dx, double*_dxdot, double *_q, double *_qdot, double *p_Toq);
 
@@ -84,7 +91,8 @@ public:
 private:
 	Eigen::VectorXd Kp, KpTask;
 	Eigen::VectorXd Kd, KdTask;
-	Eigen::VectorXd K_Hinf, KiTask;
+	Eigen::VectorXd Ki, KiTask;
+	Eigen::VectorXd K_Hinf, K_HinfTask;
 
 	Eigen::VectorXd q, dq, qdot, dqdot, dqddot;
 	Eigen::VectorXd FrictionTorque;
@@ -114,7 +122,7 @@ private:
 	Eigen::VectorXd G, Gx;
 
 	int m_Jnum;
-	double m_KpBase, m_KdBase, m_HinfBase;
+	double m_KpBase, m_KdBase, m_KiBase, m_HinfBase;
 	double InitTime=0;
 
 	SerialManipulator *pManipulator;
