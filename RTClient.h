@@ -23,14 +23,17 @@
 #include <sys/ioctl.h>
 #include <math.h>
 
-#include "NRMKsercan_tp.h"  //<Header for the SERCAN API
-#include "NRMKhw_tp.h"		//<Header for the SERCAN API
+//#include "NRMKsercan_tp.h"  //<Header for the SERCAN API
+//#include "NRMKhw_tp.h"		//<Header for the SERCAN API
 //-xenomai-///////////////////////////////////////////////////////////////
 #include <native/task.h>
 #include <native/timer.h>
 #include <native/mutex.h>
 #include <native/queue.h>
 #include <rtdk.h>		//The rdtk real-time printing library
+
+#include <alchemy/task.h>
+#include <rtdm/can.h>
 /****************************************************************************/
 
 #include "EcatDataSocket.h"

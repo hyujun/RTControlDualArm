@@ -99,11 +99,11 @@ private:
 
 	Eigen::VectorXd e, e_dev, e_int, e_int_sat;
 
-
 	SE3 dSE3, eSE3;
 	SO3 dSO3;
 	Eigen::Vector3d  omega;
 	double theta=0;
+	double alpha=0.01;
 
     Eigen::VectorXd dx, dxdot;
     Vector3d eOrient;

@@ -119,6 +119,7 @@ list(APPEND components
 	"Util" 
 	"Foundation"
 )
+
 list(REMOVE_DUPLICATES components) # remove duplicate defaults
 
 foreach( component ${components} )

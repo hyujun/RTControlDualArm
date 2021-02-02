@@ -250,7 +250,7 @@ void PoEKinematics::GetManipulability( double *_TaskEigen, double *_OrientEigen 
 	return;
 }
 
-void PoEKinematics::GetManipulabilityMeasure(void)
+double PoEKinematics::GetManipulabilityMeasure(void)
 {
     return sqrt((mAnalyticJacobian*mAnalyticJacobian.transpose()).determinant());
 }

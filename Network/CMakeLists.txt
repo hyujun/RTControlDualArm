@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(Network)
+project(Network )
 
 set(SOURCE_FILES SocketHandler.h PacketHandler.h KRISSSensorHandler.h)
 

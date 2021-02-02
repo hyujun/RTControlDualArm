@@ -298,7 +298,7 @@ void Controller::simTaskInvDynController(VectorXd &_dx, VectorXd &_dxdot, Vector
     ToqOut.setZero();
     MatrixXd AJacobian;
     MatrixXd pInvJac;
-    Matrix eye = MatrixXd::Identity(m_Jnum, m_Jnum);
+    MatrixXd eye = MatrixXd::Identity(m_Jnum, m_Jnum);
     VectorXd q0dot;
     q0dot = alpha*(_q.cwiseInverse()*pManipulator->pKin->GetManipulabilityMeasure());
     pManipulator->pKin->GetAnalyticJacobian(AJacobian);

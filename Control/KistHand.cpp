@@ -172,8 +172,10 @@ void KistHand::ForKinematics_Fingers(digit *pFinger, int Pos )
     fT56 << 1, 0, 0, L[3], 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1;
 
     fT06 = fT01 * fT12 * fT23 * fT34 * fT45 * fT56;
-    for (int i = 0; i <= 3; i++)
+    for (unsigned int i = 0; i < 3; i++)
+    {
         pFinger->p[i] = fT06(i, 3);
+    }
 }
 
 void KistHand::InvKinematics_Thumb(digit *pThumb )

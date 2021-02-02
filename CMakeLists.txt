@@ -2,7 +2,12 @@
 # Set minimum version of CMake. Since command 'project' use
 # VERSION sub-option we need at least 3.0.
 # Note: If you use 2.6 or 2.4, God kills a kitten. Seriously.
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
+
+cmake_policy(SET CMP0022 NEW)
+if (POLICY CMP0048)
+    cmake_policy(SET CMP0048 NEW)
+endif()
 
 ####
 # Set variables:
@@ -17,20 +22,17 @@ include(CMakePackageConfigHelpers)
 include(FindPkgConfig)
 include(${PROJECT_SOURCE_DIR}/modules/CMakeFunctions.cmake)
 
-cmake_policy(SET CMP0022 NEW)
-
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++${CMAKE_CXX_STANDARD} -O2 -fopenmp" )
-message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-message(STATUS "C++${CMAKE_CXX_STANDARD} support has been enabled by default.")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-dev -std=c++${CMAKE_CXX_STANDARD} -O2 -fopenmp")
 
 set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
 
 set(PROJ_INSTALL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/bin/inc)
 set(PROJ_INSTALL_BIN_DIR ${PROJECT_SOURCE_DIR}/bin)
-set(PROJ_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
+set(PROJ_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/bin/lib)
 
 set(CTRL_HEADERS_DIR ${PROJECT_SOURCE_DIR}/Control)
 set(ECAT_HEADERS_DIR ${PROJECT_SOURCE_DIR}/EcatSystem)
@@ -39,6 +41,7 @@ set(NET_HEADERS_DIR ${PROJECT_SOURCE_DIR}/Network)
 
 include_directories(${PROJ_INSTALL_INCLUDE_DIR})
 include_directories(
+        ${KERNELHEADERS_DIR}
         ${CTRL_HEADERS_DIR}
         ${ECAT_HEADERS_DIR}
         ${KDL_HEADERS_DIR}
@@ -73,19 +76,26 @@ if(OpenMP_CXX_FOUND)
     target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
 endif(OpenMP_CXX_FOUND)
 
-find_package(Xenomai REQUIRED)
+find_package(Xenomai 3.0.0 REQUIRED)
+message(STATUS "Xenomai found with theses skins: ${Xenomai_SKINS}")
 if(Xenomai_FOUND)
-    message(STATUS "Xenomai Native includes : ${Xenomai_NATIVE_INCLUDE_DIRS}" )
-    message(STATUS "Xenomai Native definitions: ${Xenomai_NATIVE_DEFINITIONS}")
-    message(STATUS "Xenomai Native LIBRARY_DIRS : ${Xenomai_NATIVE_LIBRARY_DIRS}")
-    message(STATUS "Xenomai Native LIBRARIES : ${Xenomai_NATIVE_LIBRARIES}")
-    message(STATUS "Xenomai Native LDFLAGS : ${Xenomai_NATIVE_LDFLAGS}")
-    message(STATUS "Xenomai Native DL_FLAGS : ${Xenomai_NATIVE_DL_FLAGS}")
+    list(APPEND xenomai_components
+         "NATIVE"
+         #"POSIX"
+         #"RTDM"
+         )
+    foreach(comp_lists ${xenomai_components})
+        message(STATUS "Xenomai ${comp_lists} includes : ${Xenomai_${comp_lists}_INCLUDE_DIRS}" )
+        message(STATUS "Xenomai ${comp_lists} definitions: ${Xenomai_${comp_lists}_DEFINITIONS}")
+        message(STATUS "Xenomai ${comp_lists} LIBRARY_DIRS : ${Xenomai_${comp_lists}_LIBRARY_DIRS} ")
+        message(STATUS "Xenomai ${comp_lists} LIBRARIES : ${Xenomai_${comp_lists}_LIBRARIES}")
+        message(STATUS "Xenomai ${comp_lists} LDFLAGS : ${Xenomai_${comp_lists}_LDFLAGS}")
+        message(STATUS "Xenomai ${comp_lists} DL_FLAGS : ${Xenomai_${comp_lists}_DL_FLAGS}")
 
-    include_directories(${Xenomai_NATIVE_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} PUBLIC ${Xenomai_NATIVE_LIBRARY_DIRS} ${Xenomai_NATIVE_LIBRARIES})
-    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS ${Xenomai_NATIVE_LDFLAGS})
-    target_compile_definitions(${PROJECT_NAME} PUBLIC ${Xenomai_NATIVE_DEFINITIONS})
+        include_directories(${Xenomai_${comp_lists}_INCLUDE_DIRS})
+        target_link_libraries(${PROJECT_NAME} ${Xenomai_${comp_lists}_LIBRARY_DIRS} ${Xenomai_${comp_lists}_DL_FLAGS})
+        set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS ${Xenomai_${comp_lists}_DEFINITIONS})
+    endforeach(comp_lists ${Xenomai_SKINS})
 endif(Xenomai_FOUND)
 
 find_package(Etherlab REQUIRED)
@@ -93,29 +103,29 @@ if(Etherlab_FOUND)
     message(STATUS "Etherlab_INC_DIRS = ${Etherlab_INCLUDE_DIR}")
     message(STATUS "Etherlab_LIB_DIRS = ${Etherlab_LIBRARIES}")
     include_directories(${Etherlab_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} PUBLIC ${Etherlab_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} ${Etherlab_LIBRARIES})
 endif(Etherlab_FOUND)
 
-find_package(NRMKHW REQUIRED)
-if(NRMKHW_FOUND)
-    message(STATUS "NRMKHW_INC_DIRS = ${NRMKHW_INCLUDE_DIR}")
-    message(STATUS "NRMKHW_LIB_DIRS = ${NRMKHW_LIBRARIES}")
-    include_directories(${NRMKHW_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} PUBLIC ${NRMKHW_LIBRARIES})
-endif(NRMKHW_FOUND)
+#find_package(NRMKHW REQUIRED)
+#if(NRMKHW_FOUND)
+#    message(STATUS "NRMKHW_INC_DIRS = ${NRMKHW_INCLUDE_DIR}")
+#    message(STATUS "NRMKHW_LIB_DIRS = ${NRMKHW_LIBRARIES}")
+#    include_directories(${NRMKHW_INCLUDE_DIR})
+#    target_link_libraries(${PROJECT_NAME} ${NRMKHW_LIBRARIES})
+#endif(NRMKHW_FOUND)
 
-find_package(NRMKhelper REQUIRED)
-if(NRMKhelper_FOUND)
-    message(STATUS "NRMKhelper_INC_DIRS = ${NRMKhelper_INCLUDE_DIR}")
-    message(STATUS "NRMKhelper_LIB_DIRS = ${NRMKhelper_LIBRARIES}")
-    include_directories(${NRMKhelper_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} PUBLIC ${NRMKhelper_LIBRARIES})
-endif(NRMKhelper_FOUND)
+#find_package(NRMKhelper REQUIRED)
+#if(NRMKhelper_FOUND)
+#    message(STATUS "NRMKhelper_INC_DIRS = ${NRMKhelper_INCLUDE_DIR}")
+#    message(STATUS "NRMKhelper_LIB_DIRS = ${NRMKhelper_LIBRARIES}")
+#    include_directories(${NRMKhelper_INCLUDE_DIR})
+#    target_link_libraries(${PROJECT_NAME} ${NRMKhelper_LIBRARIES})
+#endif(NRMKhelper_FOUND)
 
 find_package(Poco REQUIRED COMPONENTS Foundation Util Net)
 if (Poco_FOUND)
     MESSAGE(STATUS "Poco_INCLUDE_DIRS = ${Poco_INCLUDE_DIRS}")
     MESSAGE(STATUS "Poco_LIBRARIES = ${Poco_LIBRARIES}")
     include_directories(${Poco_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} PUBLIC ${Poco_LIBRARIES})
-endif ()
+    target_link_libraries(${PROJECT_NAME} ${Poco_LIBRARIES})
+endif(Poco_FOUND)
