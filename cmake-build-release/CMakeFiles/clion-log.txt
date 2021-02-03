@@ -1,0 +1,20 @@
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - Unix Makefiles" /home/control/tmp/tmp.MmqHxu5V1u
+-- Eigen found (include: /usr/include/eigen3)
+-- Found Etherlab: /opt/etherlab/lib/libethercat.a;/opt/etherlab/lib/libethercat_rtdm.a
+-- Etherlab_INC_DIRS = /opt/etherlab/include
+-- Etherlab_LIB_DIRS = /opt/etherlab/lib/libethercat.a;/opt/etherlab/lib/libethercat_rtdm.a
+-- Eigen found (include: /usr/include/eigen3)
+-- Assuming Poco install directory structure at /usr.
+-- Found dynamic library directory: /usr/lib.
+-- Found Poco: /usr/lib/libPocoFoundation.so;/usr/lib/libPocoUtil.so;/usr/lib/libPocoNet.so
+-- Poco_INCLUDE_DIRS = /usr/include;/usr/include;/usr/include;/usr/include
+-- Poco_LIBRARIES = /usr/lib/libPocoFoundation.so;/usr/lib/libPocoUtil.so;/usr/lib/libPocoNet.so
+-- Kernel release: 4.9.38-xenomai-3.0.5
+-- Kernel headers: /usr/src/linux-headers-4.9.38-xenomai-3.0.5
+-- Xenomai Kernel Headers located in /usr/src/linux-headers-4.9.38-xenomai-3.0.5/include/xenomai
+-- xeno-config is found. Xenomai should be ok and version found is 3.0.5
+-- xeno-config has the --auto-init-solib option
+-- Xenomai found with theses skins: posix;vxworks;psos;alchemy;rtdm;smokey;cobalt;native
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/control/tmp/tmp.MmqHxu5V1u/cmake-build-release

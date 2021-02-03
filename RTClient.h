@@ -31,13 +31,9 @@
 #include <native/mutex.h>
 #include <native/queue.h>
 #include <rtdk.h>		//The rdtk real-time printing library
-
 #include <alchemy/task.h>
 #include <rtdm/can.h>
 /****************************************************************************/
-
-#include "EcatDataSocket.h"
-#include "EcatControlSocket.h"
 
 #include "EcatSystem/Ecat_Master.h"
 #include "EcatSystem/Ecat_Elmo.h"

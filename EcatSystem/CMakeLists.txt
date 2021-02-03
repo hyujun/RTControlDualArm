@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(EcatSystem )
+project(EcatSystem)
 
 add_library(${PROJECT_NAME} SHARED STATIC
         Ecat_Master.cpp
@@ -22,6 +22,6 @@ find_package(Etherlab REQUIRED)
 if(Etherlab_FOUND)
     message(STATUS "Etherlab_INC_DIRS = ${Etherlab_INCLUDE_DIR}")
     message(STATUS "Etherlab_LIB_DIRS = ${Etherlab_LIBRARIES}")
-    include_directories(${Etherlab_INCLUDE_DIR})
+    target_include_directories(${PROJECT_NAME} PUBLIC ${Etherlab_INCLUDE_DIR})
     target_link_libraries(${PROJECT_NAME} PUBLIC ${Etherlab_LIBRARIES})
 endif(Etherlab_FOUND)

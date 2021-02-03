@@ -134,6 +134,7 @@ include(FindPackageHandleStandardArgs)
 if( Xenomai_FIND_COMPONENTS )
     # if components specified in find_package(), make sure each of those pieces were found
     set(_XENOMAI_FOUND_REQUIRED_VARS )
+    set(Xenomai_FOUND_COMP ${Xenomai_FIND_COMPONENTS})
     foreach( component ${Xenomai_FIND_COMPONENTS} )
         string( TOUPPER ${component} _COMPONENT )
         set(_XENOMAI_FOUND_REQUIRED_VARS ${_XENOMAI_FOUND_REQUIRED_VARS} Xenomai_${_COMPONENT}_INCLUDE_DIRS  Xenomai_${_COMPONENT}_LIBRARIES)

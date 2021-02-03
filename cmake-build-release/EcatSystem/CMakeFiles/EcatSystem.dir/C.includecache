@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/control/tmp/tmp.MmqHxu5V1u/EcatSystem/PDOConfig.c
+PDOConfig.h
+/home/control/tmp/tmp.MmqHxu5V1u/EcatSystem/PDOConfig.h
+
+/home/control/tmp/tmp.MmqHxu5V1u/EcatSystem/PDOConfig.h
+ecrt.h
+/home/control/tmp/tmp.MmqHxu5V1u/EcatSystem/ecrt.h
+
+/opt/etherlab/include/ecrt.h
+asm/byteorder.h
+-
+linux/types.h
+-
+linux/time.h
+-
+stdlib.h
+-
+stdint.h
+-
+sys/time.h
+-
+

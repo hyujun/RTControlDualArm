@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(Network )
+project(Network)
 
 set(SOURCE_FILES SocketHandler.h PacketHandler.h KRISSSensorHandler.h)
 
@@ -17,6 +17,6 @@ find_package(Poco REQUIRED COMPONENTS Foundation Util Net)
 if (Poco_FOUND)
     MESSAGE(STATUS "Poco_INCLUDE_DIRS = ${Poco_INCLUDE_DIRS}")
     MESSAGE(STATUS "Poco_LIBRARIES = ${Poco_LIBRARIES}")
-    include_directories(${Poco_INCLUDE_DIRS})
+    target_include_directories(${PROJECT_NAME} PUBLIC ${Poco_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME} PUBLIC ${Poco_LIBRARIES})
 endif ()

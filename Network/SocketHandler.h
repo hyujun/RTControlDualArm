@@ -9,9 +9,9 @@
 #define SOCKETHANDLER_H_
 
 #include <iostream>
-#include <string.h>
+#include <cstring>
 #include <mutex>
-#include <stdio.h>
+#include <cstdio>
 #include <Poco/Net/TCPServer.h>
 #include <Poco/Net/TCPServerConnection.h>
 #include <Poco/Net/TCPServerConnectionFactory.h>

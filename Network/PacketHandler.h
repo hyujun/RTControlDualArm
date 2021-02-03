@@ -5,8 +5,8 @@
 #ifndef RTCONTROLDUALARM_PACKETHANDLER_H
 #define RTCONTROLDUALARM_PACKETHANDLER_H
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 #define INDEX_TASK_TARGET 0x6090
 #define Index_HandCommand_request 0x3333

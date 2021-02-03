@@ -7,8 +7,8 @@
 
 
 #include <strings.h>
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #define KRISS_PORT 6340
 #define KRISS_IP_ADD 192.168.1.1

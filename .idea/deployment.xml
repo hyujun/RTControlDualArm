@@ -2,18 +2,24 @@
 <project version="4">
   <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="Remote Host (14772c1a-b79c-4c22-b7f0-be442d49c48f)">
+      <paths name="Remote Host (14efbf60-efc9-4c25-8ea1-fe2938994f08)">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/RTControlDualArm" local="$PROJECT_DIR$" />
+            <mapping deploy="/tmp/tmp.MmqHxu5V1u" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-release" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+      <paths name="Remote Host (decbebdd-89e7-4552-b659-698a01439d3c)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/tmp.lWOXijNVxc" local="$PROJECT_DIR$" />
           </mappings>
           <excludedPaths>
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-release" />
-            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-release" />
-            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
-            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-relwithdebinfo" />
-            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-minsizerel" />
           </excludedPaths>
         </serverdata>
       </paths>

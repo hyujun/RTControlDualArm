@@ -1,0 +1,2 @@
+/usr/bin/ar qc libEcatSystem.a  CMakeFiles/EcatSystem.dir/Ecat_Master.cpp.o CMakeFiles/EcatSystem.dir/PDOConfig.c.o
+/usr/bin/ranlib libEcatSystem.a
