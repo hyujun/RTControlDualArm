@@ -67,4 +67,4 @@ unsigned int cycle_ns = 1000000;  	/**< 1 ms, Initial Value */
 static int period = 1000000;		/**< 1 ms, Initial Value */
 
 
-#endif /* RTCLIENT_H_ */
+#endif
