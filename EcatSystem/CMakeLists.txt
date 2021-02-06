@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-project(EcatSystem)
+cmake_minimum_required(VERSION 3.0)
+project(EcatSystem LANGUAGES C CXX)
 
 add_library(${PROJECT_NAME} SHARED STATIC
         Ecat_Master.cpp

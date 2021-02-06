@@ -27,15 +27,15 @@ cmake_policy(SET CMP0022 NEW)
 set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_CXX_COMPILER "g++")
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CMAKE_CXX_STANDARD} -Wall" )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3 -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 
 message(STATUS "C++${CMAKE_CXX_STANDARD} support has been enabled by default.")
 set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/modules)
+
 
 set(BUILD_SHARED_LIBS TRUE)
 
@@ -43,7 +43,10 @@ set(BUILD_SHARED_LIBS TRUE)
 # Set variables:
 #   * PROJECT_NAME
 #   * PROJECT_VERSION
-project(RTControlDualArm)
+project(RTControlDualArm LANGUAGES CXX)
+
+unset(CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES)
+unset(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
 
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
 set(PROJ_INSTALL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/bin/inc)
@@ -79,11 +82,7 @@ target_link_libraries(${PROJECT_NAME}
         sub::NETWORK
 )
 
-find_package(Xenomai 3.0.0 REQUIRED
-             NATIVE
-             #RTDM
-             #POSIX
-             )
+find_package(Xenomai 3.0.0 REQUIRED NATIVE)
 message(STATUS "Xenomai found with theses skins: ${Xenomai_SKINS}")
 if(Xenomai_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${KERNELHEADERS_DIR})
@@ -101,3 +100,5 @@ if(Xenomai_FOUND)
         set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS ${Xenomai_${comp_lists}_DEFINITIONS})
     endforeach(comp_lists ${Xenomai_SKINS})
 endif(Xenomai_FOUND)
+
+find_package(Doxygen)

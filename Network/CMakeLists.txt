@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-project(Network)
+cmake_minimum_required(VERSION 3.0)
+project(Network LANGUAGES CXX)
 
 set(SOURCE_FILES SocketHandler.h PacketHandler.h KRISSSensorHandler.h)
 
@@ -13,7 +13,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(${PROJECT_NAME}
         INTERFACE ${PROJECT_SOURCE_DIR})
 
-find_package(Poco REQUIRED COMPONENTS Foundation Util Net)
+find_package(Poco REQUIRED COMPONENTS Foundation Util Zip Net JSON)
 if (Poco_FOUND)
     MESSAGE(STATUS "Poco_INCLUDE_DIRS = ${Poco_INCLUDE_DIRS}")
     MESSAGE(STATUS "Poco_LIBRARIES = ${Poco_LIBRARIES}")
