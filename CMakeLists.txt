@@ -2,42 +2,11 @@
 # Set minimum version of CMake. Since command 'project' use
 # VERSION sub-option we need at least 3.0.
 # Note: If you use 2.6 or 2.4, God kills a kitten. Seriously.
-cmake_minimum_required(VERSION 3.5)
-
-cmake_policy(SET CMP0022 NEW)
-if (POLICY CMP0048)
-    cmake_policy(SET CMP0048 NEW)
-endif()
-
-# If no build type was specified, set it to Release.
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug Release CACHE STRING
-        "Choose the type of build, options are: None Debug Release."
-        FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
-
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-include(FindPkgConfig)
-include(./modules/CMakeFunctions.cmake)
-
-cmake_policy(SET CMP0022 NEW)
+cmake_minimum_required(VERSION 3.8)
 
 # THIS HAS TO COME BEFORE THE PROJECT LINE
 set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_CXX_COMPILER "g++")
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3 -O0")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
-
-message(STATUS "C++${CMAKE_CXX_STANDARD} support has been enabled by default.")
-set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/modules)
-
-
-set(BUILD_SHARED_LIBS TRUE)
 
 ####
 # Set variables:
@@ -45,8 +14,139 @@ set(BUILD_SHARED_LIBS TRUE)
 #   * PROJECT_VERSION
 project(RTControlDualArm LANGUAGES CXX)
 
-unset(CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES)
-unset(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
+# Use MACOSX_RPATH by default on OS X. This was added in CMake 2.8.12 and
+# became default in CMake 3.0. Explicitly setting this policy is necessary to
+# suppress a warning in CMake 3.0 and above.
+if(POLICY CMP0042)
+    cmake_policy(SET CMP0042 NEW)
+endif()
+
+# Simplify variable reference and escape sequence evaluation. This was added in
+# CMake 3.1. Explicitly setting this policy is necessary to suppress a warning
+# in CMake 3.1 and above.
+if(POLICY CMP0053)
+    cmake_policy(SET CMP0053 NEW)
+endif()
+
+cmake_policy(SET CMP0022 NEW)
+if (POLICY CMP0048)
+    cmake_policy(SET CMP0048 NEW)
+endif()
+
+if (POLICY CMP0025)
+    cmake_policy(SET CMP0025 NEW)
+endif()
+
+#===============================================================================
+# Build options
+#===============================================================================
+#option(BUILD_DOC "Build Documentation" off)
+option(Dualarm_CODECOV "Turn on codecov support" ON)
+option(Dualarm_VERBOSE "Whether print detailed information in CMake process" ON)
+option(Dualarm_SHARED_LIBS "Build shared libraries" ON)
+
+#===============================================================================
+# CodeCov settings
+#===============================================================================
+if(Dualarm_CODECOV AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Coverage"))
+    include(modules/CodeCoverage.cmake)
+    setup_target_for_coverage(codecov ctest coverage)
+    set(CMAKE_CXX_FLAGS_DEBUG
+        "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fprofile-arcs -ftest-coverage"
+        )
+endif()
+
+#===============================================================================
+# Build type settings
+#===============================================================================
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug | Release | RelWithDebInfo | MinSizeRel" FORCE)
+endif()
+string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UPPERCASE)
+
+set(BUILD_TYPE_DEBUG TRUE)
+set(BUILD_TYPE_RELEASE TRUE)
+set(BUILD_TYPE_RELWITHDEBINFO FALSE)
+set(BUILD_TYPE_MINSIZEREL FALSE)
+
+if("${CMAKE_BUILD_TYPE_UPPERCASE}" STREQUAL "DEBUG")
+    set(BUILD_TYPE_DEBUG TRUE)
+elseif("${CMAKE_BUILD_TYPE_UPPERCASE}" STREQUAL "RELEASE")
+    set(BUILD_TYPE_RELEASE TRUE)
+elseif("${CMAKE_BUILD_TYPE_UPPERCASE}" STREQUAL "RELWITHDEBINFO")
+    set(BUILD_TYPE_RELWITHDEBINFO TRUE)
+elseif("${CMAKE_BUILD_TYPE_UPPERCASE}" STREQUAL "MINSIZEREL")
+    set(BUILD_TYPE_MINSIZEREL TRUE)
+else()
+    message(WARNING "CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} unknown. Valid options are: Debug | Release | RelWithDebInfo | MinSizeRel")
+endif()
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(FindPkgConfig)
+include(modules/CMakeFunctions.cmake)
+
+#===============================================================================
+# Compiler flags
+#===============================================================================
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag(-std=gnu++17 CXX17_SUPPORT)
+if(CXX17_SUPPORT)
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17")
+else()
+    check_cxx_compiler_flag(-std=gnu++14 CXX14_SUPPORT)
+    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14" )
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fPIC" )
+execute_process(
+        COMMAND ${CMAKE_CXX_COMPILER} -dumpfullversion -dumpversion OUTPUT_VARIABLE GCC_VERSION)
+if(GCC_VERSION VERSION_LESS 5.3.1)
+    message(FATAL_ERROR "The installed g++ version is ${GCC_VERSION}. ${PROJECT_NAME} requires g++ 5.3.1 or greater.")
+endif()
+
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -fno-omit-frame-pointer -fno-inline-functions -fno-inline-functions-called-once -fno-optimize-sibling-calls")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS_DEBUG}")
+set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_DEBUG} -pg")
+set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
+
+set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/modules)
+
+set(BUILD_SHARED_LIBS TRUE)
+
+#===============================================================================
+# Print build summary
+#===============================================================================
+if(Dualarm_VERBOSE)
+    message(STATUS "")
+    message(STATUS "[ Build summary ]")
+    message(STATUS "CMAKE_GENERATOR  : ${CMAKE_GENERATOR}")
+    message(STATUS "Compiler ID      : ${CMAKE_CXX_COMPILER_ID}")
+    message(STATUS "Compiler version : ${CMAKE_CXX_COMPILER_VERSION}")
+    message(STATUS "Build type       : ${CMAKE_BUILD_TYPE}")
+    message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
+    message(STATUS "Install path     : ${CMAKE_INSTALL_PREFIX}")
+    message(STATUS "CXX_FLAGS        : ${CMAKE_CXX_FLAGS}")
+    if(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "RELEASE")
+        message(STATUS "CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
+    elseif(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "DEBUG")
+        message(STATUS "CXX_FLAGS_DEBUG  : ${CMAKE_CXX_FLAGS_DEBUG}")
+    elseif(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "RELWITHDEBINFO")
+        message(STATUS "CXX_FLAGS_RELWITHDEBINFO: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+    elseif(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "PROFILE")
+        message(STATUS "CXX_FLAGS_PROFILE: ${CMAKE_CXX_FLAGS_PROFILE}")
+    endif()
+    message(STATUS "CMAKE_SOURCE_DIR : ${CMAKE_SOURCE_DIR}")
+    message(STATUS "CMAKE_BINARY_DIR : ${CMAKE_BINARY_DIR}")
+    message(STATUS "")
+endif(Dualarm_VERBOSE)
 
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
 set(PROJ_INSTALL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/bin/inc)
@@ -75,6 +175,7 @@ add_subdirectory(Network)
 add_executable(${PROJECT_NAME}
         RTClient.cpp
 )
+
 target_link_libraries(${PROJECT_NAME}
         sub::CTRL
         sub::ECAT
@@ -101,4 +202,23 @@ if(Xenomai_FOUND)
     endforeach(comp_lists ${Xenomai_SKINS})
 endif(Xenomai_FOUND)
 
-find_package(Doxygen)
+# check if Doxygen is installed
+#find_package(Doxygen)
+#if (DOXYGEN_FOUND)
+#    # set input and output files
+#    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/ doc/Doxyfile.in)
+#    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+#
+#    # request to configure the file
+#    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+#    message("Doxygen build started")
+#
+#    # note the option ALL which allows to build the docs together with the application
+#    add_custom_target( doc_doxygen ALL
+#                       COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+#                       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+#                       COMMENT "Generating API documentation with Doxygen"
+#                       VERBATIM )
+#else (DOXYGEN_FOUND)
+#    message("Doxygen need to be installed to generate the doxygen documentation")
+#endif (DOXYGEN_FOUND)

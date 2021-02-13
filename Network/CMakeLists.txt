@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
 project(Network LANGUAGES CXX)
 
 set(SOURCE_FILES SocketHandler.h PacketHandler.h KRISSSensorHandler.h)
