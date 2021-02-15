@@ -22,7 +22,6 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <math.h>
-#include <cmath>
 
 //-xenomai-///////////////////////////////////////////////////////////////
 #include <native/task.h>

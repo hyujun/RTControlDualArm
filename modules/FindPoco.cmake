@@ -161,7 +161,7 @@ foreach( component ${components} )
 	if(NOT Poco_${component}_LIBRARY_DEBUG)
 		find_library(
 				Poco_${component}_LIBRARY_DEBUG
-				Names Poco${component}d
+				Names Poco${component}
 				HINTS ${Poco_ROOT_DIR}
 				PATH_SUFFIXES
 				lib

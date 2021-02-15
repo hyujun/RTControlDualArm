@@ -5,14 +5,14 @@
 cmake_minimum_required(VERSION 3.8)
 
 # THIS HAS TO COME BEFORE THE PROJECT LINE
-set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_CXX_COMPILER "g++")
+#set(CMAKE_C_COMPILER "gcc")
+#set(CMAKE_CXX_COMPILER "g++")
 
 ####
 # Set variables:
 #   * PROJECT_NAME
 #   * PROJECT_VERSION
-project(RTControlDualArm LANGUAGES CXX)
+project(RTControlDualArm LANGUAGES C CXX)
 
 # Use MACOSX_RPATH by default on OS X. This was added in CMake 2.8.12 and
 # became default in CMake 3.0. Explicitly setting this policy is necessary to
@@ -36,6 +36,18 @@ endif()
 if (POLICY CMP0025)
     cmake_policy(SET CMP0025 NEW)
 endif()
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(FindPkgConfig)
+include(modules/CMakeFunctions.cmake)
+
+set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
+set(PROJ_INSTALL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/bin/inc)
+set(PROJ_INSTALL_BIN_DIR ${PROJECT_SOURCE_DIR}/bin)
+set(PROJ_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
+
+set(CMAKE_DEBUG_POSTFIX "d")
 
 #===============================================================================
 # Build options
@@ -81,30 +93,25 @@ else()
     message(WARNING "CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} unknown. Valid options are: Debug | Release | RelWithDebInfo | MinSizeRel")
 endif()
 
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-include(FindPkgConfig)
-include(modules/CMakeFunctions.cmake)
-
 #===============================================================================
 # Compiler flags
 #===============================================================================
 include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag(-std=gnu++17 CXX17_SUPPORT)
+check_cxx_compiler_flag(-std=c++17 CXX17_SUPPORT)
 if(CXX17_SUPPORT)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS OFF)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 else()
-    check_cxx_compiler_flag(-std=gnu++14 CXX14_SUPPORT)
+    check_cxx_compiler_flag(-std=c++14 CXX14_SUPPORT)
     set(CMAKE_CXX_STANDARD 14)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS OFF)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14" )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14" )
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fPIC" )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fPIC -pedantic" )
 execute_process(
         COMMAND ${CMAKE_CXX_COMPILER} -dumpfullversion -dumpversion OUTPUT_VARIABLE GCC_VERSION)
 if(GCC_VERSION VERSION_LESS 5.3.1)
@@ -120,38 +127,6 @@ set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
 set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 
 set(BUILD_SHARED_LIBS TRUE)
-
-#===============================================================================
-# Print build summary
-#===============================================================================
-if(Dualarm_VERBOSE)
-    message(STATUS "")
-    message(STATUS "[ Build summary ]")
-    message(STATUS "CMAKE_GENERATOR  : ${CMAKE_GENERATOR}")
-    message(STATUS "Compiler ID      : ${CMAKE_CXX_COMPILER_ID}")
-    message(STATUS "Compiler version : ${CMAKE_CXX_COMPILER_VERSION}")
-    message(STATUS "Build type       : ${CMAKE_BUILD_TYPE}")
-    message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
-    message(STATUS "Install path     : ${CMAKE_INSTALL_PREFIX}")
-    message(STATUS "CXX_FLAGS        : ${CMAKE_CXX_FLAGS}")
-    if(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "RELEASE")
-        message(STATUS "CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
-    elseif(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "DEBUG")
-        message(STATUS "CXX_FLAGS_DEBUG  : ${CMAKE_CXX_FLAGS_DEBUG}")
-    elseif(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "RELWITHDEBINFO")
-        message(STATUS "CXX_FLAGS_RELWITHDEBINFO: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-    elseif(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "PROFILE")
-        message(STATUS "CXX_FLAGS_PROFILE: ${CMAKE_CXX_FLAGS_PROFILE}")
-    endif()
-    message(STATUS "CMAKE_SOURCE_DIR : ${CMAKE_SOURCE_DIR}")
-    message(STATUS "CMAKE_BINARY_DIR : ${CMAKE_BINARY_DIR}")
-    message(STATUS "")
-endif(Dualarm_VERBOSE)
-
-set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
-set(PROJ_INSTALL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/bin/inc)
-set(PROJ_INSTALL_BIN_DIR ${PROJECT_SOURCE_DIR}/bin)
-set(PROJ_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
 
 set(CTRL_HEADERS_DIR ${PROJECT_SOURCE_DIR}/Control)
 set(ECAT_HEADERS_DIR ${PROJECT_SOURCE_DIR}/EcatSystem)
@@ -222,3 +197,30 @@ endif(Xenomai_FOUND)
 #else (DOXYGEN_FOUND)
 #    message("Doxygen need to be installed to generate the doxygen documentation")
 #endif (DOXYGEN_FOUND)
+
+#===============================================================================
+# Print build summary
+#===============================================================================
+if(Dualarm_VERBOSE)
+    message(STATUS "")
+    message(STATUS "[ Build summary ]")
+    message(STATUS "CMAKE_GENERATOR  : ${CMAKE_GENERATOR}")
+    message(STATUS "Compiler ID      : ${CMAKE_CXX_COMPILER_ID}")
+    message(STATUS "Compiler version : ${CMAKE_CXX_COMPILER_VERSION}")
+    message(STATUS "Build type       : ${CMAKE_BUILD_TYPE}")
+    message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
+    message(STATUS "Install path     : ${CMAKE_INSTALL_PREFIX}")
+    message(STATUS "CXX_FLAGS        : ${CMAKE_CXX_FLAGS}")
+    if(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "RELEASE")
+        message(STATUS "CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
+    elseif(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "DEBUG")
+        message(STATUS "CXX_FLAGS_DEBUG  : ${CMAKE_CXX_FLAGS_DEBUG}")
+    elseif(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "RELWITHDEBINFO")
+        message(STATUS "CXX_FLAGS_RELWITHDEBINFO: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+    elseif(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "PROFILE")
+        message(STATUS "CXX_FLAGS_PROFILE: ${CMAKE_CXX_FLAGS_PROFILE}")
+    endif()
+    message(STATUS "CMAKE_SOURCE_DIR : ${CMAKE_SOURCE_DIR}")
+    message(STATUS "CMAKE_BINARY_DIR : ${CMAKE_BINARY_DIR}")
+    message(STATUS "")
+endif(Dualarm_VERBOSE)
