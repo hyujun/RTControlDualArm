@@ -6,13 +6,13 @@ cmake_minimum_required(VERSION 3.8)
 
 # THIS HAS TO COME BEFORE THE PROJECT LINE
 #set(CMAKE_C_COMPILER "gcc")
-#set(CMAKE_CXX_COMPILER "g++")
+#set(CMAKE_CXX_COMPILER "gcc")
 
 ####
 # Set variables:
 #   * PROJECT_NAME
 #   * PROJECT_VERSION
-project(RTControlDualArm LANGUAGES C CXX)
+project(RTControlDualArm VERSION 2.0.0 LANGUAGES C CXX)
 
 # Use MACOSX_RPATH by default on OS X. This was added in CMake 2.8.12 and
 # became default in CMake 3.0. Explicitly setting this policy is necessary to
@@ -48,6 +48,8 @@ set(PROJ_INSTALL_BIN_DIR ${PROJECT_SOURCE_DIR}/bin)
 set(PROJ_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
 
 set(CMAKE_DEBUG_POSTFIX "d")
+set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/modules)
+set(BUILD_SHARED_LIBS TRUE)
 
 #===============================================================================
 # Build options
@@ -123,10 +125,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -fno-omit-frame-pointer -fno-inline-functions -fno
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS_DEBUG}")
 set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_DEBUG} -pg")
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
-
-set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/modules)
-
-set(BUILD_SHARED_LIBS TRUE)
 
 set(CTRL_HEADERS_DIR ${PROJECT_SOURCE_DIR}/Control)
 set(ECAT_HEADERS_DIR ${PROJECT_SOURCE_DIR}/EcatSystem)

@@ -17,7 +17,7 @@ namespace HYUControl {
 class Motion {
 public:
 	Motion();
-	Motion(SerialManipulator *_pManipulator);
+	explicit Motion(SerialManipulator *_pManipulator);
 	virtual ~Motion();
 
 	uint16_t JointMotion(double *_dq, double *_dqdot, double *_dqddot, VectorXd &_Target, double *_q, double *_qdot, double &_Time, uint16_t &_StatusWord, uint16_t &_MotionType);

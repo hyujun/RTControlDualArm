@@ -1,6 +1,6 @@
 /**
  * @file RTClient.h
- * @brief Main Client for Bionic Arm
+ * @brief Main Client for Dual-Arm System
  * @date 2018-11-28.
  * @author Junho Park
  * @version 1.0.0
@@ -9,19 +9,20 @@
 #ifndef RTCLIENT_H_
 #define RTCLIENT_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <signal.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdint>
+#include <csignal>
+#include <cstring>		// string function definitions
+#include <cerrno>		// Error number definitions
+#include <ctime>		// time calls
+#include <cmath>
+
 #include <unistd.h>
-#include <string.h>		// string function definitions
 #include <fcntl.h>		// File control definitions
-#include <errno.h>		// Error number definitions
 #include <termios.h>	// POSIX terminal control definitions
-#include <time.h>		// time calls
 #include <sys/mman.h>
 #include <sys/ioctl.h>
-#include <math.h>
 
 //-xenomai-///////////////////////////////////////////////////////////////
 #include <native/task.h>
@@ -49,7 +50,6 @@
 #define _DEBUG_ 			/**<Debug Print Parameter*/
 #define _ECAT_ON_ 			/**<EtherCAT device enable Parameter*/
 #define _USE_DC_MODE_		/**<EtherCAT Distributed Clock mode enable Parameter*/
-//#define _WITH_KIST_HAND_
 
 typedef unsigned int UINT32;	/**<typedef uint32_t*/
 typedef int64_t		INT64;		/**<typedef uint64_t*/

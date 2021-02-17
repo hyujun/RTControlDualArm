@@ -22,7 +22,7 @@ class EcatElmo : public Slave
 {
 public:
     EcatElmo() : Slave(Elmo_VendorID, Elmo_ProductCode) {}
-    virtual ~EcatElmo() {}
+    ~EcatElmo() override = default;
 
     /**
      * @brief Check the Elmo is Initialized
@@ -42,7 +42,7 @@ public:
      * @brief Show the statusword in string(int)
      * @return state_
      */
-    int Elmo_DeviceState(void) const {return state_;};
+    int Elmo_DeviceState() const {return state_;};
 
     /**
      * @brief Write Output Torque in 1000 percentage
@@ -70,7 +70,7 @@ public:
      * @param[in] domain_address
      * @return void
      */
-	virtual void processData(size_t index, uint8_t* domain_address) //read and write PDO and if index is 8,
+	void processData(size_t index, uint8_t* domain_address) override //read and write PDO and if index is 8,
 	{                                                               //check the state and change the flag of state
 		// DATA READ WRITE
 		switch(index)
@@ -157,7 +157,7 @@ public:
 		}
     }
 
-	std::string GetDevState(void)
+	std::string GetDevState()
 	{
 		return device_state_str_[state_];
 	}
@@ -167,23 +167,23 @@ public:
 	 * @return address of Elmo_syncs[0]
 	 * @see PDOConfig.h
 	 */
-	virtual const ec_sync_info_t* syncs() { return &Elmo_syncs[0]; }
+	const ec_sync_info_t* syncs() override { return &Elmo_syncs[0]; }
 
 	/**
 	 * @brief size of sync
 	 * @return normalized size of Elmo_sync
 	 * @see PDOConfig.h
 	 */
-	virtual size_t syncSize() {
+	size_t syncSize() override {
 	    return sizeof(Elmo_syncs)/sizeof(ec_sync_info_t);
 	}
 
 
-	virtual const ec_pdo_entry_info_t* channels() {
+	const ec_pdo_entry_info_t* channels() override {
 	    return Elmo_pdo_entries;
 	}
 
-	virtual void domains(DomainMap& domains) const {
+	void domains(DomainMap& domains) const override {
 	    domains = domains_;
 	}
 
@@ -322,7 +322,7 @@ private:
         return STATE_UNDEFINED;
     }
 
-    uint16_t transition(DeviceState state, uint16_t control_word)
+    uint16_t transition(DeviceState state, uint16_t control_word) const
     {
         switch(state)
         {

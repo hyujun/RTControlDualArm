@@ -2,16 +2,16 @@
  * RTControlSocket.h
  *
  *  Created on: 2019. 12. 12.
- *      Author: Administrator
+ *      Author: Junho Park
  */
 
 #ifndef SOCKETHANDLER_H_
 #define SOCKETHANDLER_H_
 
 #include <iostream>
-#include <string.h>
 #include <mutex>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 #include <Poco/Net/TCPServer.h>
 #include <Poco/Net/TCPServerConnection.h>
 #include <Poco/Net/TCPServerConnectionFactory.h>

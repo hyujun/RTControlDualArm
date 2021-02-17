@@ -11,8 +11,8 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <stdio.h>
-#include <stdint.h>
+#include <cstdio>
+#include <cstdint>
 #include <unistd.h>
 #include <iostream>
 #include <sstream>
@@ -108,7 +108,7 @@ public:
 	/**
 	 * @brief deactivate the client
 	 */
-	void deactivate(void);
+	void deactivate();
 
 	/**
 	 * @brief TPDO, RPDO process execute
@@ -128,17 +128,17 @@ public:
 	 */
 	void RxUpdate(unsigned int domain = 0);
 
-	std::string GetEcatMasterLinkState(void)
+	std::string GetEcatMasterLinkState()
 	{
 		return EcatMasterLinkState;
 	}
 
-	unsigned int GetEcatMasterState(void)
+	unsigned int GetEcatMasterState() const
 	{
 		return EcatMasterState;
 	}
 
-	unsigned int GetConnectedSlaves(void)
+	unsigned int GetConnectedSlaves() const
 	{
 		return ConnectedSlaves;
 	}
@@ -169,12 +169,12 @@ private:
 	/**
 	 * @brief Check master state
 	 */
-	void checkMasterState(void);
+	void checkMasterState();
 
 	/**
 	 * @brief Check slave state
 	 */
-	void checkSlaveStates(void);
+	void checkSlaveStates();
 
 	/**
 	 * @brief Confirm the EtherCAT Master is Running
@@ -215,17 +215,17 @@ private:
 		uint32_t domainWorkingCounter=0;
 		uint32_t domainWCState=0;
 
-		ec_domain_t *domain = NULL;
+		ec_domain_t *domain = nullptr;
 		ec_domain_state_t domain_state = {};
-		uint8_t *domain_pd = NULL;
+		uint8_t *domain_pd = nullptr;
 
 		std::vector<ec_pdo_entry_reg_t> domain_regs;
 
 		struct Entry{
-			Slave* slave = NULL; 				/**<slave pointer*/
+			Slave* slave = nullptr; 				/**<slave pointer*/
 			int num_pdos = 0;					/**<number of pdo entries */
-			unsigned int* offset = NULL; 		/**<alias of slave*/
-			unsigned int* bit_position = NULL; 	/**<position of slave*/
+			unsigned int* offset = nullptr; 		/**<alias of slave*/
+			unsigned int* bit_position = nullptr; 	/**<position of slave*/
 		};
 
 		std::vector<Entry> entries;
@@ -234,8 +234,8 @@ private:
 	std::map<unsigned int, DomainInfo*> m_domain_info;
 
 	struct SlaveInfo{
-		Slave* slave = NULL;
-		ec_slave_config_t* config = NULL;
+		Slave* slave = nullptr;
+		ec_slave_config_t* config = nullptr;
 		ec_slave_config_state_t config_state = {0};
 		unsigned int SlaveState=0;
 		std::string SlaveConnected="offline";

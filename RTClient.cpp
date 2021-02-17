@@ -147,9 +147,6 @@ void RTRArm_run(void *arg)
     MatrixXd pInvJacobian;
 
 	short MaxTor = 1200;
-
-	int k=0;
-
 	hand_motion = 0x00;
 
 	uint16_t ControlMotion = SYSTEM_BEGIN;
@@ -170,11 +167,11 @@ void RTRArm_run(void *arg)
 	 *            start time,
 	 *            period
 	 */
-	rt_task_set_periodic(NULL, TM_NOW, cycle_ns);
+	rt_task_set_periodic(nullptr, TM_NOW, cycle_ns);
 
-	while (1)
+	while (true)
 	{
-		rt_task_wait_period(NULL); 	//wait for next cycle
+		rt_task_wait_period(nullptr); 	//wait for next cycle
         if(break_flag == 1)
             break;
 
@@ -207,7 +204,7 @@ void RTRArm_run(void *arg)
 		}
 
 #else
-		for(k=0; k < DUAL_ARM_DOF; k++)
+		for(int k=0; k < DUAL_ARM_DOF; k++)
 		{
 			DeviceState[k] = 			ecat_elmo[k].Elmo_DeviceState();
 			StatusWord[k] = 			ecat_elmo[k].status_word_;
@@ -356,11 +353,11 @@ void print_run(void *arg)
 	 *            period (here: 100ms = 0.1s)
 	 */
 	RTIME PrintPeriod = 5e8;
-	rt_task_set_periodic(NULL, TM_NOW, PrintPeriod);
+	rt_task_set_periodic(nullptr, TM_NOW, PrintPeriod);
 	
-	while (1)
+	while (true)
 	{
-		rt_task_wait_period(NULL); //wait for next cycle
+		rt_task_wait_period(nullptr); //wait for next cycle
         if(break_flag==1)
             break;
 
@@ -466,10 +463,10 @@ void tcpip_run(void *arg)
 	std::cout << "-- maxConcurrentConnections: " << server.maxConcurrentConnections() << std::endl;
 
 	server.start();
-	rt_task_set_periodic(NULL, TM_NOW, 10e6);
-	while(1)
+	rt_task_set_periodic(nullptr, TM_NOW, 10e6);
+	while(true)
 	{
-		rt_task_wait_period(NULL);
+		rt_task_wait_period(nullptr);
 		if(break_flag==1)
 		    break;
         TCP_SetTargetTaskData(hand_motion, hand_state);
@@ -532,7 +529,7 @@ int main(int argc, char **argv)
 	//cycle_ns = 1250000; // nanosecond -> 800Hz
 	//cycle_ns = 2e6; // nanosecond -> 500Hz
     cycle_ns = 10e6;
-	period = ((double) cycle_ns)/((double) NSEC_PER_SEC);	//period in second unit
+	period = static_cast<int>((float) cycle_ns)/((float) NSEC_PER_SEC);	//period in second unit
 
 
 #if defined(_ECAT_ON_)
@@ -571,11 +568,11 @@ int main(int argc, char **argv)
 
 #if defined(_ECAT_ON_)
 	rt_task_create(&RTArm_task, "CONTROL_PROC_Task", 1024*1024*4, 99, 0); // MUST SET at least 4MB stack-size (MAXIMUM Stack-size ; 8192 kbytes)
-	rt_task_start(&RTArm_task, &RTRArm_run, NULL);
+	rt_task_start(&RTArm_task, &RTRArm_run, nullptr);
 #endif
 
 	rt_task_create(&print_task, "CONSOLE_PROC_Task", 0, 70, 0);
-	rt_task_start(&print_task, &print_run, NULL);
+	rt_task_start(&print_task, &print_run, nullptr);
 
 	//rt_task_create(&tcpip_task, "TCPIP_PROC_Task", 0, 80, 0);
 	//rt_task_start(&tcpip_task, &tcpip_run, NULL);

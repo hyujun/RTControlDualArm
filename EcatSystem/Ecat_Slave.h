@@ -32,7 +32,7 @@ public:
 	 * @see PDOConfig.h
 	 */
 	Slave(uint32_t vendor_id, uint32_t product_id): m_vendor_id(vendor_id), m_product_id(product_id){}
-	virtual ~Slave(){}
+	virtual ~Slave()= default;
 
     bool isHomingEnable() const {return homing_flag_;}
 
@@ -46,22 +46,22 @@ public:
     	return homing_flag_;
     }
 
-    int32_t getHomingOffset(void)
+    int32_t getHomingOffset() const
     {
     	return mHomingOffset;
     }
 
-    int8_t getHomingMethod(void)
+    int8_t getHomingMethod() const
     {
     	return mHomingMethod;
     }
 
-    uint32_t getHomingSpeed(void)
+    uint32_t getHomingSpeed() const
     {
     	return mHomingSpeed;
     }
 
-    uint16_t getHomingCurrentLimit(void)
+    uint16_t getHomingCurrentLimit() const
     {
     	return mHomingCurrentLimit;
     }
@@ -79,7 +79,7 @@ public:
 	 * @return NULL
 	 */
 	virtual const ec_sync_info_t* syncs(){
-		return NULL;
+		return nullptr;
 	}
 	/**
 	 * @brief base method for Sync size
@@ -94,7 +94,7 @@ public:
 	 * @return NULL
 	 */
 	virtual const ec_pdo_entry_info_t* channels(){
-		return NULL;
+		return nullptr;
 	}
 
 	/**
@@ -115,7 +115,6 @@ public:
 	 */
 	void setSlaveAlias(int alias){
 		slave_alias = alias;
-		return;
 	}
 
 	/**
@@ -124,14 +123,13 @@ public:
 	 */
 	void setSlavePosition(int position){
 		slave_position = position;
-		return;
 	}
 
 	/**
 	 * @brief base method for get the slave alias
 	 * @return slave_alias
 	 */
-	int getSlaveAlias(void){
+	int getSlaveAlias() const{
 		return slave_alias;
 	}
 
@@ -139,7 +137,7 @@ public:
 	 * @brief base method for get the slave position
 	 * @return slave_position
 	 */
-	int getSlavePosition(void){
+	int getSlavePosition() const{
 		return slave_position;
 	}
 
@@ -148,15 +146,15 @@ public:
 
 protected:
 
-	int slave_alias; /**<slave alias from slave configuration */
-	int slave_position; /**<slave position from slave configuration  */
+	int slave_alias{}; /**<slave alias from slave configuration */
+	int slave_position{}; /**<slave position from slave configuration  */
 
     bool homing_flag_ = false;
 
-    int32_t mHomingOffset;
-    int8_t mHomingMethod;
-    uint32_t mHomingSpeed;
-    uint16_t mHomingCurrentLimit;
+    int32_t mHomingOffset{};
+    int8_t mHomingMethod{};
+    uint32_t mHomingSpeed{};
+    uint16_t mHomingCurrentLimit{};
 };
 
 }

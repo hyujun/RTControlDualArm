@@ -17,21 +17,15 @@ target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.65.1 COMPONENTS filesystem QUIET)
-message(STATUS "Boost version: ${Boost_VERSION}")
-
-# This is needed if your Boost version is newer than your CMake version
-# or if you have an old version of CMake (<3.5)
-if(NOT TARGET Boost::filesystem)
-    add_library(Boost::filesystem IMPORTED INTERFACE)
-    set_property(TARGET Boost::filesystem PROPERTY
-                 INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
-    set_property(TARGET Boost::filesystem PROPERTY
-                 INTERFACE_LINK_LIBRARIES ${Boost_LIBRARIES})
+set(Boost_NO_BOOST_CMAKE ON)
+set(BOOST_INCLUDEDIR "/usr/include")
+set(BOOST_LIBRARYDIR "/usr/lib/x86_64-linux-gnu")
+find_package(Boost COMPONENTS filesystem system QUIET)
+if(Boost_FOUND)
+    message(STATUS "Boost version: ${Boost_VERSION}")
+    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+    target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${Boost_LIBRARIES})
 endif()
-
-target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem)
-
 
 #find_package(Eigen 3.0.0)
 #IF( Eigen_FOUND )

@@ -6,7 +6,7 @@ namespace hyuEcat {
 Master::DomainInfo::DomainInfo(ec_master_t* master)
 {
 	domain = ecrt_master_create_domain(master);
-	if(domain == NULL){
+	if(domain == nullptr){
 		printWarning("Err: Failed to create domain!");
 		return;
 	}
@@ -14,7 +14,7 @@ Master::DomainInfo::DomainInfo(ec_master_t* master)
 	domain_regs.push_back(empty);
 }
 
-Master::DomainInfo::~DomainInfo(void)
+Master::DomainInfo::~DomainInfo()
 {
 	for(Entry& entry : entries){
 		delete [] entry.offset;
@@ -25,7 +25,7 @@ Master::DomainInfo::~DomainInfo(void)
 
 Master::Master(const int master) {
 	p_master = ecrt_request_master(master);
-	if(p_master == NULL){
+	if(p_master == nullptr){
 		printWarning("Err: Failed to obtain master!");
 		ecrt_release_master(p_master);
 		return;
@@ -72,7 +72,7 @@ void Master::addSlave(uint16_t alias, uint16_t position, Slave* slave)
 	slave_info.slave = slave;
 	slave_info.config = ecrt_master_slave_config(p_master, alias, position, slave->m_vendor_id, slave->m_product_id);
 
-	if(slave_info.config == NULL){
+	if(slave_info.config == nullptr){
 		printWarning("Err: Add slave, Failed to get slave configuration.");
 		return;
 	}
@@ -90,9 +90,9 @@ void Master::addSlave(uint16_t alias, uint16_t position, Slave* slave)
 	}
 	else{
 		printWarning("Add slave. Sync size is zero for "
-				+ static_cast<std::ostringstream*>( &(std::ostringstream() << alias) )->str()
+				+ dynamic_cast<std::ostringstream*>( &(std::ostringstream() << alias) )->str()
 				+ ":"
-				+ static_cast<std::ostringstream*>( &(std::ostringstream() << position) )->str());
+				+ dynamic_cast<std::ostringstream*>( &(std::ostringstream() << position) )->str());
 	}
 
 	Slave::DomainMap domain_map;
@@ -100,7 +100,7 @@ void Master::addSlave(uint16_t alias, uint16_t position, Slave* slave)
 	for(auto& iter : domain_map){
 		unsigned int domain_index = iter.first;
 		DomainInfo* domain_info = m_domain_info[domain_index];
-		if(domain_info == NULL){
+		if(domain_info == nullptr){
 			domain_info = new DomainInfo(p_master);
 			m_domain_info[domain_index] = domain_info;
 		}
@@ -117,7 +117,7 @@ void Master::addSlaveWithHoming(uint16_t alias, uint16_t position, EcatElmo* sla
 	slave_info.slave = slave;
 	slave_info.config = ecrt_master_slave_config(p_master, alias, position, slave->m_vendor_id, slave->m_product_id);
 
-	if(slave_info.config == NULL){
+	if(slave_info.config == nullptr){
 		printWarning("Err: Add slave, Failed to get slave configuration.");
 		return;
 	}
@@ -169,7 +169,7 @@ void Master::addSlaveWithHoming(uint16_t alias, uint16_t position, EcatElmo* sla
 	for(auto& iter : domain_map){
 		unsigned int domain_index = iter.first;
 		DomainInfo* domain_info = m_domain_info[domain_index];
-		if(domain_info == NULL){
+		if(domain_info == nullptr){
 			domain_info = new DomainInfo(p_master);
 			m_domain_info[domain_index] = domain_info;
 		}
@@ -252,7 +252,7 @@ void Master::activate(void)
     for (auto& iter : m_domain_info){
         DomainInfo* domain_info = iter.second;
         domain_info->domain_pd = ecrt_domain_data(domain_info->domain);
-        if (domain_info->domain_pd==NULL){
+        if (domain_info->domain_pd==nullptr){
             printWarning("Activate. Failed to retrieve domain process data.");
             return;
         }
@@ -292,7 +292,7 @@ void Master::activateWithDC(uint8_t RefPosition, uint32_t SyncCycleNano)
     for (auto& iter : m_domain_info){
         DomainInfo* domain_info = iter.second;
         domain_info->domain_pd = ecrt_domain_data(domain_info->domain);
-        if (domain_info->domain_pd==NULL){
+        if (domain_info->domain_pd==nullptr){
             printWarning("Activate. Failed to retrieve domain process data.");
             return;
         }
@@ -310,10 +310,10 @@ void Master::SyncEcatMaster(uint64_t RefTime)
 	return;
 }
 
-void Master::deactivate(void)
+void Master::deactivate()
 {
 	ecrt_release_master(p_master);
-	p_master = NULL;
+	p_master = nullptr;
 	return;
 }
 
