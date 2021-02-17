@@ -1,6 +1,6 @@
-#RTControlDualArm
+# RTControlDualArm
 
-##Installation
+## Installation
 Xenomai 3.0.9 - linux 4.9.90 \
 Etherlab 1.5.2
 
