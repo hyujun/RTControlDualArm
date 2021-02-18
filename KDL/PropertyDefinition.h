@@ -30,11 +30,11 @@ typedef struct{
 typedef struct{
 	double mass_kg; 	/**< mass of each link in kg*/
 	double Ixx_kgm2; 	/**< xx direction inertia in kgm^2*/
-	double Iyy_kgm2; 	/**< xy direction inertia in kgm^2*/
-	double Izz_kgm2; 	/**< xz direction inertia in kgm^2*/
-	double Ixy_kgm2; 	/**< yy direction inertia in kgm^2*/
+    double Ixy_kgm2;    /**< xy direction inertia in kgm^2*/
+    double Izx_kgm2;    /**< xz direction inertia in kgm^2*/
+    double Iyy_kgm2;     /**< yy direction inertia in kgm^2*/
 	double Iyz_kgm2; 	/**< yz direction inertia in kgm^2*/
-	double Izx_kgm2; 	/**< zz direction inertia in kgm^2*/
+    double Izz_kgm2;    /**< zz direction inertia in kgm^2*/
 	double CoM_x;		/**< x direction CoM in m*/
 	double CoM_y;		/**< y direction CoM in m*/
 	double CoM_z;		/**< z direction CoM in m*/
