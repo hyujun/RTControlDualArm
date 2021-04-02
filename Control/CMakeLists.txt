@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.8)
 project(Control LANGUAGES CXX)
 
+set(CMAKE_DEBUG_POSTFIX "d")
+file(GLOB SOURCE_FILES "*.cpp")
+
 add_library(${PROJECT_NAME} SHARED STATIC
-        Controller.cpp
-        KistHand.cpp
-        Motion.cpp
-        Trajectory.cpp
-        )
+            ${SOURCE_FILES}
+            )
+
 add_library(sub::CTRL ALIAS ${PROJECT_NAME})
 
 target_include_directories( ${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
@@ -27,10 +28,7 @@ if(Boost_FOUND)
     target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${Boost_LIBRARIES})
 endif()
 
-#find_package(Eigen 3.0.0)
-#IF( Eigen_FOUND )
-#    add_definitions( ${Eigen_DEFINITIONS} )
-#    target_include_directories (${PROJECT_NAME} PUBLIC ${Eigen_INCLUDE_DIRS} )
-#ELSE()
-#    MESSAGE( FATAL_ERROR "Please point the environment variable EIGEN_INCLUDE_DIR to the include directory of your Eigen installation.")
-#ENDIF()
+install(TARGETS ${PROJECT_MANE}
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin)

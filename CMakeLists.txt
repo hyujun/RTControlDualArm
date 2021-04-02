@@ -222,3 +222,4 @@ if(Dualarm_VERBOSE)
     message(STATUS "CMAKE_BINARY_DIR : ${CMAKE_BINARY_DIR}")
     message(STATUS "")
 endif(Dualarm_VERBOSE)
+

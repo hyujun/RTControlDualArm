@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.8)
 project(Network LANGUAGES CXX)
 
-set(SOURCE_FILES SocketHandler.h PacketHandler.h KRISSSensorHandler.h)
+set(CMAKE_DEBUG_POSTFIX "d")
+file(GLOB SOURCE_FILES "*.h")
 
 add_library(${PROJECT_NAME} SHARED STATIC
         ${SOURCE_FILES}
@@ -20,3 +21,8 @@ if (Poco_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${Poco_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME} ${Poco_LIBRARIES})
 endif ()
+
+install(TARGETS ${PROJECT_MANE}
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin)

@@ -1,22 +1,17 @@
 cmake_minimum_required(VERSION 3.8)
 project(EcatSystem LANGUAGES C CXX)
 
+set(CMAKE_DEBUG_POSTFIX "d")
+file(GLOB SOURCE_FILES "*.cpp" "*.c")
+
 add_library(${PROJECT_NAME} SHARED STATIC
-        Ecat_Master.cpp
-        PDOConfig.c
-        )
+            ${SOURCE_FILES}
+            )
+
 add_library(sub::ECAT ALIAS ${PROJECT_NAME})
 
 target_include_directories( ${PROJECT_NAME}
         PUBLIC ${PRJECT_SOURCE_DIR})
-
-#find_package(Eigen3 CONFIG)
-#set( EIGEN3_INCLUDE_DIR /usr/include/eigen3)
-#IF( NOT EIGEN3_INCLUDE_DIR )
-#    MESSAGE( FATAL_ERROR "Please point the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
-#ENDIF()
-#include_directories ( ${EIGEN3_INCLUDE_DIR} )
-#message(STATUS "Eigen3 includes : ${EIGEN3_INCLUDE_DIR}" )
 
 find_package(Etherlab REQUIRED)
 if(Etherlab_FOUND)
@@ -25,3 +20,8 @@ if(Etherlab_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${Etherlab_INCLUDE_DIR})
     target_link_libraries(${PROJECT_NAME} PUBLIC ${Etherlab_LIBRARIES})
 endif(Etherlab_FOUND)
+
+install(TARGETS ${PROJECT_MANE}
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin)
