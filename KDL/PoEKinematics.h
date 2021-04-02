@@ -28,203 +28,229 @@ namespace HYUMotionKinematics {
  * @brief PoEKinematics Class for Tree-type Manipulator
  * @version 1.2.0
  */
-class PoEKinematics : public HYUMotionBase::LieOperator {
-public:
+    class PoEKinematics : public HYUMotionBase::LieOperator {
+    public:
+        /**
+         * @brief PoEKinematics class constructor
+         * @details A chain matrix should be defined.
+         */
+        PoEKinematics();
+        /**
+         * @brief PoEKinematics class constructor
+         * @details A chain matrix should be defined.
+         */
+        PoEKinematics( const MatrixXi &_ChainMat );
+        virtual ~PoEKinematics();
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        /**
+         * @brief Construct the kinematic infomation
+         * @param[in] _w omega(twist)
+         * @param[in] _p link position
+         * @param[in] _l link length
+         * @param[in] _link_num number of link attached to base-coordinate
+         */
+        void UpdateKinematicInfo( const Vector3d &_w, const Vector3d &_p, const Vector3d &_l, const int _link_num );
 
-	/**
-	 * @brief PoEKinematics class constructor
-	 * @details A chain matrix should be defined.
-	 */
-	PoEKinematics();
-	/**
-	 * @brief PoEKinematics class constructor
-	 * @details A chain matrix should be defined.
-	 */
-	PoEKinematics( const MatrixXi &_ChainMat );
-	virtual ~PoEKinematics();
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-	/**
-	 * @brief Construct the kinematic infomation
-	 * @param[in] _w omega(twist)
-	 * @param[in] _p link position
-	 * @param[in] _l link length
-	 * @param[in] _link_num number of link attached to base-coordinate
-	 */
-	void UpdateKinematicInfo( Vector3d _w, Vector3d _p, Vector3d _l, int _link_num );
+        /**
+         * @brief Calculate the joint velocity v
+         * @param[in] _w joint axis with respect to the base coordinate
+         * @param[in] _p lint position attached to joint coordinate
+         * @return v
+         */
+        Vector3d GetV( const Vector3d &_w, const Vector3d &_p );
 
-	/**
-	 * @brief Calculate the joint velocity v
-	 * @param[in] _w joint axis with respect to the base coordinate
-	 * @param[in] _p lint position attached to joint coordinate
-	 * @return v
-	 */
-	Vector3d GetV( const Vector3d &_w, const Vector3d &_p );
+        /**
+         * @brief Calculate the initial configuration of serial robot
+         * @param[in] _link total length of robot
+         * @return SE(3)
+         */
+        SE3 GetM( const Vector3d &_link );
 
-	/**
-	 * @brief Calculate the initial configuration of serial robot
-	 * @param[in] _link total length of robot
-	 * @return SE(3)
-	 */
-	SE3 GetM( const Vector3d &_link );
+        void SetTwist( const se3 &_Twist, const int _link_num );
+        /**
+         * @brief Calculate the Twist of joint
+         * @param[in] _w joint axis with respect to the base coordinate
+         * @param[in] _v joint velocity
+         * @return se3 vector
+         */
+        se3 GetTwist( const Vector3d &_w, const Vector3d &_v );
 
-	/**
-	 * @brief Calculate the Twist of joint
-	 * @param[in] _w joint axis with respect to the base coordinate
-	 * @param[in] _v joint velocity
-	 * @return se3 vector
-	 */
-	se3 GetTwist( const Vector3d &_w, const Vector3d &_v );
+        /**
+         * @brief Calculate the Homogeneous transformation matrix SE(3)
+         * @param[in] _q generalized coordinate of joint position
+         */
+        void HTransMatrix( const VectorXd &_q );
 
-	/**
-	 * @brief Calculate the Homogeneous transformation matrix SE(3)
-	 * @param[in] _q generalized coordinate of joint position
-	 */
-	void HTransMatrix( const double *_q );
+        void PrepareJacobian( const VectorXd &_q );
+        /**
+         * @brief calculate the space jacobian
+         * @return 6 x n(DoF) jacobian matrix w.r.t, base coordinate
+         */
+        void GetSpaceJacobian( MatrixXd &_SpaceJacobian )
+        {
+            _SpaceJacobian = mSpaceJacobian;
+        }
 
-	void PrepareJacobian( const double *_q );
-	/**
-	 * @brief calculate the space jacobian
-	 * @return 6 x n(DoF) jacobian matrix w.r.t, base coordinate
-	 */
-	void GetSpaceJacobian( MatrixXd &_SpaceJacobian )
-	{
-		_SpaceJacobian = mSpaceJacobian;
-		return;
-	}
+        /**
+         * @brief calculate the body jacobian
+         * @return 6 x n(DoF) jacobian matrix w.r.t., end-effector coordinate
+         */
+        void GetBodyJacobian( MatrixXd &_BodyJacobian )
+        {
+            _BodyJacobian = mBodyJacobian;
+        }
 
-	/**
-	 * @brief calculate the body jacobian
-	 * @return 6 x n(DoF) jacobian matrix w.r.t., end-effector coordinate
-	 */
-	void GetBodyJacobian( MatrixXd &_BodyJacobian )
-	{
-		_BodyJacobian = mBodyJacobian;
-		return;
-	}
+        void GetBodyJacobianDot( MatrixXd &_BodyJacobianDot );
 
-	/**
-	 * @brief calcuate the analytic jacobian
-	 * @return 6 x n(DoF) jacobian matrix
-	 */
-	void GetAnalyticJacobian( MatrixXd &_AnalyticJacobian )
-	{
-		_AnalyticJacobian = mAnalyticJacobian;
-		return;
-	}
+        /**
+         * @brief calcuate the analytic jacobian
+         * @return 6 x n(DoF) jacobian matrix
+         */
+        void GetAnalyticJacobian( MatrixXd &_AnalyticJacobian )
+        {
+            _AnalyticJacobian = mAnalyticJacobian;
+        }
 
-	void GetpinvJacobian( MatrixXd &_pinvJacobian );
+        void GetAnalyticJacobianDot(const VectorXd &_qdot, MatrixXd &_AnalyticJacobianDot);
 
-	void GetScaledTransJacobian( MatrixXd &_ScaledTransJacobian );
+        void GetpinvJacobian( MatrixXd &_pinvJacobian );
 
-	void GetTaskVelocity( double *_qdot, VectorXd *_TaskVelocity, int &_size );
+        void GetScaledTransJacobian( MatrixXd &_ScaledTransJacobian );
 
-	void GetManipulability( double *_TaskEigen, double *_OrientEigen );
+        void GetDampedpInvJacobian( MatrixXd &_DampedpInvJacobian );
 
-	double GetManipulabilityMeasure(void);
-	/**
-	 * @brief forward kinematics of serial robot
-	 * @return end-effector position x, y, z. not orientation(Working)
-	 */
-	void GetForwardKinematics( Vector3d *_Position, Vector3d *_Orientation, int &_NumChain );
+        void GetBlockpInvJacobian( MatrixXd &_BlockpInvJacobian );
 
-	SE3 GetForwardKinematicsSE3( const int &_EndPosition ) const;
+        void GetRelativeJacobian( MatrixXd &_RelativeJacobian );
 
-	void GetAngleAxis( Vector3d *_Axis, double *_Angle, int &_NumChain );
+        void GetWeightDampedpInvJacobian( const VectorXd &_rdot, MatrixXd &_WDampedpInvJacobian );
 
-	void SO3toRollPitchYaw( const Matrix3d &_RotMat, Vector3d &_Orientation );
+        void GetWDampedpInvLambda(VectorXd *lambda);
 
-	void RollPitchYawtoSO3( const double &_Roll_rad, const double &_Pitch_rad, const double &_Yaw_rad, Matrix3d &_RotMat);
+        void GetInverseConditionNumber( double *_InverseCondNumber );
 
-	SE3 GetTMat(int _begin, int _end)
-	{
-		return T[_begin][_end];
-	}
+        double GetManipulabilityMeasure();
 
-	int GetNumChain(void) const
-	{
-		return m_NumChain;
-	}
+        void Getq0dotWithMM(const double &gain, VectorXd &q0dot);
+        /**
+         * @brief forward kinematics of serial robot
+         * @return end-effector position x, y, z. not orientation(Working)
+         */
+        void GetForwardKinematics( Vector3d *_Position, Vector3d *_Orientation, int &_NumChain );
 
-	se3 GetTwist(int _pos) const
-	{
-		return v_se3[_pos];
-	}
+        SE3 GetForwardKinematicsSE3( const int &_EndPosition ) const;
 
-	SE3 GetMMat(int _pos) const
-	{
-		return M[_pos];
-	}
+        SO3 GetForwardKinematicsSO3( const int &_EndPosition ) const;
 
-private:
+        void GetAngleAxis( Vector3d *_Axis, double *_Angle, int &_NumChain );
 
-	void SpaceJacobian(void);
+        void SO3toRollPitchYaw( const Matrix3d &_RotMat, Vector3d &_Orientation );
 
-	void SpaceToBodyJacobian(void);
+        void RollPitchYawtoSO3( const double &_Roll_rad, const double &_Pitch_rad, const double &_Yaw_rad, Matrix3d &_RotMat);
 
-	void AnalyticJacobian(void);
+        SE3 GetTMat(const int _begin, const int _end)
+        {
+            return T[_begin][_end];
+        }
 
-	void ScaledTransJacobian(void);
+        int GetNumChain() const
+        {
+            return m_NumChain;
+        }
 
-	MatrixXd mSpaceJacobian;
-	MatrixXd mBodyJacobian;
-	MatrixXd mAnalyticJacobian;
-	MatrixXd mRelativeJacobian;
+        se3 GetTwist(const int _pos) const
+        {
+            return v_se3[_pos];
+        }
 
-	MatrixXi ChainMatrix;
+        SE3 GetMMat(const int _pos) const
+        {
+            return M[_pos];
+        }
 
-	int m_NumChain;
-	int m_DoF;
+    protected:
 
-	int ChainJointCount[2];
-	int JointEndNum[2];
+        void SpaceJacobian();
 
-	SE3 SE3_Tmp;
-	se3 se3_Tmp;
+        void SpaceToBodyJacobian();
 
-	VectorXi Arr[2];
+        void BodyJacobianDot( const VectorXd &_qdot );
 
-	VectorXd ScaledFactor;
-	MatrixXd mScaledTransJacobian;
+        void AnalyticJacobian();
 
-	MatrixXd Mat_Tmp;
-	VectorXd Vec_Tmp;
+        void AnalyticJacobianDot( const VectorXd &_qdot );
 
-	Quaterniond q;
+        void ScaledTransJacobian();
 
-	Vector3d Omega;
-	Vector3d r;
-	double Theta;
+        void pInvJacobian();
 
-	/**
-	 * @brief SE(3) Homogeneous transform matrix container
-	 */
-	SE3 T[16][16];
-	//SE3 **T;
+        void DampedpInvJacobian(const double sigma);
 
-	/**
-	 * @brief SE(3) matrix container w.r.t., base coordinate
-	 */
-	SE3 M[16];
-	//SE3 *M;
+        void RelativeJacobian(const int From, const int To);
 
-	/**
-	 * @brief SE(3) matrix container
-	 */
-	SE3 Exp_S[16];
-	//SE3 *Exp_S;
+        void BlockpInvJacobian( Matrix<double, 6, Dynamic> &_Jacobian1, Matrix<double, 6, Dynamic> &_Jacobian2 );
 
-	/**
-	 * @brief twist expression for Adjoint/adjoint matrix
-	 */
-	se3 v_se3[16];
-	//se3 *v_se3;
+        void WeightpInvJacobian( const VectorXd &_rdot );
 
-	/**
-	 * @brief Kinematic infomation update flag
-	 */
-	volatile int isInfoUpdated;
+        MatrixXi ChainMatrix;
+        int m_NumChain;
+        int m_DoF;
+        int ChainJointCount[2];
+        int JointEndNum[2];
 
-};
+        SE3 SE3_Tmp;
+        se3 se3_Tmp;
+
+        VectorXi Arr[2];
+
+        MatrixXd mSpaceJacobian;
+        MatrixXd mBodyJacobian;
+        MatrixXd mBodyJacobianDot;
+        MatrixXd mAnalyticJacobian;
+        MatrixXd mAnalyticJacobianDot;
+        VectorXd ScaledFactor;
+        MatrixXd mScaledTransJacobian;
+        MatrixXd mpInvJacobin;
+        MatrixXd mDampedpInvJacobian;
+        MatrixXd mBlockpInvJacobian;
+        MatrixXd mWeightDampedpInvJacobian;
+        Eigen::Matrix<double, 6, Dynamic> mRelativeJacobian;
+
+        MatrixXd Mat_Tmp;
+        VectorXd Vec_Tmp;
+
+        Quaterniond q;
+
+        double WpInv_epsilon_left;
+        double WpInv_epsilon_right;
+        VectorXd lambda_left;
+        VectorXd lambda_right;
+
+        /**
+         * @brief SE(3) Homogeneous transform matrix container
+         */
+        SE3 T[17][17];
+        //SE3 **T;
+
+        /**
+         * @brief SE(3) matrix container w.r.t., base coordinate
+         */
+        SE3 M[17];
+        //SE3 *M;
+
+        /**
+         * @brief SE(3) matrix container
+         */
+        SE3 Exp_S[17];
+        //SE3 *Exp_S;
+
+        /**
+         * @brief twist expression for Adjoint/adjoint matrix
+         */
+        se3 v_se3[17];
+        //se3 *v_se3;
+
+    };
 
 }
 

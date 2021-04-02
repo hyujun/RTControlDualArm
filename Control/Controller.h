@@ -39,7 +39,7 @@ public:
 	 * @brief Controller constructor
 	 * @param[in] JointNum number of joint
 	 */
-	Controller(SerialManipulator *pManipulator);
+	Controller(std::shared_ptr<SerialManipulator> pManipulator);
 	virtual ~Controller();
 
 	/**
@@ -58,6 +58,10 @@ public:
     void SetPIDGain(VectorXd &_Kp, VectorXd &_Kd, VectorXd &_Ki, VectorXd &_Kinf);
 	void GetPIDGain(double *_Kp, double *_Kd, double *_Ki, int &_JointNum);
 	void GetPIDGain(VectorXd &_Kp, VectorXd &_Kd, VectorXd &_Ki);
+	void SetCLIKGain( const double &_Kp_Translation, const double &_Kp_Rotation );
+	void SetTaskspaceGain( const VectorXd &_KpTask, const VectorXd &_KdTask);
+	void GetTaskspaceGain( const VectorXd &_KpTask, const VectorXd &_KdTask);
+	void GetControllerStates(VectorXd &_dq, VectorXd &_dqdot, VectorXd &_ErrTask);
 	/**
 	 * @brief simple pd controller
 	 * @param[in] q current joint position
@@ -66,20 +70,18 @@ public:
 	 * @param[in] dq_dot desired joint velocity
 	 * @param[in] toq joint input torque as control input
 	 */
-	void PDController( double *p_q, double *p_qdot, double *p_dq, double *p_dqdot, double *p_Toq, float &_dt );
-	void PDGravController( double *p_q, double *p_qdot, double *p_dq, double *p_dqdot, double *p_Toq );
-	void InvDynController( double *p_q, double *p_qdot, double *p_dq, double *p_dqdot, double *p_dqddot, double *p_Toq, float &_dt );
-	void TaskInvDynController(double *p_dx, double *p_dxdot, double *p_q, double *p_qdot, double *p_Toq, double &_dt);
+	void PDController( const VectorXd &_q, const VectorXd &_qdot, const VectorXd &_dq, const VectorXd &_dqdot, VectorXd &_Toq);
+	void PDGravController( const VectorXd &_q, const VectorXd &_qdot, const VectorXd &_dq, const VectorXd &_dqdot, VectorXd &_Toq );
+    void InvDynController( const VectorXd &_q, const VectorXd &_qdot, const VectorXd &_dq, const VectorXd &_dqdot, const VectorXd &_dqddot, VectorXd &_Toq, const double &_dt );
+	void TaskInvDynController( const VectorXd &_dx, const VectorXd &_dxdot, const VectorXd &_dxddot, const VectorXd &_q, const VectorXd &_qdot, VectorXd &_Toq, const double &_dt, const int mode);
 
-    void simInvDynController( VectorXd &_q, VectorXd &_qdot, VectorXd &_dq, VectorXd &_dqdot, VectorXd &_dqddot, double *p_Toq, double &_dt );
-	void simTaskInvDynController(VectorXd &_dx, VectorXd &_dxdot, VectorXd &_q, VectorXd &_qdot, double *p_Toq, double &_dt);
+	void TaskError( const VectorXd &_dx, const VectorXd &_dxdot, const VectorXd &_qdot, VectorXd &_error_x, VectorXd &_error_xdot );
+	void TaskRelativeError( const VectorXd &_dx, const VectorXd &_dxdot, const VectorXd &_qdot, VectorXd &_error_x, VectorXd &_error_xdot );
 
-	void TaskError(double *_dx, double*_dxdot, double *_q, double *_qdot, double *p_Toq);
+	void CLIKTaskController( const VectorXd &_q, const VectorXd &_qdot, const VectorXd &_dx, const VectorXd &_dxdot, VectorXd &_Toq, const double &_dt, const int mode );
 
-	void CLIKTaskController( double *_q, double *_qdot, double *_dq, double *_dqdot, const VectorXd *_dx, const VectorXd *_dxdot, const VectorXd &_dqdotNull, double *p_Toq, float &_dt );
-
-	void FrictionIdentification( double *p_q, double *p_qdot, double *p_dq, double *p_dqdot, double *p_dqddot, double *p_Toq, double &gt );
-	void FrictionCompensator( VectorXd &_qdot, VectorXd &_dqdot );
+	void FrictionIdentification( const VectorXd &_q, const VectorXd &_qdot, VectorXd &_dq, VectorXd &_dqdot, VectorXd &_dqddot, VectorXd &_Toq, const double &gt );
+	void FrictionCompensator( const VectorXd &_qdot, const VectorXd &_dqdot );
 	/**
 	 * @brief joint input torque saturator
 	 * @param[in] p_toq joint input torque as control input
@@ -94,38 +96,36 @@ private:
 	Eigen::VectorXd Ki, KiTask;
 	Eigen::VectorXd K_Hinf, K_HinfTask;
 
-	Eigen::VectorXd q, dq, qdot, dqdot, dqddot;
+	Eigen::VectorXd dq, dqdot, dqddot;
+	Eigen::VectorXd dq_old;
 	Eigen::VectorXd FrictionTorque;
 
 	Eigen::VectorXd e, e_dev, e_int, e_int_sat;
+	Eigen::VectorXd Vector_temp;
+	Eigen::MatrixXd Matrix_temp;
 
-	SE3 dSE3, eSE3;
-	SO3 dSO3;
-	Eigen::Vector3d  omega;
-	double theta=0;
-	double alpha=0.01;
-
-    Eigen::VectorXd dx, dxdot;
-    Vector3d eOrient;
+	double alpha;
 
 	Eigen::VectorXd eTask, edotTask;
 	Eigen::MatrixXd edotTmp;
 
-	Eigen::VectorXd ToqOut;
 	Eigen::VectorXd GainWeightFactor;
 
 	Eigen::MatrixXd ScaledTransJacobian;
-	Eigen::MatrixXd BodyJacobian;
+	Eigen::MatrixXd pInvJacobian;
+	Eigen::MatrixXd BlockpInvJacobian;
+	Eigen::MatrixXd WdampedpInvJacobian;
+	Eigen::MatrixXd DampedpInvJacobian;
 	Eigen::MatrixXd AnalyticJacobian;
+    VectorXd q0dot;
 
 	Eigen::MatrixXd M, Mx;
 	Eigen::VectorXd G, Gx;
 
 	int m_Jnum;
-	double m_KpBase, m_KdBase, m_KiBase, m_HinfBase;
-	double InitTime=0;
+	double InitTime=0.0;
 
-	SerialManipulator *pManipulator;
+    std::shared_ptr<SerialManipulator> pManipulator;
 };
 
 } /* namespace HYUCtrl */
