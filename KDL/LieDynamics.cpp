@@ -57,6 +57,7 @@ namespace HYUMotionDynamics{
         Iner_mat.setZero(6*this->m_DoF, 6*this->m_DoF);
         Gamma_mat.setZero(6*this->m_DoF, 6*this->m_DoF);
         L_mat.setZero(6*this->m_DoF, 6*this->m_DoF);
+        LA_mat.setZero(6*this->m_DoF, this->m_DoF);
         ad_Aqd.setZero(6*this->m_DoF, 6*this->m_DoF);
         ad_V.setZero(6*this->m_DoF, 6*this->m_DoF);
 
@@ -64,8 +65,6 @@ namespace HYUMotionDynamics{
 
         grav.setZero(6);
         grav << 0, 0, 0, 0, 0, 9.8;
-
-        Eigen::initParallel();
     }
 
     Liedynamics::~Liedynamics()
@@ -199,6 +198,31 @@ namespace HYUMotionDynamics{
         return;
     }
 
+    void Liedynamics::LA_Link()
+    {
+        LA_mat = A_mat;
+        for(int k=0; k < this->m_NumChain; k++)
+        {
+            for (int i = 0; i < this->m_DoF; ++i)
+            {
+                if(ChainMatrix(k,i) == 1)
+                {
+                    for(int j=i+1; j< this->m_DoF; ++j)
+                    {
+                        if(ChainMatrix(k,j) == 1)
+                        {
+                            if(!(k>0 && ChainMatrix(k-1,j) == 1))
+                            {
+                                LA_mat.block(6*j, i, 6, 1).noalias() += LieOperator::AdjointMatrix(GetTMat(j+1,i+1))*A[j];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
     void Liedynamics::ad_Aqdot_Link( const VectorXd &_qdot )
     {
         this->ad_Aqd.setZero();
@@ -251,21 +275,35 @@ namespace HYUMotionDynamics{
 
         L_link();
         Vdot_base();
-
-        if(LA_mat.cols() != m_DoF || LA_mat.rows() != 6*m_DoF)
-        {
-            LA_mat.setZero(6*this->m_DoF, this->m_DoF);
-        }
-        else
-        {
-            LA_mat.setZero();
-        }
-
-        LA_mat.noalias() += L_mat*A_mat;
+        LA_Link();
 
         //Gamma_Link();
         //ad_Aqdot_Link(_qdot);
         //ad_V_Link(_qdot);
+    }
+
+    void Liedynamics::M_Matrix( MatrixXd &_M )
+    {
+        if(_M.rows() != this->m_DoF && _M.cols() != this->m_DoF)
+            _M.setZero(this->m_DoF,this->m_DoF);
+        else
+            _M.setZero();
+
+        Matrix<double,1,1> tmp;
+        for(int i=0; i<m_DoF; i++)
+        {
+            for(int j=i; j<m_DoF; j++)
+            {
+                tmp.setZero();
+                for(int k=i; k<m_DoF; k++)
+                {
+                    tmp.noalias() += LA_mat.block(6*i,k,6,1).transpose()*GIner[k]*LA_mat.block(6*i,k,6,1);
+                }
+                _M(i,j) = tmp(0,0);
+                if(i != j)
+                    _M(j,i) = _M(i,j);
+            }
+        }
     }
 
     void Liedynamics::C_Matrix( MatrixXd &_C )
@@ -294,18 +332,8 @@ namespace HYUMotionDynamics{
 
     void Liedynamics::MG_Mat_Joint( MatrixXd &_M, VectorXd&_G )
     {
-        if(_M.rows() != this->m_DoF && _M.cols() != this->m_DoF)
-            _M.setZero(this->m_DoF,this->m_DoF);
-        else
-            _M.setZero();
-
-        if(_G.rows() != this->m_DoF)
-            _G.setZero(this->m_DoF);
-        else
-            _G.setZero();
-
-        _M.noalias() += LA_mat.transpose()*Iner_mat*LA_mat;
-        _G.noalias() += (LA_mat.transpose()*(Iner_mat*(L_mat*VdotBase)));
+        M_Matrix(_M);
+        G_Matrix(_G);
     }
 
     void Liedynamics::MG_Mat_Task(const MatrixXd &_M, const VectorXd &_G, MatrixXd &_Mx, VectorXd &_Gx)

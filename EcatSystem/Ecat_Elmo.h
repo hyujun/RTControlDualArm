@@ -71,7 +71,7 @@ public:
      * @return void
      */
 	void processData(size_t index, uint8_t* domain_address) override //read and write PDO and if index is 8,
-	{                                                               //check the state and change the flag of state
+	{                                                                //check the state and change the flag of state
 		// DATA READ WRITE
 		switch(index)
 		{

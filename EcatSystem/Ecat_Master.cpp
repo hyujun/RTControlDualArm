@@ -63,7 +63,7 @@ void Master::SDOwrite(uint16_t position, uint16_t index, uint8_t subindex, uint8
 	return;
 }
 
-void Master::addSlave(uint16_t alias, uint16_t position, Slave* slave)
+void Master::addSlave( uint16_t alias, uint16_t position, Slave* slave )
 {
 	slave->setSlaveAlias(alias);
 	slave->setSlavePosition(position);
@@ -84,7 +84,6 @@ void Master::addSlave(uint16_t alias, uint16_t position, Slave* slave)
 		int pdos_status = ecrt_slave_config_pdos(slave_info.config, num_syncs, syncs);
 		if(pdos_status){
 			printWarning("Err: Add slave Failed to configure PDOs");
-
 			return;
 		}
 	}
@@ -302,19 +301,16 @@ void Master::activateWithDC(uint8_t RefPosition, uint32_t SyncCycleNano)
 
 void Master::SyncEcatMaster(uint64_t RefTime)
 {
-	struct timespec tp;
 	clock_gettime(CLOCK_TO_USE, &tp);
 	ecrt_master_application_time(p_master, TIMESPEC2NS(tp));
 	ecrt_master_sync_reference_clock( p_master );
 	ecrt_master_sync_slave_clocks( p_master );
-	return;
 }
 
 void Master::deactivate()
 {
 	ecrt_release_master(p_master);
 	p_master = nullptr;
-	return;
 }
 
 void Master::update(unsigned int domain)
@@ -327,7 +323,7 @@ void Master::update(unsigned int domain)
     ecrt_domain_process(domain_info->domain);
 
     // check process data state (optional)
-    //checkDomainState(domain);
+    checkDomainState(domain);
 
     // check for master and slave state change
 
@@ -351,9 +347,12 @@ void Master::TxUpdate(unsigned int domain)
     DomainInfo* domain_info = m_domain_info[domain];
 
     // read and write process data
-    for (DomainInfo::Entry& entry : domain_info->entries){
-        for (int i=0; i<entry.num_pdos; ++i){
-            (entry.slave)->processData(i, domain_info->domain_pd + entry.offset[i]);
+    if(EcatMasterLinkState == "up")
+    {
+        for (DomainInfo::Entry& entry : domain_info->entries){
+            for (int i=0; i<entry.num_pdos; ++i){
+                (entry.slave)->processData(i, domain_info->domain_pd + entry.offset[i]);
+            }
         }
     }
 
@@ -372,19 +371,22 @@ void Master::RxUpdate(unsigned int domain)
     ecrt_domain_process(domain_info->domain);
 
     // check process data state (optional)
-    //checkDomainState();
+    checkDomainState(domain);
 
     // check for master and slave state change
     checkMasterState();
 	checkSlaveStates();
 
     // read and write process data
-    for (DomainInfo::Entry& entry : domain_info->entries){
-        for (int i=0; i<entry.num_pdos; ++i){
-            (entry.slave)->processData(i, domain_info->domain_pd + entry.offset[i]);
+    if(EcatMasterLinkState == "up")
+    {
+        for (DomainInfo::Entry& entry : domain_info->entries)
+        {
+            for (int i=0; i<entry.num_pdos; ++i){
+                (entry.slave)->processData(i, domain_info->domain_pd + entry.offset[i]);
+            }
         }
     }
-    return;
 }
 
 
@@ -394,17 +396,16 @@ void Master::checkDomainState(unsigned int domain)
 
     ec_domain_state_t ds;
     ecrt_domain_state(domain_info->domain, &ds);
-
     if (ds.working_counter != domain_info->domain_state.working_counter){
     	domain_info->domainWorkingCounter = ds.working_counter;
 #if defined(_ECAT_MASTER_DEBUG_)
-        printf("Domain: WC %u.\n", ds.working_counter);
+        printf("Domain: WC %u.\n", domain_info->domainWorkingCounter);
 #endif
     }
     if (ds.wc_state != domain_info->domain_state.wc_state){
     	domain_info->domainWCState = ds.wc_state;
 #if defined(_ECAT_MASTER_DEBUG_)
-        printf("Domain: State %u.\n", ds.wc_state);
+        printf("Domain: State %u.\n", domain_info->domainWCState);
 #endif
     }
     domain_info->domain_state = ds;
@@ -414,23 +415,22 @@ void Master::checkMasterState()
 {
     ec_master_state_t ms;
     ecrt_master_state(p_master, &ms);
-
     if (ms.slaves_responding != m_master_state.slaves_responding){
     	this->ConnectedSlaves = ms.slaves_responding;
 #if defined(_ECAT_MASTER_DEBUG_)
-        printf("%u slave(s).\n", ms.slaves_responding);
+        printf("%u slave(s).\n", this->ConnectedSlaves);
 #endif
     }
     if (ms.al_states != m_master_state.al_states){
     	this->EcatMasterState = ms.al_states;
 #if defined(_ECAT_MASTER_DEBUG_)
-        printf("Master AL states: 0x%02X.\n", ms.al_states);
+        printf("Master AL states: 0x%02X.\n", this->EcatMasterState);
 #endif
     }
     if (ms.link_up != m_master_state.link_up){
     	this->EcatMasterLinkState = ms.link_up ? "up" : "down";
 #if defined(_ECAT_MASTER_DEBUG_)
-        printf("Link is %s.\n", ms.link_up ? "up" : "down");
+        printf("Link is %s.\n", this->EcatMasterLinkState);
 #endif
     }
     m_master_state = ms;
@@ -439,36 +439,34 @@ void Master::checkMasterState()
 
 void Master::checkSlaveStates()
 {
-	int id_count = 0;
     for (SlaveInfo& slave : m_slave_info)
     {
         ec_slave_config_state_t s;
         ecrt_slave_config_state(slave.config, &s);
-
+        slave.position = s.position;
         if (s.al_state != slave.config_state.al_state){
             //this spams the terminal at initialization.
         	slave.SlaveState = s.al_state;
 #if defined(_ECAT_MASTER_DEBUG_)
-        	printf( "Slave %d:  ", id_count );
-            printf(" State 0x%02X.\n", s.al_state);
+        	printf( "Slave %d:  ", slave.position );
+            printf(" State 0x%02X.\n", slave.SlaveState);
 #endif
         }
         if (s.online != slave.config_state.online){
         	slave.SlaveConnected = s.online ? "online" : "offline";
 #if defined(_ECAT_MASTER_DEBUG_)
-        	printf( "Slave %d:  ", id_count );
-            printf(" %s.\n", s.online ? "online" : "offline");
+        	printf( "Slave %d:  ", slave.position );
+            printf(" %s.\n", slave.SlaveConnected);
 #endif
         }
         if (s.operational != slave.config_state.operational){
         	slave.SlaveNMT = s.operational ? "Operational" : "Not Operational";
 #if defined(_ECAT_MASTER_DEBUG_)
-        	printf( "Slave %d:  ", id_count );
-            printf(" %s operational.\n", s.operational ? "" : "Not ");
+        	printf( "Slave %d:  ", slave.position );
+            printf(" %s.\n", slave.SlaveNMT);
 #endif
         }
         slave.config_state = s;
-        ++id_count;
     }
 }
 

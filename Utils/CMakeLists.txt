@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.8)
 project(Utils LANGUAGES CXX)
 
+set(CMAKE_DEBUG_POSTFIX "d")
+file(GLOB SOURCE_FILES "*.cpp" "*.c")
+
 add_library(${PROJECT_NAME} SHARED STATIC
-        ellipsoid.cpp
-        similarity.cpp
-        )
+            ${SOURCE_FILES}
+            )
 
 add_library(sub::Utils ALIAS ${PROJECT_NAME})
 

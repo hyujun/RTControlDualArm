@@ -61,8 +61,7 @@ typedef int8_t 		INT8;   	/**<typedef int8_t*/
 
 
 // Cycle time in nanosecond
-unsigned int cycle_ns = 1000000;  	/**< 1 ms, Initial Value */
-static int period = 1000000;		/**< 1 ms, Initial Value */
+unsigned long cycle_ns = 1000000;  	/**< 1 ms, Initial Value */
 
 
 #endif

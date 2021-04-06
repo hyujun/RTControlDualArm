@@ -208,6 +208,8 @@ private:
 	ec_master_t *p_master;
 	ec_master_state_t m_master_state = {};
 
+    struct timespec tp;
+
 	struct DomainInfo{
 		DomainInfo(ec_master_t* master);
 		~DomainInfo();
@@ -222,10 +224,10 @@ private:
 		std::vector<ec_pdo_entry_reg_t> domain_regs;
 
 		struct Entry{
-			Slave* slave = nullptr; 				/**<slave pointer*/
-			int num_pdos = 0;					/**<number of pdo entries */
-			unsigned int* offset = nullptr; 		/**<alias of slave*/
-			unsigned int* bit_position = nullptr; 	/**<position of slave*/
+			Slave* slave = nullptr; 				/**< slave pointer*/
+			int num_pdos = 0;					    /**< number of pdo entries */
+			unsigned int* offset = nullptr; 		/**< alias of slave*/
+			unsigned int* bit_position = nullptr; 	/**< position of slave*/
 		};
 
 		std::vector<Entry> entries;
@@ -240,6 +242,7 @@ private:
 		unsigned int SlaveState=0;
 		std::string SlaveConnected="offline";
 		std::string SlaveNMT="PreOP";
+		unsigned int position=0;
 	};
 
 	std::vector<SlaveInfo> m_slave_info;

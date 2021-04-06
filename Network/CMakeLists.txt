@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.8)
 project(Network LANGUAGES CXX)
 
 set(CMAKE_DEBUG_POSTFIX "d")
-file(GLOB SOURCE_FILES "*.h")
+file(GLOB SOURCE_FILES "*.cpp" "*.c")
 
 add_library(${PROJECT_NAME} SHARED STATIC
-        ${SOURCE_FILES}
-        )
+            ${SOURCE_FILES}
+            )
 
 add_library(sub::NETWORK ALIAS ${PROJECT_NAME})
 

@@ -1,20 +1,20 @@
 #include "PDOConfig.h"
 
 ec_pdo_entry_info_t Elmo_pdo_entries[] = {
-	    {0x607a, 0x00, 32}, 	/* Target position */
-	    {0x60ff, 0x00, 32}, 	/* Target velocity */
-	    {0x6071, 0x00, 16}, 	/* Target torque */
-	    {0x6072, 0x00, 16}, 	/* Maximal torque */
-	    {0x6040, 0x00, 16}, 	/* Controlword */
+	    {0x607a, 0x00, 32}, 	    /* Target position */
+	    {0x60ff, 0x00, 32}, 	    /* Target velocity */
+	    {0x6071, 0x00, 16}, 	    /* Target torque */
+	    {0x6072, 0x00, 16}, 	    /* Maximal torque */
+	    {0x6040, 0x00, 16}, 	    /* Controlword */
 	    {0x6060, 0x00, 8}, 		/* Modes of operation */
 
-	    {0x6069, 0x00, 32}, 	/* Velocity sensor actual value */
+	    {0x6069, 0x00, 32}, 	    /* Velocity sensor actual value */
 
-	    {0x6064, 0x00, 32}, 	/* Position actual value */
-	    {0x6077, 0x00, 16}, 	/* Torque value */
-	    {0x6041, 0x00, 16}, 	/* Statusword */
+	    {0x6064, 0x00, 32}, 	    /* Position actual value */
+	    {0x6077, 0x00, 16}, 	    /* Torque value */
+	    {0x6041, 0x00, 16}, 	    /* Statusword */
 	    {0x6061, 0x00, 8}, 		/* Modes of operation display */
-	    {0x0000, 0x00, 8}, 		/* Gap */
+	    //{0x0000, 0x00, 8}, 		/* Gap */
 };
 
 ec_pdo_info_t Elmo_pdos[] = {

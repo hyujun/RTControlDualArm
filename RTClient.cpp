@@ -6,27 +6,13 @@
 #include "RTClient.h"
 
 //Modify this number to indicate the actual number of motor on the network
-#if defined(_WITH_KIST_HAND_)
-
-#define ELMO_TOTAL 			17
-#define DUAL_ARM_DOF 		15
-#define HAND_DOF			2
-
-std::map<int, int> ElmoDualArmMap = {
-		{0,0}, {1,1}, {2,2}, {3,3}, {4,4}, {5,5}, {6,6}, {7,7}, {8,10}, {9,11}, {10,12}, {11,13}, {12,14}, {13,15}, {14,16}
-};
-
-std::map<int, int> ElmoHandMap = {
-		{0, 8}, {1, 9}
-};
-
-#else
 #define ELMO_TOTAL 16
 #define DUAL_ARM_DOF 16
-#endif
 
-hyuEcat::Master ecatmaster;
-hyuEcat::EcatElmo ecat_elmo[ELMO_TOTAL];
+struct EcatArg{
+    hyuEcat::Master ecatmaster;
+    hyuEcat::EcatElmo ecat_elmo[ELMO_TOTAL];
+};
 
 // When all slaves or drives reach OP mode,
 // system_ready becomes 1.
@@ -34,7 +20,7 @@ int system_ready = 0;
 int break_flag = 0;
 // Global time (beginning from zero)
 double double_gt=0; //real global time
-float float_dt=0;
+double double_dt=0;
 
 // EtherCAT Data (Dual-Arm)
 UINT16	StatusWord[DUAL_ARM_DOF] = {0,};
@@ -44,23 +30,6 @@ INT16 	ActualTor[DUAL_ARM_DOF] = {0,};
 INT8	ModeOfOperationDisplay[DUAL_ARM_DOF] = {0,};
 INT8	DeviceState[DUAL_ARM_DOF] = {0,};
 INT16 	TargetTor[DUAL_ARM_DOF] = {0,};		//100.0 persentage
-
-#if defined(_WITH_KIST_HAND_)
-// EthercCAT Data (Hand)
-UINT16	Hand_StatusWord[HAND_DOF] = {0,};
-INT32 	Hand_ActualPos[HAND_DOF] = {0,};
-INT32 	Hand_ActualVel[HAND_DOF] = {0,};
-INT16 	Hand_ActualTor[HAND_DOF] = {0,};
-INT8	Hand_ModeOfOperationDisplay[HAND_DOF] = {0,};
-INT8	Hand_DeviceState[HAND_DOF] = {0,};
-
-INT32 	Hand_TargetPos[HAND_DOF] = {0,};		//inc
-INT32 	Hand_TargetVel[HAND_DOF] = {0,};		//inc/sec
-INT16 	Hand_TargetTor[HAND_DOF] = {0,};		//100.0 persentage
-INT8 	Hand_ModeOfOperation[HAND_DOF] = {0,};
-UINT16	Hand_ControlWord[HAND_DOF] = {0,};
-
-#endif
 /****************************************************************************/
 // Xenomai RT tasks
 RT_TASK RTArm_task;
@@ -70,54 +39,46 @@ RT_TASK tcpip_task;
 RT_QUEUE msg_tcpip;
 
 void signal_handler(int signum);
-int isSlaveInit(void);
 
 // For RT thread management
 unsigned long fault_count=0;
 unsigned long ethercat_time=0;
 unsigned long worst_time=0;
 
-static double ActualPos_Rad[DUAL_ARM_DOF] = {0.0,};
-static double ActualVel_Rad[DUAL_ARM_DOF] = {0.0,};
-static double TargetPos_Rad[DUAL_ARM_DOF] = {0.0,};
-static double TargetVel_Rad[DUAL_ARM_DOF] = {0.0,};
-static double TargetAcc_Rad[DUAL_ARM_DOF] = {0.0,};
-static double TargetToq[DUAL_ARM_DOF] = {0.0,};
+VectorXd ActualPos_Rad;
+VectorXd ActualVel_Rad;
+VectorXd TargetPos_Rad;
+VectorXd TargetVel_Rad;
+VectorXd TargetAcc_Rad;
+VectorXd TargetToq;
 
 static int hand_motion;
 static int hand_state;
 
-#if defined(_WITH_KIST_HAND_)
-static double Hand_ActualPos_Rad[HAND_DOF] = {0.0,};
-static double Hand_ActualVel_Rad[HAND_DOF] = {0.0,};
-#endif
-
-
-static double best_manipulatorpower=0;
-
 #if defined(_ECAT_ON_)
-int isSlaveInit(void)
+int isSlaveInit( EcatArg *arg )
 {
+    return 1;
 	int elmo_count = 0;
 	int slave_count = 0;
 
 	for(int i=0; i<ELMO_TOTAL; ++i)
 	{
-		if(ecat_elmo[i].initialized())
+		if(arg->ecat_elmo[i].initialized())
 		{
 			elmo_count++;
 		}
 	}
 
-	for(int j=0; j<((int)ecatmaster.GetConnectedSlaves()-1); j++)
+	for(int j=0; j<((int)arg->ecatmaster.GetConnectedSlaves()-1); j++)
 	{
-		if(ecatmaster.GetSlaveState(j) == 0x08)
+		if(arg->ecatmaster.GetSlaveState(j) == 0x08)
 		{
 			slave_count++;
 		}
 	}
 
-	if((elmo_count == ELMO_TOTAL) && (slave_count == ((int)ecatmaster.GetConnectedSlaves()-1)))
+	if((elmo_count == ELMO_TOTAL) && (slave_count == ((int)arg->ecatmaster.GetConnectedSlaves()-1)))
 		return 1;
 	else
 		return 0;
@@ -130,8 +91,9 @@ Vector3d ForwardAxis[2];
 int NumChain;
 
 // RTArm_task
-void RTRArm_run(void *arg)
+void RTRArm_run( void *arg )
 {
+    auto *ctrl_ecat_arg = (EcatArg*)arg;
 #if defined(_PLOT_ON_)
 	int sampling_time 	= 20;	// Data is sampled every 10 cycles.
 	int sampling_tick 	= sampling_time;
@@ -144,24 +106,25 @@ void RTRArm_run(void *arg)
 	RTIME p1 = 0;
 	RTIME p3 = 0;
 
-    MatrixXd pInvJacobian;
-
 	short MaxTor = 1200;
 	hand_motion = 0x00;
 
 	uint16_t ControlMotion = SYSTEM_BEGIN;
 	uint16_t JointState = SYSTEM_BEGIN;
 
-	VectorXd finPos(DUAL_ARM_DOF);
-	finPos.setZero();
+    ActualPos_Rad.setZero(16);
+    ActualVel_Rad.setZero(16);
+    TargetPos_Rad.setZero(16);
+    TargetVel_Rad.setZero(16);
+    TargetAcc_Rad.setZero(16);
+    TargetToq.setZero(16);
+	VectorXd finPos = VectorXd::Zero(16);
 
-	SerialManipulator DualArm;
-	HYUControl::Controller Control(&DualArm);
-	HYUControl::Motion motion(&DualArm);
+	std::shared_ptr<SerialManipulator> DualArm = std::make_shared<SerialManipulator>();
+	std::shared_ptr<HYUControl::Controller> Control = std::make_shared<HYUControl::Controller>(DualArm);
+    std::shared_ptr<HYUControl::Motion> motion = std::make_shared<HYUControl::Motion>(DualArm);
 
-	DualArm.UpdateManipulatorParam();
-
-	//HYUControl::KistHand kisthand;
+	DualArm->UpdateManipulatorParam();
 
 	/* Arguments: &task (NULL=self),
 	 *            start time,
@@ -177,123 +140,63 @@ void RTRArm_run(void *arg)
 
 		previous = rt_timer_read();
 
-		ecatmaster.RxUpdate();
+        //ctrl_ecat_arg->ecatmaster.RxUpdate();
 
-#if defined(_WITH_KIST_HAND_)
-		//read the motor data
-		for(k=0; k < DUAL_ARM_DOF; k++)
-		{
-			DeviceState[k] = 			ecat_elmo[ElmoDualArmMap[k]].Elmo_DeviceState();
-			StatusWord[k] = 			ecat_elmo[ElmoDualArmMap[k]].status_word_;
-			ModeOfOperationDisplay[k] = ecat_elmo[ElmoDualArmMap[k]].mode_of_operation_display_;
-			ControlWord[k] = 			ecat_elmo[ElmoDualArmMap[k]].control_word_;
-			ActualPos[k] = 				ecat_elmo[ElmoDualArmMap[k]].position_;
-			ActualVel[k] = 				ecat_elmo[ElmoDualArmMap[k]].velocity_;
-			ActualTor[k] = 				ecat_elmo[ElmoDualArmMap[k]].torque_;
-		}
-
-		for(k=0; k < HAND_DOF; k++)
-		{
-			Hand_DeviceState[k] = 				ecat_elmo[ElmoHandMap[k]].Elmo_DeviceState();
-			Hand_StatusWord[k] = 				ecat_elmo[ElmoHandMap[k]].status_word_;
-			Hand_ModeOfOperationDisplay[k] = 	ecat_elmo[ElmoHandMap[k]].mode_of_operation_display_;
-			Hand_ControlWord[k] = 				ecat_elmo[ElmoHandMap[k]].control_word_;
-			Hand_ActualPos[k] = 				ecat_elmo[ElmoHandMap[k]].position_;
-			Hand_ActualVel[k] = 				ecat_elmo[ElmoHandMap[k]].velocity_;
-			Hand_ActualTor[k] = 				ecat_elmo[ElmoHandMap[k]].torque_;
-		}
-
-#else
 		for(int k=0; k < DUAL_ARM_DOF; k++)
 		{
-			DeviceState[k] = 			ecat_elmo[k].Elmo_DeviceState();
-			StatusWord[k] = 			ecat_elmo[k].status_word_;
-			ModeOfOperationDisplay[k] = ecat_elmo[k].mode_of_operation_display_;
-			ActualPos[k] = 				ecat_elmo[k].position_;
-			ActualVel[k] = 				ecat_elmo[k].velocity_;
-			ActualTor[k] = 				ecat_elmo[k].torque_;
+			DeviceState[k] = 			ctrl_ecat_arg->ecat_elmo[k].Elmo_DeviceState();
+			StatusWord[k] = 			ctrl_ecat_arg->ecat_elmo[k].status_word_;
+			ModeOfOperationDisplay[k] = ctrl_ecat_arg->ecat_elmo[k].mode_of_operation_display_;
+			ActualPos[k] =				ctrl_ecat_arg->ecat_elmo[k].position_;
+			ActualVel[k] =				ctrl_ecat_arg->ecat_elmo[k].velocity_;
+			ActualTor[k] =				ctrl_ecat_arg->ecat_elmo[k].torque_;
 		}
-#endif
-        DualArm.ENCtoRAD(ActualPos, ActualPos_Rad);
-        DualArm.VelocityConvert(ActualVel, ActualVel_Rad);
+
+        DualArm->ENCtoRAD(ActualPos, ActualPos_Rad);
+        DualArm->VelocityConvert(ActualVel, ActualVel_Rad);
 
 		if( system_ready )
 		{
-			DualArm.pKin->PrepareJacobian(ActualPos_Rad);
+			DualArm->pKin->PrepareJacobian(ActualPos_Rad);
+            DualArm->pDyn->PrepareDynamics(ActualPos_Rad, ActualVel_Rad);
+			DualArm->pKin->GetForwardKinematics( ForwardPos, ForwardOri, NumChain );
 
-			DualArm.pKin->GetpinvJacobian(pInvJacobian);
-			DualArm.pDyn->PrepareDynamics(ActualPos_Rad, ActualVel_Rad);
-
-			//DualArm.pKin->GetManipulability( TaskCondNumber, OrientCondNumber );
-			DualArm.pKin->GetForwardKinematics( ForwardPos, ForwardOri, NumChain );
-
-			DualArm.StateMachine( ActualPos_Rad, ActualVel_Rad, finPos, JointState, ControlMotion );
-			motion.JointMotion( TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, finPos, ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlMotion );
+			//DualArm->StateMachine( ActualPos_Rad, ActualVel_Rad, finPos, JointState, ControlMotion );
+			//motion->JointMotion( TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, finPos, ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlMotion );
             //if(JointState == MOVE_CUSTOMIZE1)
             //    hand_motion == 0x11;
             //else if(JointState == MOVE_CUSTOMIZE9)
             //    hand_motion == 0x00;
 
 			//if( ControlMotion == MOVE_FRICTION )
-			//	Control.FrictionIdentification( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_gt );
+			//	Control->FrictionIdentification( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_gt );
 			//else if( ControlMotion == MOVE_CLIK_JOINT )
-			//	Control.CLIKTaskController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetPos_Task, TargetVel_Task, nullMotion, TargetToq, float_dt );
+			//	Control->CLIKTaskController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetPos_Task, TargetVel_Task, nullMotion, TargetToq, double_dt );
 			//else
 			//{
-				Control.InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, float_dt );
+				Control->InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_dt );
 			//}
 
-			DualArm.TorqueConvert(TargetToq, TargetTor, MaxTor);
+			DualArm->TorqueConvert(TargetToq, TargetTor, MaxTor);
 
-			//manipulatorpower = DualArm.PowerComsumption(ActualTor);
-
-#if defined(_WITH_KIST_HAND_)
-			//write the motor data
-			for(OutputCommandCount=0; OutputCommandCount < DUAL_ARM_DOF; ++OutputCommandCount)
-			{
-				if(double_gt >= 1.0)
-				{
-					ecat_elmo[ElmoDualArmMap[OutputCommandCount]].writeTorque(TargetTor[OutputCommandCount]);
-				}
-				else
-				{
-					ecat_elmo[ElmoDualArmMap[OutputCommandCount]].writeTorque(0);
-				}
-			}
-
-			for(OutputCommandCount=0; OutputCommandCount < HAND_DOF; ++OutputCommandCount)
-			{
-				if(double_gt >= 1.0)
-				{
-					ecat_elmo[ElmoHandMap[OutputCommandCount]].writeVelocity(Hand_TargetVel[OutputCommandCount]);
-				}
-				else
-				{
-					ecat_elmo[ElmoHandMap[OutputCommandCount]].writeVelocity(0);
-				}
-			}
-
-#else
 			//write the motor data
 			for(int j=0; j < DUAL_ARM_DOF; ++j)
 			{
-
 				if(double_gt >= 1.0 && JointState != SYSTEM_BEGIN)
 				{
-					//ecat_elmo[j].writeTorque(TargetTor[j]);
+					//ctrl_ecat_arg->ecat_elmo[j].writeTorque(TargetTor[j]);
 				}
 				else
 				{
-					ecat_elmo[j].writeTorque(0);
+                    ctrl_ecat_arg->ecat_elmo[j].writeTorque(0);
 				}
 			}
-#endif
 		}
 
-		ecatmaster.TxUpdate();
+        //ctrl_ecat_arg->ecatmaster.TxUpdate();
 
 #if defined(_USE_DC_MODE_)
-		ecatmaster.SyncEcatMaster(rt_timer_read());
+        //ctrl_ecat_arg->ecatmaster.SyncEcatMaster(rt_timer_read());
 #endif
 
 		// For EtherCAT performance statistics
@@ -301,9 +204,9 @@ void RTRArm_run(void *arg)
 		p3 = rt_timer_read();
 		now = rt_timer_read();
 
-		if ( isSlaveInit() == 1 )
+		if ( isSlaveInit(ctrl_ecat_arg) == 1 )
 		{
-			float_dt = ((float)(long)(p3 - p1))*1e-3; 		// us
+            double_dt = ((double)(long)(p3 - p1))*1e-3; 	// us
 			double_gt += ((double)(long)(p3 - p1))*1e-9; 	// s
 			ethercat_time = (long) now - previous;
 
@@ -314,9 +217,6 @@ void RTRArm_run(void *arg)
 				if ( worst_time<ethercat_time )
 					worst_time=ethercat_time;
 
-				//if(best_manipulatorpower < manipulatorpower)
-				//	best_manipulatorpower = manipulatorpower;
-
 				if( ethercat_time > (unsigned long)cycle_ns )
 				{
 					fault_count++;
@@ -324,10 +224,9 @@ void RTRArm_run(void *arg)
 				}
 			}
 		}
-
 		else
 		{
-			if(ecatmaster.GetConnectedSlaves() < ELMO_TOTAL)
+			if(ctrl_ecat_arg->ecatmaster.GetConnectedSlaves() < ELMO_TOTAL)
 			{
 				//signal_handler(1);
 			}
@@ -336,13 +235,13 @@ void RTRArm_run(void *arg)
 			double_gt = 0;
 			worst_time = 0;
 			ethercat_time = 0;
-			best_manipulatorpower=0;
 		}
 	}
 }
 
 void print_run(void *arg)
 {
+    auto *print_ecat_arg = (EcatArg*)arg;
 	long stick=0;
 	int count=0;
 
@@ -370,8 +269,8 @@ void print_run(void *arg)
 		if ( system_ready )
 		{
 			rt_printf("Time=%0.2fs\n", double_gt);
-			rt_printf("actTask_dt= %lius, desTask_dt=%0.1fus, Worst_dt= %lius, Fault=%d, PowerComsumption=%0.2lfW\n",
-					ethercat_time/1000, float_dt, worst_time/1000, fault_count, best_manipulatorpower);
+			rt_printf("actTask_dt= %lius, desTask_dt=%0.1fus, Worst_dt= %lius, Fault=%d\n",
+					ethercat_time/1000, double_dt, worst_time/1000, fault_count);
 
 			for(int j=0; j<DUAL_ARM_DOF; ++j)
 			{
@@ -383,16 +282,16 @@ void print_run(void *arg)
 				rt_printf(" ModeOfOp: %d,",			ModeOfOperationDisplay[j]);
 				//rt_printf("\n");
 #endif
-				rt_printf("\tActPos(Deg): %0.2lf,", 	ActualPos_Rad[j]*RADtoDEG);
-				//rt_printf("\tTarPos(Deg): %0.2lf,",	TargetPos_Rad[j]*RADtoDEG);
+				rt_printf("\tActPos(Deg): %0.2lf,", 	ActualPos_Rad(j)*RADtoDEG);
+				//rt_printf("\tTarPos(Deg): %0.2lf,",	TargetPos_Rad(j))*RADtoDEG);
 				rt_printf("\tActPos(inc): %d,", 		ActualPos[j]);
 				//rt_printf("\n");
-				rt_printf("\tActVel(Deg/s): %0.1lf,", 	ActualVel_Rad[j]*RADtoDEG);
-				//rt_printf("\tTarVel(Deg/s): %0.1lf,",	TargetVel_Rad[j]*RADtoDEG);
+				rt_printf("\tActVel(Deg/s): %0.1lf,", 	ActualVel_Rad(j)*RADtoDEG);
+				//rt_printf("\tTarVel(Deg/s): %0.1lf,",	TargetVel_Rad(j)*RADtoDEG);
 				//rt_printf("\tActVel(inc/s): %d,", 	ActualVel[j]);
 				//rt_printf("\n");
 				rt_printf("\tActTor(%): %d,",			ActualTor[j]);
-				rt_printf("\tCtrlTor(Nm): %0.1lf", 	TargetToq[j]);
+				rt_printf("\tCtrlTor(Nm): %0.1lf", 	TargetToq(j));
 				//rt_printf("\tTarTor(%): %d", 			TargetTor[j]);
 				//rt_printf("\n");
 			}
@@ -432,14 +331,14 @@ void print_run(void *arg)
 				rt_printf("\nReady Time: %i sec", stick);
 
 				rt_printf("\nMaster State: %s, AL state: 0x%02X, ConnectedSlaves : %d",
-						ecatmaster.GetEcatMasterLinkState().c_str(), ecatmaster.GetEcatMasterState(), ecatmaster.GetConnectedSlaves());
-				for(int i=0; i<((int)ecatmaster.GetConnectedSlaves()-1); i++)
+                          print_ecat_arg->ecatmaster.GetEcatMasterLinkState().c_str(), print_ecat_arg->ecatmaster.GetEcatMasterState(), print_ecat_arg->ecatmaster.GetConnectedSlaves());
+				for(int i=0; i<((int)print_ecat_arg->ecatmaster.GetConnectedSlaves()-1); i++)
 				{
 					rt_printf("\nID: %d , SlaveState: 0x%02X, SlaveConnection: %s, SlaveNMT: %s ", i,
-							ecatmaster.GetSlaveState(i), ecatmaster.GetSlaveConnected(i).c_str(), ecatmaster.GetSlaveNMT(i).c_str());
+                              print_ecat_arg->ecatmaster.GetSlaveState(i), print_ecat_arg->ecatmaster.GetSlaveConnected(i).c_str(), print_ecat_arg->ecatmaster.GetSlaveNMT(i).c_str());
 
-					rt_printf(" SlaveStatus : %s,", ecat_elmo[i].GetDevState().c_str());
-					rt_printf(" StatWord: 0x%04X, ", ecat_elmo[i].status_word_);
+					rt_printf(" SlaveStatus : %s,", print_ecat_arg->ecat_elmo[i].GetDevState().c_str());
+					rt_printf(" StatWord: 0x%04X, ", print_ecat_arg->ecat_elmo[i].status_word_);
 
 				}
 				rt_printf("\n");
@@ -478,36 +377,29 @@ void tcpip_run(void *arg)
 void signal_handler(int signum)
 {
 	rt_printf("\nSignal Interrupt: %d", signum);
-    break_flag=1;
 
-	rt_printf("\nTCPIP RTTask Closing....");
-	rt_task_delete(&tcpip_task);
-	rt_printf("\nTCPIP RTTask Closing Success....");
+	//rt_printf("\nTCPIP RTTask Closing....");
+    //rt_task_delete(&tcpip_task);
+    //rt_printf("\nTCPIP RTTask Closing Success....");
+
+    rt_printf("\nConsolPrint RTTask Closing....");
+    rt_task_delete(&print_task);
+    rt_printf("\nConsolPrint RTTask Closing Success....");
 
 #if defined(_ECAT_ON_)
 	rt_printf("\nEtherCAT RTTask Closing....");
 	rt_task_delete(&RTArm_task);
 	rt_printf("\nEtherCAT RTTask Closing Success....");
-
-    ecatmaster.deactivate();
 #endif
 
-	rt_printf("\nConsolPrint RTTask Closing....");
-	rt_task_delete(&print_task);
-	rt_printf("\nConsolPrint RTTask Closing Success....");
-
     rt_printf("\n\n\t !!RT Arm Client System Stopped!! \n");
-    exit(signum);
+    break_flag=1;
 }
 
 /****************************************************************************/
 int main(int argc, char **argv)
 {
-    Eigen::initParallel();
-    Eigen::setNbThreads(3);
-    std::cout << "Eigen Multithreading: " << Eigen::nbThreads() << std::endl;
-
-	// Perform auto-init of rt_print buffers if the task doesn't do so
+    // Perform auto-init of rt_print buffers if the task doesn't do so
     rt_print_auto_init(1);
 
     signal(SIGHUP, signal_handler);
@@ -528,60 +420,43 @@ int main(int argc, char **argv)
 	//cycle_ns = 1000000; // nanosecond -> 1kHz
 	//cycle_ns = 1250000; // nanosecond -> 800Hz
 	//cycle_ns = 2e6; // nanosecond -> 500Hz
-    cycle_ns = 10e6;
-	period = static_cast<int>((float) cycle_ns)/((float) NSEC_PER_SEC);	//period in second unit
+    cycle_ns = 50e6;
 
+    EcatArg *ecat_arg = new EcatArg;
 
 #if defined(_ECAT_ON_)
 
-#if defined(_WITH_KIST_HAND_)
-	int CheckElmoHand=0;
-	int SlaveNum;
-	for(SlaveNum=0; SlaveNum < ELMO_TOTAL; SlaveNum++)
+	for(int SlaveNum=0; SlaveNum < ELMO_TOTAL; SlaveNum++)
 	{
-		ecatmaster.addSlave(0, SlaveNum, &ecat_elmo[SlaveNum]);
-		if(ElmoHandMap[CheckElmoHand] == SlaveNum)
-		{
-			ecat_elmo[SlaveNum].mode_of_operation_ = 9;
-			//ecat_elmo[SlaveNum].writeTorque(-10);
-			CheckElmoHand++;
-		}
+		ecat_arg->ecatmaster.addSlave(0, SlaveNum, &ecat_arg->ecat_elmo[SlaveNum]);
 	}
-#else
-	int SlaveNum;
-	for(SlaveNum=0; SlaveNum < ELMO_TOTAL; SlaveNum++)
-	{
-		ecatmaster.addSlave(0, SlaveNum, &ecat_elmo[SlaveNum]);
-	}
-
-#endif
 
 #if defined(_USE_DC_MODE_)
-	ecatmaster.activateWithDC(1, cycle_ns);
+    ecat_arg->ecatmaster.activateWithDC(1, cycle_ns);
 #else
-	ecatmaster.activate();
+    ecat_arg->ecatmaster.activate();
 #endif
 #endif
 
 	// RTArm_task: create and start
 	rt_printf("\n-- Now running rt task ...\n");
 
+    rt_task_create(&print_task, "Console_proc", 0, 70, 0);
+    rt_task_start(&print_task, &print_run, (EcatArg *)ecat_arg);
+
 #if defined(_ECAT_ON_)
-	rt_task_create(&RTArm_task, "CONTROL_PROC_Task", 1024*1024*4, 99, 0); // MUST SET at least 4MB stack-size (MAXIMUM Stack-size ; 8192 kbytes)
-	rt_task_start(&RTArm_task, &RTRArm_run, nullptr);
+	rt_task_create(&RTArm_task, "Control_proc", 1024*1024*5, 95, 0); // MUST SET at least 4MB stack-size (MAXIMUM Stack-size ; 8192 kbytes)
+	rt_task_start(&RTArm_task, &RTRArm_run, (EcatArg *)ecat_arg);
 #endif
 
-	rt_task_create(&print_task, "CONSOLE_PROC_Task", 0, 70, 0);
-	rt_task_start(&print_task, &print_run, nullptr);
-
-	//rt_task_create(&tcpip_task, "TCPIP_PROC_Task", 0, 80, 0);
+	//rt_task_create(&tcpip_task, "TCPIP_proc", 0, 80, 0);
 	//rt_task_start(&tcpip_task, &tcpip_run, NULL);
 
 	// Must pause here
 	pause();
 
-	// Finalize
-	signal_handler(SIGTERM);
+    ecat_arg->ecatmaster.deactivate();
+    delete ecat_arg;
 
     return 0;
 }
