@@ -284,7 +284,7 @@ namespace HYUMotionDynamics{
                 tmp.setZero();
                 for(int k=i; k<m_DoF; k++)
                 {
-                    tmp.noalias() += LA_mat.block(6*i,k,6,1).transpose()*GIner[k]*LA_mat.block(6*i,k,6,1);
+                    tmp.noalias() += LA_mat.block(6*k,i,6,1).transpose()*GIner[k]*LA_mat.block(6*k,j,6,1);
                 }
                 _M(i,j) = tmp(0,0);
                 if(i != j)
