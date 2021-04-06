@@ -9,10 +9,8 @@
 #define ELMO_TOTAL 16
 #define DUAL_ARM_DOF 16
 
-struct EcatArg{
-    hyuEcat::Master ecatmaster;
-    hyuEcat::EcatElmo ecat_elmo[ELMO_TOTAL];
-};
+hyuEcat::Master ecatmaster;
+hyuEcat::EcatElmo ecat_elmo[ELMO_TOTAL];
 
 // When all slaves or drives reach OP mode,
 // system_ready becomes 1.
@@ -58,29 +56,28 @@ static int hand_motion;
 static int hand_state;
 
 #if defined(_ECAT_ON_)
-int isSlaveInit( EcatArg *arg )
+int isSlaveInit()
 {
-    return 1;
 	int elmo_count = 0;
 	int slave_count = 0;
 
 	for(int i=0; i<ELMO_TOTAL; ++i)
 	{
-		if(arg->ecat_elmo[i].initialized())
+		if(ecat_elmo[i].initialized())
 		{
 			elmo_count++;
 		}
 	}
 
-	for(int j=0; j<((int)arg->ecatmaster.GetConnectedSlaves()-1); j++)
+	for(int j=0; j<((int)ecatmaster.GetConnectedSlaves()-1); j++)
 	{
-		if(arg->ecatmaster.GetSlaveState(j) == 0x08)
+		if(ecatmaster.GetSlaveState(j) == 0x08)
 		{
 			slave_count++;
 		}
 	}
 
-	if((elmo_count == ELMO_TOTAL) && (slave_count == ((int)arg->ecatmaster.GetConnectedSlaves()-1)))
+	if((elmo_count == ELMO_TOTAL) && (slave_count == ((int)ecatmaster.GetConnectedSlaves()-1)))
 		return 1;
 	else
 		return 0;
@@ -95,7 +92,6 @@ int NumChain;
 // RTArm_task
 void RTRArm_run( void *arg )
 {
-    auto *ctrl_ecat_arg = (EcatArg*)arg;
 #if defined(_PLOT_ON_)
 	int sampling_time 	= 20;	// Data is sampled every 10 cycles.
 	int sampling_tick 	= sampling_time;
@@ -144,16 +140,16 @@ void RTRArm_run( void *arg )
 
 		previous = rt_timer_read();
 
-        //ctrl_ecat_arg->ecatmaster.RxUpdate();
+        ecatmaster.RxUpdate();
 
 		for(int k=0; k < DUAL_ARM_DOF; k++)
 		{
-			DeviceState[k] = 			ctrl_ecat_arg->ecat_elmo[k].Elmo_DeviceState();
-			StatusWord[k] = 			ctrl_ecat_arg->ecat_elmo[k].status_word_;
-			ModeOfOperationDisplay[k] = ctrl_ecat_arg->ecat_elmo[k].mode_of_operation_display_;
-			ActualPos[k] =				ctrl_ecat_arg->ecat_elmo[k].position_;
-			ActualVel[k] =				ctrl_ecat_arg->ecat_elmo[k].velocity_;
-			ActualTor[k] =				ctrl_ecat_arg->ecat_elmo[k].torque_;
+			DeviceState[k] = 			ecat_elmo[k].Elmo_DeviceState();
+			StatusWord[k] = 			ecat_elmo[k].status_word_;
+			ModeOfOperationDisplay[k] = ecat_elmo[k].mode_of_operation_display_;
+			ActualPos[k] =				ecat_elmo[k].position_;
+			ActualVel[k] =				ecat_elmo[k].velocity_;
+			ActualTor[k] =				ecat_elmo[k].torque_;
 		}
 
         DualArm->ENCtoRAD(ActualPos, ActualPos_Rad);
@@ -193,19 +189,19 @@ void RTRArm_run( void *arg )
 			{
 				if(double_gt >= 1.0 && JointState != SYSTEM_BEGIN)
 				{
-					//ctrl_ecat_arg->ecat_elmo[j].writeTorque(TargetTor[j]);
+					//ecat_elmo[j].writeTorque(TargetTor[j]);
 				}
 				else
 				{
-                    ctrl_ecat_arg->ecat_elmo[j].writeTorque(0);
+                    ecat_elmo[j].writeTorque(0);
 				}
 			}
 		}
 
-        //ctrl_ecat_arg->ecatmaster.TxUpdate();
+        ecatmaster.TxUpdate();
 
 #if defined(_USE_DC_MODE_)
-        //ctrl_ecat_arg->ecatmaster.SyncEcatMaster(rt_timer_read());
+        ecatmaster.SyncEcatMaster(rt_timer_read());
 #endif
 
 		// For EtherCAT performance statistics
@@ -213,7 +209,7 @@ void RTRArm_run( void *arg )
 		p3 = rt_timer_read();
 		now = rt_timer_read();
 
-		if ( isSlaveInit(ctrl_ecat_arg) == 1 )
+		if ( isSlaveInit() == 1 )
 		{
             double_dt = ((double)(long)(p3 - p1))*1e-3; 	// us
 			double_gt += ((double)(long)(p3 - p1))*1e-9; 	// s
@@ -235,7 +231,7 @@ void RTRArm_run( void *arg )
 		}
 		else
 		{
-			if(ctrl_ecat_arg->ecatmaster.GetConnectedSlaves() < ELMO_TOTAL)
+			if(ecatmaster.GetConnectedSlaves() < ELMO_TOTAL)
 			{
 				//signal_handler(1);
 			}
@@ -250,7 +246,6 @@ void RTRArm_run( void *arg )
 
 void print_run(void *arg)
 {
-    auto *print_ecat_arg = (EcatArg*)arg;
 	long stick=0;
 	int count=0;
 
@@ -340,14 +335,14 @@ void print_run(void *arg)
 				rt_printf("\nReady Time: %i sec", stick);
 
 				rt_printf("\nMaster State: %s, AL state: 0x%02X, ConnectedSlaves : %d",
-                          print_ecat_arg->ecatmaster.GetEcatMasterLinkState().c_str(), print_ecat_arg->ecatmaster.GetEcatMasterState(), print_ecat_arg->ecatmaster.GetConnectedSlaves());
-				for(int i=0; i<((int)print_ecat_arg->ecatmaster.GetConnectedSlaves()-1); i++)
+                          ecatmaster.GetEcatMasterLinkState().c_str(), ecatmaster.GetEcatMasterState(), ecatmaster.GetConnectedSlaves());
+				for(int i=0; i<((int)ecatmaster.GetConnectedSlaves()-1); i++)
 				{
 					rt_printf("\nID: %d , SlaveState: 0x%02X, SlaveConnection: %s, SlaveNMT: %s ", i,
-                              print_ecat_arg->ecatmaster.GetSlaveState(i), print_ecat_arg->ecatmaster.GetSlaveConnected(i).c_str(), print_ecat_arg->ecatmaster.GetSlaveNMT(i).c_str());
+                              ecatmaster.GetSlaveState(i), ecatmaster.GetSlaveConnected(i).c_str(), ecatmaster.GetSlaveNMT(i).c_str());
 
-					rt_printf(" SlaveStatus : %s,", print_ecat_arg->ecat_elmo[i].GetDevState().c_str());
-					rt_printf(" StatWord: 0x%04X, ", print_ecat_arg->ecat_elmo[i].status_word_);
+					rt_printf(" SlaveStatus : %s,", ecat_elmo[i].GetDevState().c_str());
+					rt_printf(" StatWord: 0x%04X, ", ecat_elmo[i].status_word_);
 
 				}
 				rt_printf("\n");
@@ -386,9 +381,9 @@ void signal_handler(int signum)
 {
 	rt_printf("\nSignal Interrupt: %d", signum);
 
-	//rt_printf("\nTCPIP RTTask Closing....");
-    //rt_task_delete(&tcpip_task);
-    //rt_printf("\nTCPIP RTTask Closing Success....");
+	rt_printf("\nTCPIP RTTask Closing....");
+    rt_task_delete(&tcpip_task);
+    rt_printf("\nTCPIP RTTask Closing Success....");
 
     rt_printf("\nConsolPrint RTTask Closing....");
     rt_task_delete(&print_task);
@@ -430,19 +425,17 @@ int main(int argc, char **argv)
 	//cycle_ns = 2e6; // nanosecond -> 500Hz
     cycle_ns = 2e6;
 
-    EcatArg *ecat_arg = new EcatArg;
-
 #if defined(_ECAT_ON_)
 
 	for(int SlaveNum=0; SlaveNum < ELMO_TOTAL; SlaveNum++)
 	{
-		ecat_arg->ecatmaster.addSlave(0, SlaveNum, &ecat_arg->ecat_elmo[SlaveNum]);
+		ecatmaster.addSlave(0, SlaveNum, &ecat_elmo[SlaveNum]);
 	}
 
 #if defined(_USE_DC_MODE_)
-    ecat_arg->ecatmaster.activateWithDC(1, cycle_ns);
+    ecatmaster.activateWithDC(1, cycle_ns);
 #else
-    ecat_arg->ecatmaster.activate();
+    ecatmaster.activate();
 #endif
 #endif
 
@@ -450,21 +443,20 @@ int main(int argc, char **argv)
 	rt_printf("\n-- Now running rt task ...\n");
 
     rt_task_create(&print_task, "Console_proc", 0, 70, 0);
-    rt_task_start(&print_task, &print_run, (EcatArg *)ecat_arg);
+    rt_task_start(&print_task, &print_run, nullptr);
 
 #if defined(_ECAT_ON_)
 	rt_task_create(&RTArm_task, "Control_proc", 1024*1024*5, 95, 0); // MUST SET at least 4MB stack-size (MAXIMUM Stack-size ; 8192 kbytes)
-	rt_task_start(&RTArm_task, &RTRArm_run, (EcatArg *)ecat_arg);
+	rt_task_start(&RTArm_task, &RTRArm_run, nullptr);
 #endif
 
-	//rt_task_create(&tcpip_task, "TCPIP_proc", 0, 80, 0);
-	//rt_task_start(&tcpip_task, &tcpip_run, NULL);
+	rt_task_create(&tcpip_task, "TCPIP_proc", 0, 80, 0);
+	rt_task_start(&tcpip_task, &tcpip_run, NULL);
 
 	// Must pause here
 	pause();
 
-    ecat_arg->ecatmaster.deactivate();
-    delete ecat_arg;
+    ecatmaster.deactivate();
 
     return 0;
 }
