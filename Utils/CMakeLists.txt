@@ -11,7 +11,7 @@ add_library(${PROJECT_NAME} SHARED STATIC
 add_library(sub::Utils ALIAS ${PROJECT_NAME})
 
 target_include_directories( ${PROJECT_NAME}
-        PUBLIC ${PROJECT_SOURCE_DIR})
+                            PUBLIC ${PRJECT_SOURCE_DIR})
 
 find_package(OpenMP REQUIRED)
 if(OpenMP_CXX_FOUND)

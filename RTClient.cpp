@@ -50,6 +50,8 @@ VectorXd ActualVel_Rad;
 VectorXd TargetPos_Rad;
 VectorXd TargetVel_Rad;
 VectorXd TargetAcc_Rad;
+VectorXd TargetPos_Task;
+VectorXd TargetVel_Task;
 VectorXd TargetToq;
 
 static int hand_motion;
@@ -117,12 +119,14 @@ void RTRArm_run( void *arg )
     TargetPos_Rad.setZero(16);
     TargetVel_Rad.setZero(16);
     TargetAcc_Rad.setZero(16);
+    TargetPos_Task.setZero(12);
+    TargetVel_Task.setZero(12);
     TargetToq.setZero(16);
 	VectorXd finPos = VectorXd::Zero(16);
 
 	std::shared_ptr<SerialManipulator> DualArm = std::make_shared<SerialManipulator>();
-	std::shared_ptr<HYUControl::Controller> Control = std::make_shared<HYUControl::Controller>(DualArm);
-    std::shared_ptr<HYUControl::Motion> motion = std::make_shared<HYUControl::Motion>(DualArm);
+	std::unique_ptr<HYUControl::Controller> Control = std::make_unique<HYUControl::Controller>(DualArm);
+    std::unique_ptr<HYUControl::Motion> motion = std::make_unique<HYUControl::Motion>(DualArm);
 
 	DualArm->UpdateManipulatorParam();
 
@@ -161,20 +165,25 @@ void RTRArm_run( void *arg )
             DualArm->pDyn->PrepareDynamics(ActualPos_Rad, ActualVel_Rad);
 			DualArm->pKin->GetForwardKinematics( ForwardPos, ForwardOri, NumChain );
 
-			//DualArm->StateMachine( ActualPos_Rad, ActualVel_Rad, finPos, JointState, ControlMotion );
-			//motion->JointMotion( TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, finPos, ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlMotion );
-            //if(JointState == MOVE_CUSTOMIZE1)
+			DualArm->StateMachine( ActualPos_Rad, ActualVel_Rad, finPos, JointState, ControlMotion );
+			motion->JointMotion( TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, finPos, ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlMotion );
+
+			//if(JointState == MOVE_CUSTOMIZE1)
             //    hand_motion == 0x11;
             //else if(JointState == MOVE_CUSTOMIZE9)
             //    hand_motion == 0x00;
 
 			//if( ControlMotion == MOVE_FRICTION )
-			//	Control->FrictionIdentification( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_gt );
+            //{
+            //    Control->FrictionIdentification( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_gt );
+            //}
 			//else if( ControlMotion == MOVE_CLIK_JOINT )
-			//	Control->CLIKTaskController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetPos_Task, TargetVel_Task, nullMotion, TargetToq, double_dt );
+            //{
+                Control->CLIKTaskController( ActualPos_Rad, ActualVel_Rad, TargetPos_Task, TargetVel_Task, TargetToq, double_dt, 6 );
+            //}
 			//else
 			//{
-				Control->InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_dt );
+			//	Control->InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_dt );
 			//}
 
 			DualArm->TorqueConvert(TargetToq, TargetTor, MaxTor);
@@ -269,8 +278,8 @@ void print_run(void *arg)
 		if ( system_ready )
 		{
 			rt_printf("Time=%0.2fs\n", double_gt);
-			rt_printf("actTask_dt= %lius, desTask_dt=%0.1fus, Worst_dt= %lius, Fault=%d\n",
-					ethercat_time/1000, double_dt, worst_time/1000, fault_count);
+			rt_printf("Calculation= %0.2fus, DesisredTask_dt=%0.2fus, WorstCalculation= %0.2fus, Fault=%d\n",
+					static_cast<double>(ethercat_time)*1e-3, double_dt, static_cast<double>(worst_time)*1e-3, fault_count);
 
 			for(int j=0; j<DUAL_ARM_DOF; ++j)
 			{
@@ -347,7 +356,6 @@ void print_run(void *arg)
 	}
 }
 
-
 void tcpip_run(void *arg)
 {
 	Poco::Net::ServerSocket sock(SERVER_PORT);
@@ -420,7 +428,7 @@ int main(int argc, char **argv)
 	//cycle_ns = 1000000; // nanosecond -> 1kHz
 	//cycle_ns = 1250000; // nanosecond -> 800Hz
 	//cycle_ns = 2e6; // nanosecond -> 500Hz
-    cycle_ns = 50e6;
+    cycle_ns = 2e6;
 
     EcatArg *ecat_arg = new EcatArg;
 

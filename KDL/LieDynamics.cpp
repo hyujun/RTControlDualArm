@@ -200,27 +200,14 @@ namespace HYUMotionDynamics{
 
     void Liedynamics::LA_Link()
     {
-        LA_mat = A_mat;
-        for(int k=0; k < this->m_NumChain; k++)
+        LA_mat.setZero(6*m_DoF, m_DoF);
+        for(int i=0; i<m_DoF; i++)
         {
-            for (int i = 0; i < this->m_DoF; ++i)
+            for(int j=i; j<m_DoF; j++)
             {
-                if(ChainMatrix(k,i) == 1)
-                {
-                    for(int j=i+1; j< this->m_DoF; ++j)
-                    {
-                        if(ChainMatrix(k,j) == 1)
-                        {
-                            if(!(k>0 && ChainMatrix(k-1,j) == 1))
-                            {
-                                LA_mat.block(6*j, i, 6, 1).noalias() += LieOperator::AdjointMatrix(GetTMat(j+1,i+1))*A[j];
-                            }
-                        }
-                    }
-                }
+                LA_mat.block(6*j, i, 6, 1).noalias() += L_mat.block(6*j, 6*i, 6, 6)*A[i];
             }
         }
-
     }
 
     void Liedynamics::ad_Aqdot_Link( const VectorXd &_qdot )
