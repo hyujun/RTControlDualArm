@@ -9,12 +9,9 @@
 #define SOCKETHANDLER_H_
 
 #include <iostream>
-#include <mutex>
-#include <cstring>
-#include <cstdio>
-#include <Poco/Net/TCPServer.h>
-#include <Poco/Net/TCPServerConnection.h>
-#include <Poco/Net/TCPServerConnectionFactory.h>
+#include <algorithm>
+#include <Poco/Net/ServerSocket.h>
+#include <Poco/Net/SocketAddress.h>
 
 #include "PacketHandler.h"
 #include "KRISSSensorHandler.h"
@@ -23,105 +20,77 @@ const Poco::UInt16 SERVER_PORT = 32452;
 int TargetHandMotion=0x00;
 int TargetHandState=0x00;
 
-class Session : public Poco::Net::TCPServerConnection
+class SocketHandler
 {
 public:
-	Session(const Poco::Net::StreamSocket &socket) : TCPServerConnection(socket)
+    SocketHandler(const Poco::Net::ServerSocket &socket)
+	{
+        server_sock = socket;
+        connectedSockList.push_back(socket);
+	}
+	virtual ~SocketHandler()
 	{
 
 	}
-	virtual ~Session() {}
 
-	virtual void run()
-	{
-		try
-		{
-			int recvSize = 0;
+    void TXRXUpdate()
+    {
+        Poco::Net::Socket::SocketList readList(connectedSockList.begin(), connectedSockList.end());
+        Poco::Net::Socket::SocketList writeList(connectedSockList.begin(), connectedSockList.end());
+        Poco::Net::Socket::SocketList exceptList(connectedSockList.begin(), connectedSockList.end());
 
-			do
-			{
-                buff_size = sizeof(buffer);
+        Poco::Timespan timeout;
+        if(Poco::Net::Socket::select(readList, writeList, exceptList, timeout) == 0)
+            return;
 
-				recvSize = socket().receiveBytes(buffer, sizeof(buffer));
-				std::cout << "Recieved Massage from client " << buffer << std::endl;
+        Poco::Net::Socket::SocketList delSockList;
 
-                memcpy(TxFrame.data, buffer, sizeof(buffer));
-                mPackethandler.packetlibrary(TxFrame);
-
-                memset(RxFrame.data, 0, sizeof(RxFrame.data));
-                RxFrame = TxFrame;
-                if(RxFrame.info.index == Index_HandCommand_request)
+        for (auto& readSock : readList)
+        {
+            if (server_sock == readSock)
+            {
+                auto newSock = server_sock.acceptConnection();
+                connectedSockList.push_back(newSock);
+                std::cout << "New Client connected" << std::endl;
+            }
+            else
+            {
+                auto n = ((Poco::Net::StreamSocket*)&readSock)->receiveBytes(buffer, sizeof(buffer));
+                if (n > 0)
                 {
-                    TargetHandState = RxFrame.info.subindex;
-                    RxFrame.info.subindex = TargetHandMotion;
+                    std::cout << "Received Message from Client: " << buffer << std::endl;
+                    snprintf(szSendMessage, sizeof(szSendMessage), "Re:%s", buffer);
+                    auto nMsgLen = strnlen(szSendMessage, sizeof(szSendMessage)-1);
+                    ((Poco::Net::StreamSocket*)&readSock)->sendBytes(szSendMessage, nMsgLen);
                 }
                 else
                 {
-                    RxFrame.info.subindex += 0x01;
+                    std::cout << "Client Disconnected" << std::endl;
+                    delSockList.push_back(readSock);
                 }
+            }
+        }
 
-
-				socket().sendBytes(RxFrame.data, sizeof(RxFrame.data));
-			} while (recvSize > 0);
-
-			std::cout << "Disconeected with the client" << std::endl;
-		}
-		catch (Poco::Exception& exc)
-		{
-			std::cout << "Session: " << exc.displayText() << std::endl;
-		}
-	}
+        for (auto& delSock : delSockList)
+        {
+            auto delIter = std::find_if(connectedSockList.begin(),connectedSockList.end(),[&delSock](auto& sock){return delSock == sock ? true : false;});
+            if (delIter != connectedSockList.end())
+            {
+                connectedSockList.erase(delIter);
+                std::cout << "Remove the Client from connectedSockList" << std::endl;
+            }
+        }
+    }
 
 private:
-	char buffer[32] = { 0, };
-	char szSendMessage[32] = { 0, };
+
+    Poco::Net::ServerSocket server_sock;
+	char buffer[128] = { 0, };
+	char szSendMessage[128] = { 0, };
     TCP_Packet TxFrame, RxFrame;
     int buff_size=0;
     PacketHandler mPackethandler;
-
-
+    Poco::Net::Socket::SocketList connectedSockList;
 
 };
-
-class SessionFactory : public Poco::Net::TCPServerConnectionFactory
-{
-public:
-	SessionFactory() { }
-	virtual ~SessionFactory() { }
-
-	virtual Poco::Net::TCPServerConnection* createConnection(const Poco::Net::StreamSocket &socket)
-	{
-		m_mtx.lock();
-		++m_ConnectedCount;
-
-		std::cout << m_ConnectedCount << "th Client Connected!" << std::endl;
-		m_mtx.unlock();
-
-		return new Session(socket);
-	}
-
-private:
-	int m_ConnectedCount = 0;
-	std::mutex m_mtx;
-};
-
-void PrintServerStatus(Poco::Net::TCPServer& server)
-{
-
-	//printf("maxThreads:%d, maxConcurrentConnections:%d\n",
-	//	server.maxThreads(), server.maxConcurrentConnections());
-
-	printf("currentThreads:%d, currentConnections:%d\n",
-		server.currentThreads(), server.currentConnections());
-
-	printf("queuedConnections:%d, totalConnections:%d\n\n",
-		server.queuedConnections(), server.totalConnections());
-}
-
-void TCP_SetTargetTaskData(int &txdata, int &rxdata)
-{
-    TargetHandMotion = txdata;
-    rxdata = TargetHandState;
-}
-
 #endif /* SOCKETHANDLER_H_ */

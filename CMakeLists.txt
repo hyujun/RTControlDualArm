@@ -55,20 +55,8 @@ set(BUILD_SHARED_LIBS TRUE)
 # Build options
 #===============================================================================
 #option(BUILD_DOC "Build Documentation" off)
-option(Dualarm_CODECOV "Turn on codecov support" ON)
 option(Dualarm_VERBOSE "Whether print detailed information in CMake process" ON)
 option(Dualarm_SHARED_LIBS "Build shared libraries" ON)
-
-#===============================================================================
-# CodeCov settings
-#===============================================================================
-if(Dualarm_CODECOV AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Coverage"))
-    include(modules/CodeCoverage.cmake)
-    setup_target_for_coverage(codecov ctest coverage)
-    set(CMAKE_CXX_FLAGS_DEBUG
-        "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fprofile-arcs -ftest-coverage"
-        )
-endif()
 
 #===============================================================================
 # Build type settings

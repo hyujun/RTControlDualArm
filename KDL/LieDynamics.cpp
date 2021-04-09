@@ -297,14 +297,12 @@ namespace HYUMotionDynamics{
     {
         _C.setZero(this->m_DoF, this->m_DoF);
         _C = -LA_mat.transpose()*(Iner_mat*L_mat*ad_Aqd*Gamma_mat - ad_V.transpose()*Iner_mat)*LA_mat;
-        return;
     }
 
     void Liedynamics::C_Vector( VectorXd &_C, const VectorXd &_qdot )
     {
         _C.setZero(this->m_DoF);
         _C.noalias() += (-LA_mat.transpose()*((Iner_mat*L_mat*ad_Aqd*Gamma_mat - ad_V.transpose()*Iner_mat)*(LA_mat*_qdot)));
-        return;
     }
 
     void Liedynamics::G_Matrix( VectorXd &_G )

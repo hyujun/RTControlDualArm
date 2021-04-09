@@ -18,6 +18,7 @@
 #include <ctime>		// time calls
 #include <cmath>
 
+#include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>		// File control definitions
 #include <termios.h>	// POSIX terminal control definitions
@@ -49,7 +50,8 @@
 
 #define _DEBUG_ 			/**<Debug Print Parameter*/
 #define _ECAT_ON_ 			/**<EtherCAT device enable Parameter*/
-#define _USE_DC_MODE_		/**<EtherCAT Distributed Clock mode enable Parameter*/
+#define _TCPIP_ON_
+//#define _PLOT_ON_
 
 typedef unsigned int UINT32;	/**<typedef uint32_t*/
 typedef int64_t		INT64;		/**<typedef uint64_t*/
@@ -59,9 +61,7 @@ typedef uint16_t 	UINT16;		/**<typedef uint16_t*/
 typedef uint8_t 	UINT8;		/**<typedef uint8_t*/
 typedef int8_t 		INT8;   	/**<typedef int8_t*/
 
-
 // Cycle time in nanosecond
-unsigned long cycle_ns = 1000000;  	/**< 1 ms, Initial Value */
-
+unsigned long cycle_ns = 1000e3;  	/**< 1 ms, Initial Value */
 
 #endif

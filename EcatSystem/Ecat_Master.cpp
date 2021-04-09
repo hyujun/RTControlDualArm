@@ -10,7 +10,7 @@ Master::DomainInfo::DomainInfo(ec_master_t* master)
 		printWarning("Err: Failed to create domain!");
 		return;
 	}
-	const ec_pdo_entry_reg_t empty = {0};
+	const ec_pdo_entry_reg_t empty = {};
 	domain_regs.push_back(empty);
 }
 
@@ -27,15 +27,12 @@ Master::Master(const int master) {
 	p_master = ecrt_request_master(master);
 	if(p_master == nullptr){
 		printWarning("Err: Failed to obtain master!");
-		ecrt_release_master(p_master);
 		return;
 	}
 }
 
 Master::~Master() {
 
-	//for(SlaveInfo& slave : m_slave_info){
-	//}
 	for(auto& domain : m_domain_info){
 		delete domain.second;
 	}
@@ -70,7 +67,7 @@ void Master::addSlave( uint16_t alias, uint16_t position, Slave* slave )
 
 	SlaveInfo slave_info;
 	slave_info.slave = slave;
-	slave_info.config = ecrt_master_slave_config(p_master, alias, position, slave->m_vendor_id, slave->m_product_id);
+	slave_info.config = ecrt_master_slave_config( p_master, alias, position, slave->m_vendor_id, slave->m_product_id );
 
 	if(slave_info.config == nullptr){
 		printWarning("Err: Add slave, Failed to get slave configuration.");
@@ -78,12 +75,14 @@ void Master::addSlave( uint16_t alias, uint16_t position, Slave* slave )
 	}
 	m_slave_info.push_back(slave_info);
 
+	//ecrt_slave_config_watchdog(slave_info.config, 0, 100);
+
 	size_t num_syncs = slave->syncSize();
 	const ec_sync_info_t* syncs = slave->syncs();
 	if(num_syncs > 0){
-		int pdos_status = ecrt_slave_config_pdos(slave_info.config, num_syncs, syncs);
+		int pdos_status = ecrt_slave_config_pdos( slave_info.config, EC_END, syncs );
 		if(pdos_status){
-			printWarning("Err: Add slave Failed to configure PDOs");
+			printWarning("Err: Add slave, Failed to configure PDOs");
 			return;
 		}
 	}
@@ -223,7 +222,7 @@ void Master::registerPDOInDomain(uint16_t alias, uint16_t position, std::vector<
     }
 
     // set the last element to null
-    ec_pdo_entry_reg_t empty = {0};
+    ec_pdo_entry_reg_t empty = {};
     domain_info->domain_regs.back() = empty;
 }
 
@@ -258,7 +257,7 @@ void Master::activate(void)
     }
 }
 
-void Master::activateWithDC(uint8_t RefPosition, uint32_t SyncCycleNano)
+void Master::activateWithDC( uint8_t RefPosition, const uint32_t SyncCycleNano )
 {
     // register domain
     for (auto& iter : m_domain_info){
@@ -281,6 +280,14 @@ void Master::activateWithDC(uint8_t RefPosition, uint32_t SyncCycleNano)
     }
     fprintf(stdout, "\n-- activeWithDC: ecrt_slave reference clock is chosen");
 
+
+    auto ret = ecrt_master_set_send_interval(p_master, SyncCycleNano);
+    if(ret != 0)
+    {
+        printf("-- activeWithDc: Failed to set send interval:%d", ret);
+        return;
+    }
+
     bool activate_status = ecrt_master_activate(p_master);
     if (activate_status){
         printWarning("Activate. Failed to activate master.");
@@ -296,13 +303,12 @@ void Master::activateWithDC(uint8_t RefPosition, uint32_t SyncCycleNano)
             return;
         }
     }
-    return;
 }
 
-void Master::SyncEcatMaster(uint64_t RefTime)
+void Master::SyncEcatMaster()
 {
-	clock_gettime(CLOCK_TO_USE, &tp);
-	ecrt_master_application_time(p_master, TIMESPEC2NS(tp));
+	clock_gettime( CLOCK_TO_USE, &tp );
+	ecrt_master_application_time( p_master, TIMESPEC2NS(tp) );
 	ecrt_master_sync_reference_clock( p_master );
 	ecrt_master_sync_slave_clocks( p_master );
 }
@@ -326,7 +332,6 @@ void Master::update(unsigned int domain)
     checkDomainState(domain);
 
     // check for master and slave state change
-
 	checkMasterState();
 	checkSlaveStates();
 
@@ -336,6 +341,8 @@ void Master::update(unsigned int domain)
             (entry.slave)->processData(i, domain_info->domain_pd + entry.offset[i]);
         }
     }
+
+    SyncEcatMaster();
 
     // send process data
     ecrt_domain_queue(domain_info->domain);
@@ -347,19 +354,17 @@ void Master::TxUpdate(unsigned int domain)
     DomainInfo* domain_info = m_domain_info[domain];
 
     // read and write process data
-    if(EcatMasterLinkState == "up")
-    {
-        for (DomainInfo::Entry& entry : domain_info->entries){
-            for (int i=0; i<entry.num_pdos; ++i){
-                (entry.slave)->processData(i, domain_info->domain_pd + entry.offset[i]);
-            }
+    for (DomainInfo::Entry& entry : domain_info->entries){
+        for (int i=0; i<entry.num_pdos; ++i){
+            (entry.slave)->processData(i, domain_info->domain_pd + entry.offset[i]);
         }
     }
+
+    SyncEcatMaster();
 
     // send process data
     ecrt_domain_queue(domain_info->domain);
     ecrt_master_send(p_master);
-    return;
 }
 
 void Master::RxUpdate(unsigned int domain)
@@ -378,13 +383,10 @@ void Master::RxUpdate(unsigned int domain)
 	checkSlaveStates();
 
     // read and write process data
-    if(EcatMasterLinkState == "up")
+    for (DomainInfo::Entry& entry : domain_info->entries)
     {
-        for (DomainInfo::Entry& entry : domain_info->entries)
-        {
-            for (int i=0; i<entry.num_pdos; ++i){
-                (entry.slave)->processData(i, domain_info->domain_pd + entry.offset[i]);
-            }
+        for (int i=0; i<entry.num_pdos; ++i){
+            (entry.slave)->processData(i, domain_info->domain_pd + entry.offset[i]);
         }
     }
 }
@@ -430,7 +432,7 @@ void Master::checkMasterState()
     if (ms.link_up != m_master_state.link_up){
     	this->EcatMasterLinkState = ms.link_up ? "up" : "down";
 #if defined(_ECAT_MASTER_DEBUG_)
-        printf("Link is %s.\n", this->EcatMasterLinkState);
+        printf("Link is %s.\n", this->EcatMasterLinkState.c_str());
 #endif
     }
     m_master_state = ms;
@@ -456,14 +458,14 @@ void Master::checkSlaveStates()
         	slave.SlaveConnected = s.online ? "online" : "offline";
 #if defined(_ECAT_MASTER_DEBUG_)
         	printf( "Slave %d:  ", slave.position );
-            printf(" %s.\n", slave.SlaveConnected);
+            printf(" %s.\n", slave.SlaveConnected.c_str());
 #endif
         }
         if (s.operational != slave.config_state.operational){
         	slave.SlaveNMT = s.operational ? "Operational" : "Not Operational";
 #if defined(_ECAT_MASTER_DEBUG_)
         	printf( "Slave %d:  ", slave.position );
-            printf(" %s.\n", slave.SlaveNMT);
+            printf(" %s.\n", slave.SlaveNMT.c_str());
 #endif
         }
         slave.config_state = s;

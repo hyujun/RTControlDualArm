@@ -29,37 +29,37 @@ public:
      * @details Returns true if Elmo has reached "operation enabled" state. The transition through the state machine is handled automatically.
      * @return mixedboolean Success:1, False:0
      */
-    bool initialized() const {return initialized_;}
+    bool initialized() const { return initialized_; }
 
     /**
      * @brief Check the Elmo acheived Homing
 	 * @details Returns true if Elmo has reached "operation enabled" state. The transition through the state machine is handled automatically.
 	 * @return mixedboolean Success:1, False:0
 	 */
-    bool isHoming() const {return homing_;}
+    bool isHoming() const { return homing_; }
 
     /**
      * @brief Show the statusword in string(int)
      * @return state_
      */
-    int Elmo_DeviceState() const {return state_;};
+    int Elmo_DeviceState() const { return state_; }
 
     /**
      * @brief Write Output Torque in 1000 percentage
      * @details User must first set max_torque.
      * @param[in] torque int16_t
      */
-    void writeTorque(int16_t torque)
+    void writeTorque( const int16_t torque )
     {
 	   target_torque_ = torque;
     }
 
-    void writeVelocity(int32_t velocity)
+    void writeVelocity( const int32_t velocity )
     {
     	target_velocity_ = velocity;
     }
 
-    void writePosition(int32_t &position)
+    void writePosition( const int32_t &position )
     {
     	this->target_position_ = position;
     }
@@ -77,54 +77,45 @@ public:
 		{
 		//RxPDO
 		case 0:
-			EC_WRITE_S32(domain_address, target_position_);
-			break;
-		case 1:
-			EC_WRITE_S32(domain_address, target_velocity_);
-			break;
-		case 2:
 			EC_WRITE_S16(domain_address, target_torque_);
 			break;
-		case 3:
+        case 1:
+            control_word_ = EC_READ_U16(domain_address);
+
+            //initialization sequence
+            control_word_ = transition(state_, control_word_);
+            EC_WRITE_U16(domain_address, control_word_);
+            break;
+        case 2:
 			EC_WRITE_U16(domain_address, max_torque_);
 			break;
-		case 4:
-			control_word_ = EC_READ_U16(domain_address);
-
-			//initialization sequence
-			control_word_ = transition(state_, control_word_);
-			EC_WRITE_U16(domain_address, control_word_);
-			break;
-		case 5:
+		case 3:
 			EC_WRITE_S8(domain_address, mode_of_operation_);
 			break;
 		//TxPDO
-		case 6:
+		case 4:
 			velocity_ = EC_READ_S32(domain_address);
 			break;
-		case 7:
+		case 5:
 			position_ = EC_READ_S32(domain_address);
 			break;
-		case 8:
+		case 6:
 			torque_ = EC_READ_S16(domain_address);
 			break;
-		case 9:
+		case 7:
 			status_word_ = EC_READ_U16(domain_address);
 			state_ = deviceState(status_word_);
 			break;
-		case 10:
+		case 8:
 			mode_of_operation_display_= EC_READ_S8(domain_address);
 			break;
-        case 11:
-            dummy= EC_READ_S8(domain_address);
-            break;
 		default:
 			std::cout << "WARNING. Elmo Gold Whistle pdo index out of range." << std::endl;
 			break;
 		}
 
 		// CHECK FOR STATE CHANGE
-		if ( index == 9 ) //if last entry  in domain
+		if ( index == 7 ) //if last entry  in domain
 		{
 			if (status_word_ != last_status_word_){
 				state_ = deviceState(status_word_);
@@ -167,7 +158,7 @@ public:
 	 * @return address of Elmo_syncs[0]
 	 * @see PDOConfig.h
 	 */
-	const ec_sync_info_t* syncs() override { return &Elmo_syncs[0]; }
+	const ec_sync_info_t* syncs() override { return Elmo_syncs; }
 
 	/**
 	 * @brief size of sync
@@ -225,8 +216,11 @@ private:
      * @details The number of domains MUST BE EQUAL TO THE SIZE OF PDO process
      */
     DomainMap domains_ = {
-    	{0, {0,1,2,3,4,5,6,7,8,9,10,11} }
+            {0, {0,1,2,3,4,5,6,7,8} }
     };
+    //DomainMap domains_ = {
+    //	{0, {0,1,2,3,4,5,6,7,8,9,10} }
+    //};
 
 //========================================================
 // ELMO SPECIFIC

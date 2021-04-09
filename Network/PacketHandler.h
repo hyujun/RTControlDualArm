@@ -24,7 +24,7 @@ struct packet_data{
 
 union TCP_Packet{
     packet_data info;
-    char data[sizeof(info)];
+    unsigned char data[sizeof(info)];
 };
 
 class PacketHandler{

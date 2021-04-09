@@ -23,8 +23,6 @@
 
 #define CLOCK_TO_USE CLOCK_REALTIME
 #define NSEC_PER_SEC (1000000000L)
-#define PERIOD_NS (NSEC_PER_SEC / FREQUENCY)
-#define DIFF_NS(A, B) (((B).tv_sec - (A).tv_sec) * NSEC_PER_SEC + (B).tv_nsec - (A).tv_nsec)
 #define TIMESPEC2NS(T) ((uint64_t) (T).tv_sec * NSEC_PER_SEC + (T).tv_nsec)
 
 //#define _ECAT_MASTER_DEBUG_
@@ -96,14 +94,14 @@ public:
 	 * @param[in] SyncCycleNano Control Cycle time in nano seconds
 	 * @return void
 	 */
-	void activateWithDC(uint8_t RefPosition, uint32_t SyncCycleNano);
+	void activateWithDC(uint8_t RefPosition, const uint32_t SyncCycleNano);
 
 	/**
 	 * @brief synchronize master with each client
 	 * @param[in] RefTime current time ex) rt_timer_read()
 	 * @return void
 	 */
-	void SyncEcatMaster(uint64_t RefTime);
+	void SyncEcatMaster();
 
 	/**
 	 * @brief deactivate the client
@@ -208,7 +206,7 @@ private:
 	ec_master_t *p_master;
 	ec_master_state_t m_master_state = {};
 
-    struct timespec tp;
+    struct timespec tp{};
 
 	struct DomainInfo{
 		DomainInfo(ec_master_t* master);
@@ -225,7 +223,7 @@ private:
 
 		struct Entry{
 			Slave* slave = nullptr; 				/**< slave pointer*/
-			int num_pdos = 0;					    /**< number of pdo entries */
+			unsigned int num_pdos = 0;				/**< number of pdo entries */
 			unsigned int* offset = nullptr; 		/**< alias of slave*/
 			unsigned int* bit_position = nullptr; 	/**< position of slave*/
 		};
@@ -238,10 +236,11 @@ private:
 	struct SlaveInfo{
 		Slave* slave = nullptr;
 		ec_slave_config_t* config = nullptr;
-		ec_slave_config_state_t config_state = {0};
+		ec_slave_config_state_t config_state = {};
 		unsigned int SlaveState=0;
 		std::string SlaveConnected="offline";
 		std::string SlaveNMT="PreOP";
+		unsigned int alias=0;
 		unsigned int position=0;
 	};
 
@@ -253,7 +252,6 @@ private:
 	unsigned short SUBINDEX_HOMING_LOWSPEED = 0x02; 	/**<Subindex for homing low speed*/
 	unsigned short INDEX_HOMING_OFFSET = 0x607CU;		/**<Index for homing offset*/
 	unsigned short INDEX_HOMING_CURRENT_LIMIT = 0x2020U;/**<Index for homing current limit*/
-
 };
 
 } /* namespace hyuEcat */
