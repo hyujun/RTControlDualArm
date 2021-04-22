@@ -36,7 +36,7 @@ Master::~Master() {
 	for(auto& domain : m_domain_info){
 		delete domain.second;
 	}
-
+	deactivate();
 }
 
 void Master::SDOread(uint16_t position, uint16_t index, uint8_t subindex, uint8_t *data)
@@ -75,9 +75,9 @@ void Master::addSlave( uint16_t alias, uint16_t position, Slave* slave )
 	}
 	m_slave_info.push_back(slave_info);
 
-	//ecrt_slave_config_watchdog(slave_info.config, 0, 100);
 
 	size_t num_syncs = slave->syncSize();
+
 	const ec_sync_info_t* syncs = slave->syncs();
 	if(num_syncs > 0){
 		int pdos_status = ecrt_slave_config_pdos( slave_info.config, EC_END, syncs );
@@ -148,7 +148,7 @@ void Master::addSlaveWithHoming(uint16_t alias, uint16_t position, EcatElmo* sla
 	size_t num_syncs = slave->syncSize();
 	const ec_sync_info_t* syncs = slave->syncs();
 	if(num_syncs > 0){
-		int pdos_status = ecrt_slave_config_pdos(slave_info.config, num_syncs, syncs);
+		int pdos_status = ecrt_slave_config_pdos(slave_info.config, EC_END, syncs);
 		if(pdos_status){
 			printWarning("Err: Add slave Failed to configure PDOs");
 
@@ -257,7 +257,7 @@ void Master::activate(void)
     }
 }
 
-void Master::activateWithDC( uint8_t RefPosition, const uint32_t SyncCycleNano )
+void Master::activateWithDC( uint8_t RefPosition, uint32_t SyncCycleNano )
 {
     // register domain
     for (auto& iter : m_domain_info){
@@ -271,22 +271,16 @@ void Master::activateWithDC( uint8_t RefPosition, const uint32_t SyncCycleNano )
 
     for (SlaveInfo& slave : m_slave_info)
     {
-    	ecrt_slave_config_dc(slave.config, 0x0300, SyncCycleNano, 0, 0, 0 );
+        // `sync0_shift` is determined by twice the calculation time.
+    	ecrt_slave_config_dc(slave.config, 0x0300, SyncCycleNano, 500000, 0, 0 );
     }
     fprintf(stdout, "\n-- activeWithDC: ecrt_slave config dc is done");
+
     int res = ecrt_master_select_reference_clock(p_master, m_slave_info.at(RefPosition).config );  //error point
     if(res < 0) {
     	fprintf(stdout, "\n-- activeWithDC: Failed to select reference clock:%d", res);
     }
     fprintf(stdout, "\n-- activeWithDC: ecrt_slave reference clock is chosen");
-
-
-    auto ret = ecrt_master_set_send_interval(p_master, SyncCycleNano);
-    if(ret != 0)
-    {
-        printf("-- activeWithDc: Failed to set send interval:%d", ret);
-        return;
-    }
 
     bool activate_status = ecrt_master_activate(p_master);
     if (activate_status){
@@ -305,66 +299,26 @@ void Master::activateWithDC( uint8_t RefPosition, const uint32_t SyncCycleNano )
     }
 }
 
-void Master::SyncEcatMaster()
+void Master::SyncEcatMaster( unsigned long _time )
 {
-	clock_gettime( CLOCK_TO_USE, &tp );
-	ecrt_master_application_time( p_master, TIMESPEC2NS(tp) );
-	ecrt_master_sync_reference_clock( p_master );
+    ecrt_master_application_time( p_master, _time );
+    if(sync_ref_counter){
+        sync_ref_counter--;
+    }
+    else{
+        sync_ref_counter=9;
+        ecrt_master_sync_reference_clock( p_master );
+    }
 	ecrt_master_sync_slave_clocks( p_master );
 }
 
 void Master::deactivate()
 {
-	ecrt_release_master(p_master);
-	p_master = nullptr;
-}
-
-void Master::update(unsigned int domain)
-{
-    // receive process data
-    ecrt_master_receive(p_master);
-
-    DomainInfo* domain_info = m_domain_info[domain];
-
-    ecrt_domain_process(domain_info->domain);
-
-    // check process data state (optional)
-    checkDomainState(domain);
-
-    // check for master and slave state change
-	checkMasterState();
-	checkSlaveStates();
-
-    // read and write process data
-    for (DomainInfo::Entry& entry : domain_info->entries){
-        for (int i=0; i<entry.num_pdos; ++i){
-            (entry.slave)->processData(i, domain_info->domain_pd + entry.offset[i]);
-        }
+    if(p_master != nullptr)
+    {
+        ecrt_release_master(p_master);
+        p_master = nullptr;
     }
-
-    SyncEcatMaster();
-
-    // send process data
-    ecrt_domain_queue(domain_info->domain);
-    ecrt_master_send(p_master);
-}
-
-void Master::TxUpdate(unsigned int domain)
-{
-    DomainInfo* domain_info = m_domain_info[domain];
-
-    // read and write process data
-    for (DomainInfo::Entry& entry : domain_info->entries){
-        for (int i=0; i<entry.num_pdos; ++i){
-            (entry.slave)->processData(i, domain_info->domain_pd + entry.offset[i]);
-        }
-    }
-
-    SyncEcatMaster();
-
-    // send process data
-    ecrt_domain_queue(domain_info->domain);
-    ecrt_master_send(p_master);
 }
 
 void Master::RxUpdate(unsigned int domain)
@@ -379,8 +333,14 @@ void Master::RxUpdate(unsigned int domain)
     checkDomainState(domain);
 
     // check for master and slave state change
-    checkMasterState();
-	checkSlaveStates();
+    if(masterslave_counter){
+        masterslave_counter--;
+    }
+    else{
+        masterslave_counter = 9;
+        checkMasterState();
+        checkSlaveStates();
+    }
 
     // read and write process data
     for (DomainInfo::Entry& entry : domain_info->entries)
@@ -391,6 +351,23 @@ void Master::RxUpdate(unsigned int domain)
     }
 }
 
+void Master::TxUpdate(unsigned int domain, unsigned long _time)
+{
+    DomainInfo* domain_info = m_domain_info[domain];
+
+    // read and write process data
+    for (DomainInfo::Entry& entry : domain_info->entries){
+        for (int i=0; i<entry.num_pdos; ++i){
+            (entry.slave)->processData(i, domain_info->domain_pd + entry.offset[i]);
+        }
+    }
+
+    SyncEcatMaster(_time);
+
+    // send process data
+    ecrt_domain_queue(domain_info->domain);
+    ecrt_master_send(p_master);
+}
 
 void Master::checkDomainState(unsigned int domain)
 {

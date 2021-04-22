@@ -128,12 +128,10 @@ public:
 				initialized_ = true;
 			}
 			else {
-				if(this->mode_of_operation_display_ == MODE_HOMING)
-				{
+				if(this->mode_of_operation_display_ == MODE_HOMING){
 					initialized_ = true;
 				}
-				else
-				{
+				else{
 					initialized_ = false;
 				}
 			}

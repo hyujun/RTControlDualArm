@@ -86,7 +86,7 @@ public:
 	/**
 	 * @brief Start Activate the client
 	 */
-	void activate(void);
+	void activate();
 
 	/**
 	 * @brief Start Activate the client with Distributed Clock Mode
@@ -94,14 +94,14 @@ public:
 	 * @param[in] SyncCycleNano Control Cycle time in nano seconds
 	 * @return void
 	 */
-	void activateWithDC(uint8_t RefPosition, const uint32_t SyncCycleNano);
+	void activateWithDC(uint8_t RefPosition, uint32_t SyncCycleNano);
 
 	/**
 	 * @brief synchronize master with each client
 	 * @param[in] RefTime current time ex) rt_timer_read()
 	 * @return void
 	 */
-	void SyncEcatMaster();
+	void SyncEcatMaster(unsigned long _time);
 
 	/**
 	 * @brief deactivate the client
@@ -109,16 +109,10 @@ public:
 	void deactivate();
 
 	/**
-	 * @brief TPDO, RPDO process execute
-	 * @param[in] domain
-	 */
-	void update(unsigned int domain = 0);
-
-	/**
 	 * @brief RPDO process execute
 	 * @param[in] domain initial value = 0
 	 */
-	void TxUpdate(unsigned int domain = 0);
+	void TxUpdate(unsigned int domain, unsigned long _time);
 
 	/**
 	 * @brief TPDO process execute
@@ -252,6 +246,9 @@ private:
 	unsigned short SUBINDEX_HOMING_LOWSPEED = 0x02; 	/**<Subindex for homing low speed*/
 	unsigned short INDEX_HOMING_OFFSET = 0x607CU;		/**<Index for homing offset*/
 	unsigned short INDEX_HOMING_CURRENT_LIMIT = 0x2020U;/**<Index for homing current limit*/
+
+	unsigned int sync_ref_counter=0;
+	unsigned int masterslave_counter=0;
 };
 
 } /* namespace hyuEcat */

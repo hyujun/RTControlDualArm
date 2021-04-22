@@ -21,12 +21,12 @@ ec_pdo_entry_info_t Elmo_pdo_entries[] = {
         {0x6040, 0x00, 16}, 	    /* Controlword */
         {0x6072, 0x00, 16}, 	    /* Maximal torque */
         {0x6060, 0x00, 8}, 	    /* Modes of operation */
+
 	    {0x6069, 0x00, 32}, 	    /* Velocity sensor actual value */
 	    {0x6064, 0x00, 32}, 	    /* Position actual value */
 	    {0x6077, 0x00, 16}, 	    /* Torque value */
 	    {0x6041, 0x00, 16}, 	    /* Statusword */
 	    {0x6061, 0x00, 8}, 		/* Modes of operation display */
-	    //{0x0000, 0x00, 8}, 		/* Gap */
 };
 
 ec_pdo_info_t Elmo_pdos[] = {
@@ -39,14 +39,23 @@ ec_pdo_info_t Elmo_pdos[] = {
         {0x160B, 1, Elmo_pdo_entries + 3}, /* RPDOB Mapping */
         {0x1a0f, 1, Elmo_pdo_entries + 4}, /* TPD0F Mapping */
         {0x1a02, 4, Elmo_pdo_entries + 5}, /* TPDO2 Mapping */
+
+        //{0x1600, 4, Elmo_pdo_entries + 0}, /* RPDO2 Mapping */
+        //{0x1a00, 5, Elmo_pdo_entries + 4}, /* RPDOD Mapping */
 };
 
 ec_sync_info_t Elmo_syncs[5] = {
     {0, EC_DIR_OUTPUT, 	0, NULL, EC_WD_DISABLE},
     {1, EC_DIR_INPUT, 	0, NULL, EC_WD_DISABLE},
-    {2, EC_DIR_OUTPUT, 	3, Elmo_pdos + 0, EC_WD_DEFAULT},
-	{3, EC_DIR_INPUT, 	2, Elmo_pdos + 3, EC_WD_DEFAULT},
+    {2, EC_DIR_OUTPUT, 	3, Elmo_pdos + 0, EC_WD_ENABLE},
+	{3, EC_DIR_INPUT, 	2, Elmo_pdos + 3, EC_WD_DISABLE},
     {0xff}
+
+    //{0, EC_DIR_OUTPUT, 	0, NULL, EC_WD_DISABLE},
+    //{1, EC_DIR_INPUT, 	0, NULL, EC_WD_DISABLE},
+    //{2, EC_DIR_OUTPUT, 	1, Elmo_pdos + 0, EC_WD_DEFAULT},
+    //{3, EC_DIR_INPUT, 	1, Elmo_pdos + 1, EC_WD_DEFAULT},
+    //{0xff}
 };
 
 

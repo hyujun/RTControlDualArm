@@ -59,7 +59,7 @@ public:
                 if (n > 0)
                 {
                     std::cout << "Received Message from Client: " << buffer << std::endl;
-                    snprintf(szSendMessage, sizeof(szSendMessage), "Re:%s", buffer);
+                    //snprintf(szSendMessage, sizeof(szSendMessage), "Re:%s", buffer);
                     auto nMsgLen = strnlen(szSendMessage, sizeof(szSendMessage)-1);
                     ((Poco::Net::StreamSocket*)&readSock)->sendBytes(szSendMessage, nMsgLen);
                 }

@@ -15,7 +15,7 @@ hyuEcat::EcatElmo ecat_elmo[ELMO_TOTAL];
 // When all slaves or drives reach OP mode,
 // system_ready becomes 1.
 int system_ready = 0;
-int break_flag = 0;
+bool break_flag = false;
 // Global time (beginning from zero)
 double double_gt=0; //real global time
 double double_dt=0;
@@ -42,7 +42,7 @@ void signal_handler(int signum);
 
 // For RT thread management
 unsigned long fault_count=0;
-unsigned long ethercat_time=0;
+unsigned long calculation_time=0;
 unsigned long worst_time=0;
 
 VectorXd ActualPos_Rad;
@@ -85,6 +85,8 @@ int isSlaveInit()
 		return 1;
 	else
 		return 0;
+#else
+	return 1;
 #endif
 }
 
@@ -106,7 +108,7 @@ void RTRArm_run( void *arg )
 	int len = sizeof(LOGGING_PACK);
 #endif
 	RTIME now, previous;
-	RTIME start;
+	RTIME start = rt_timer_read();
 	RTIME p1 = 0;
 	RTIME p3 = 0;
 
@@ -143,7 +145,7 @@ void RTRArm_run( void *arg )
 	while (true)
 	{
 		rt_task_wait_period(nullptr); 	//wait for next cycle
-        if(break_flag == 1)
+        if(break_flag)
             break;
 
 		previous = rt_timer_read();
@@ -174,6 +176,7 @@ void RTRArm_run( void *arg )
                         ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlMotion );
 
 			//if(JointState == MOVE_CUSTOMIZE1)
+
             //    hand_motion == 0x11;
             //else if(JointState == MOVE_CUSTOMIZE9)
             //    hand_motion == 0x00;
@@ -207,7 +210,7 @@ void RTRArm_run( void *arg )
 			}
 		}
 #if defined(_ECAT_ON_)
-        ecatmaster.TxUpdate();
+        ecatmaster.TxUpdate(0, rt_timer_read());
 #endif
 		// For EtherCAT performance statistics
 		p1 = p3;
@@ -218,17 +221,17 @@ void RTRArm_run( void *arg )
 		{
             double_dt = (static_cast<double>(p3 - p1))*1e-3; 	// us
 			double_gt = (static_cast<double>(p3 - start))*1e-9; // s
-			ethercat_time = (long)(now - previous);
+            calculation_time = (long)(now - previous);
 
-            system_ready=1;	//all drives have been done
+            system_ready = 1;	//all drives have been done
 
-            if ( worst_time<ethercat_time )
-                worst_time=ethercat_time;
+            if ( worst_time < calculation_time )
+                worst_time = calculation_time;
 
-            if( ethercat_time >= cycle_ns )
+            if( calculation_time >= cycle_ns )
             {
                 fault_count++;
-                worst_time=0;
+                worst_time = 0;
             }
 		}
 		else
@@ -241,7 +244,7 @@ void RTRArm_run( void *arg )
 			system_ready = 0;
 			double_gt = 0;
 			worst_time = 0;
-			ethercat_time = 0;
+            calculation_time = 0;
 			start = rt_timer_read();
 		}
 	}
@@ -264,14 +267,14 @@ void print_run(void *arg)
 	while (true)
 	{
 		rt_task_wait_period(nullptr); //wait for next cycle
-        if(break_flag==1)
+        if(break_flag)
             break;
 
 		if ( system_ready )
 		{
 			rt_printf("Time=%0.2fs\n", double_gt);
-			rt_printf("Calculation= %0.2fus, DesisredTask_dt=%0.2fus, WorstCalculation= %0.2fus, RealTimeFault=%d\n",
-					static_cast<double>(ethercat_time)*1e-3, double_dt, static_cast<double>(worst_time)*1e-3, fault_count);
+			rt_printf("Calculation= %0.2fus, DesisredTask_dt=%0.2fus, WorstCalculation= %0.2fus, Fault=%d\n",
+					static_cast<double>(calculation_time)*1e-3, double_dt, static_cast<double>(worst_time)*1e-3, fault_count);
 
 			for(int j=0; j<DUAL_ARM_DOF; ++j)
 			{
@@ -343,7 +346,7 @@ void tcpip_run(void *arg)
 	while(true)
 	{
 		rt_task_wait_period(nullptr);
-		if(break_flag==1)
+		if(break_flag)
 		    break;
 
         server.TXRXUpdate();
@@ -410,29 +413,30 @@ void event_run(void *arg)
 void signal_handler(int signum)
 {
 	rt_printf("\nSignal Interrupt: %d", signum);
+    break_flag=true;
+
+#if defined(_KEYBOARD_ON_)
+    rt_printf("\nEvent RTTask Closing....");
+    rt_task_delete(&event_task);
+    rt_printf("\nEvent RTTask Closing Success....");
+#endif
+
+#if defined(_TCPIP_ON_)
+    rt_printf("\nTCPIP RTTask Closing....");
+    rt_task_delete(&tcpip_task);
+    rt_printf("\nTCPIP RTTask Closing Success....");
+#endif
 
     rt_printf("\nConsolPrint RTTask Closing....");
     rt_task_delete(&print_task);
     rt_printf("\nConsolPrint RTTask Closing Success....");
 
-#if defined(_TCPIP_ON_)
-	rt_printf("\nTCPIP RTTask Closing....");
-    rt_task_delete(&tcpip_task);
-    rt_printf("\nTCPIP RTTask Closing Success....");
-#endif
-
-#if defined(_ECAT_ON_)
-	rt_printf("\nEtherCAT RTTask Closing....");
+	rt_printf("\nControl RTTask Closing....");
 	rt_task_delete(&RTArm_task);
-	rt_printf("\nEtherCAT RTTask Closing Success....");
-#endif
+	rt_printf("\nControl RTTask Closing Success....");
 
-    rt_printf("\nEvent RTTask Closing....");
-    rt_task_delete(&event_task);
-    rt_printf("\nEvent RTTask Closing Success....");
-
-    rt_printf("\n\n\t !!RT Arm Client System Stopped!! \n");
-    break_flag=1;
+    rt_printf("\n\n\t !!RT-DualArm Client System Stopped!! \n");
+    ecatmaster.deactivate();
 }
 
 /****************************************************************************/
@@ -471,25 +475,24 @@ int main(int argc, char **argv)
 	// RTArm_task: create and start
 	rt_printf("\n-- Now running rt tasks ...\n");
 
-    rt_task_create(&print_task, "Console_proc", 0, 70, 0);
+    rt_task_create(&print_task, "Console_proc", 0, 20, 0);
     rt_task_start(&print_task, &print_run, nullptr);
 
-#if defined(_ECAT_ON_)
-	rt_task_create(&RTArm_task, "Control_proc", 1024*1024*5, 95, 0); // MUST SET at least 4MB stack-size (MAXIMUM Stack-size ; 8192 kbytes)
+	rt_task_create(&RTArm_task, "Control_proc", 1024*1024*4, 95, 0); // MUST SET at least 4MB stack-size (MAXIMUM Stack-size ; 8192 kbytes)
 	rt_task_start(&RTArm_task, &RTRArm_run, nullptr);
-#endif
 
 #if defined(_TCPIP_ON_)
-	rt_task_create(&tcpip_task, "TCPIP_proc", 0, 85, 0);
+	rt_task_create(&tcpip_task, "TCPIP_proc", 0, 40, 0);
 	rt_task_start(&tcpip_task, &tcpip_run, nullptr);
 #endif
 
+#if defined(_KEYBOARD_ON_)
     rt_task_create(&event_task, "Event_proc", 0, 80, 0);
     rt_task_start(&event_task, &event_run, nullptr);
-
+#endif
 	// Must pause here
 	pause();
-
+    // task delete check
     ecatmaster.deactivate();
 
     return 0;

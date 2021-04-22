@@ -45,13 +45,14 @@
 #include "KDL/SerialManipulator.h"
 #include "Network/SocketHandler.h"
 
-#define WAKEUP_TIME				(5)				/**<Initial waiting time*/
-#define NSEC_PER_SEC            (1000000000L)	/**<Expression of second in nano second*/
+#define WAKEUP_TIME     (5)				/**<Initial waiting time*/
+#define NSEC_PER_SEC    (1000000000L)	/**<Expression of second in nano second*/
 
-#define _DEBUG_ 			/**<Debug Print Parameter*/
+//#define _DEBUG_ 			/**<Debug Print Parameter*/
 #define _ECAT_ON_ 			/**<EtherCAT device enable Parameter*/
 #define _TCPIP_ON_
 //#define _PLOT_ON_
+//#define _KEYBOARD_ON_
 
 typedef unsigned int UINT32;	/**<typedef uint32_t*/
 typedef int64_t		INT64;		/**<typedef uint64_t*/

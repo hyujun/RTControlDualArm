@@ -3,8 +3,8 @@ include(FindPackageHandleStandardArgs)
 
 set(Etherlab_HINTS
     /opt/etherlab
-    /usr
-    /usr/local
+    /usr/etherlab
+#    /usr/local
 )
 
 if(NOT Etherlab_ROOT_DIR)
