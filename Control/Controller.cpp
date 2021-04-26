@@ -51,36 +51,18 @@ Controller::Controller(std::shared_ptr<SerialManipulator> Manipulator)
     GainWeightFactor.resize(m_Jnum);
     GainWeightFactor.setConstant(7.0);
 
-    dq.setZero(16);
-    dqdot.setZero(16);
-    dqddot.setZero(16);
-    dq_old.setZero(16);
+    dq.setZero(m_Jnum);
+    dqdot.setZero(m_Jnum);
+    dqddot.setZero(m_Jnum);
+    dq_old.setZero(m_Jnum);
 
 #else
     GainWeightFactor.setZero(m_Jnum);
-	GainWeightFactor(0) = 20.0;
-	GainWeightFactor(1) = 23.0;
-
-	GainWeightFactor(2) = 11.5;
-	GainWeightFactor(3) = 20.5; //8
-	GainWeightFactor(4) = 11.0;
-	GainWeightFactor(5) = 9.0;
-	GainWeightFactor(6) = 5.5;
-	GainWeightFactor(7) = 5.5;
-	GainWeightFactor(8) = 5.5;
-
-	GainWeightFactor(9) = 11.5;
-	GainWeightFactor(10) = 11.5; //8
-	GainWeightFactor(11) = 11.5;
-	GainWeightFactor(12) = 9.0;
-	GainWeightFactor(13) = 5.5;
-	GainWeightFactor(14) = 5.5;
-	GainWeightFactor(15) = 5.5;
+    GainWeightFactor.setConstant(10.0);
 
 	Kp = GainWeightFactor*KpBase;
 	Kd = GainWeightFactor*KdBase;
 	Ki = GainWeightFactor*KiBase;
-	//K_Hinf = m_HinfBase;
 
 	dq.resize(m_Jnum);
 	dqdot.resize(m_Jnum);
@@ -184,7 +166,9 @@ void Controller::PDGravController( const VectorXd &_q, const VectorXd &_qdot, co
     _Toq = G;
 	_Toq.noalias() += Kp.cwiseProduct(e);
     _Toq.noalias() += Kd.cwiseProduct(e_dev);
-    //_Toq.noalias() += FrictionTorque;
+#if !defined(__SIMULATION__)
+    _Toq.noalias() += FrictionTorque;
+#endif
 }
 
 void Controller::InvDynController(const VectorXd &_q,
@@ -213,7 +197,9 @@ void Controller::InvDynController(const VectorXd &_q,
 	u0.noalias() += Kp.cwiseProduct(e);
     _Toq = G;
     _Toq.noalias() += M*u0;
+#if !defined(__SIMULATION__)
     //_Toq.noalias() += FrictionTorque;
+#endif
 }
 
 void Controller::TaskInvDynController(const VectorXd &_dx,
@@ -348,26 +334,47 @@ void Controller::CLIKTaskController( const VectorXd &_q,
                                      const double &_dt,
                                      const int mode )
 {
-    TaskError(_dx, _dxdot, _qdot, eTask, edotTask);
 
-    Vector_temp = _dxdot;
-    Vector_temp.noalias() += KpTask.cwiseProduct(eTask);
-
-	dq.setZero(16);
-	dqdot.setZero(16);
-	dqddot.setZero(16);
+    dq.setZero(16);
+    dqdot.setZero(16);
+    dqddot.setZero(16);
 
     pManipulator->pKin->GetAnalyticJacobian(AnalyticJacobian);
     pManipulator->pKin->GetpinvJacobian(pInvJacobian);
 
-    Matrix_temp = Eigen::MatrixXd::Identity(16,16);
-    Matrix_temp += -pInvJacobian*AnalyticJacobian;
+    if( mode == 7 )
+    {
+        TaskRelativeError(_dx, _dxdot, _qdot, eTask, edotTask);
+
+        pManipulator->pKin->GetRelativeJacobian(RelJacobian);
+
+        AJacwithRel = AnalyticJacobian;
+        AJacwithRel.block(6,0,6,16) = RelJacobian;
+
+        pManipulator->pKin->GetDampedpInvJacobian(RelJacobian, dpInvRelJacobian);
+
+        Vector_temp = _dxdot;
+        Vector_temp.noalias() += KpTask.cwiseProduct(eTask);
+    }
+    else
+    {
+        TaskError(_dx, _dxdot, _qdot, eTask, edotTask);
+
+        Vector_temp = _dxdot;
+        Vector_temp.noalias() += KpTask.cwiseProduct(eTask);
+
+        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp += -pInvJacobian*AnalyticJacobian;
+    }
+
 
     if(mode == 1) // jacobian pseudoinverse
     {
         alpha = 2.0;
         pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
 
+        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp += -pInvJacobian*AnalyticJacobian;
         dqdot.noalias() += pInvJacobian*Vector_temp;
         dqdot.noalias() += Matrix_temp*q0dot;
     }
@@ -376,6 +383,8 @@ void Controller::CLIKTaskController( const VectorXd &_q,
         alpha = 2.0;
         pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
 
+        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp += -pInvJacobian*AnalyticJacobian;
         dqdot.noalias() += AnalyticJacobian.transpose()*Vector_temp;
         dqdot.noalias() += Matrix_temp*q0dot;
     }
@@ -385,6 +394,8 @@ void Controller::CLIKTaskController( const VectorXd &_q,
         pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
         pManipulator->pKin->GetDampedpInvJacobian(DampedpInvJacobian);
 
+        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp += -pInvJacobian*AnalyticJacobian;
         dqdot.noalias() += DampedpInvJacobian*Vector_temp;
         dqdot.noalias() += Matrix_temp*q0dot;
     }
@@ -394,6 +405,8 @@ void Controller::CLIKTaskController( const VectorXd &_q,
         pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
         pManipulator->pKin->GetScaledTransJacobian(ScaledTransJacobian);
 
+        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp += -pInvJacobian*AnalyticJacobian;
         dqdot.noalias() += ScaledTransJacobian*Vector_temp;
         dqdot.noalias() += Matrix_temp*q0dot;
     }
@@ -403,6 +416,8 @@ void Controller::CLIKTaskController( const VectorXd &_q,
         pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
         pManipulator->pKin->GetBlockpInvJacobian(BlockpInvJacobian);
 
+        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp += -BlockpInvJacobian*AnalyticJacobian;
         dqdot.noalias() += BlockpInvJacobian*Vector_temp;
         dqdot.noalias() += Matrix_temp*q0dot;
     }
@@ -412,8 +427,14 @@ void Controller::CLIKTaskController( const VectorXd &_q,
         pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
         pManipulator->pKin->GetWeightDampedpInvJacobian(Vector_temp, WdampedpInvJacobian);
 
+        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp += -WdampedpInvJacobian*AnalyticJacobian;
         dqdot.noalias() += WdampedpInvJacobian*Vector_temp;
         //dqdot.noalias() += Matrix_temp*q0dot;
+    }
+    else if(mode == 7) // relative jacobian
+    {
+        dqdot.noalias() += dpInvRelJacobian*Vector_temp;
     }
     else
     {
@@ -524,22 +545,7 @@ void Controller::TaskImpedanceController(const VectorXd &_q, const VectorXd &_qd
 
 void Controller::FrictionIdentification( const VectorXd &_q, const VectorXd &_qdot, VectorXd &_dq, VectorXd &_dqdot, VectorXd &_dqddot, VectorXd &_Toq, const double &gt )
 {
-	GainWeightFactor(0) = 7.0;
-	GainWeightFactor(1) = 4.0;
-
-	GainWeightFactor(2) = 2.0;
-	GainWeightFactor(3) = 1.5; //8
-	GainWeightFactor(4) = 3.0;
-	GainWeightFactor(5) = 1.0;
-	GainWeightFactor(6) = 0.8;
-	GainWeightFactor(7) = 1.0;
-
-	GainWeightFactor(8) = 2.0;
-	GainWeightFactor(9) = 1.5; //8
-	GainWeightFactor(10) = 3.0;
-	GainWeightFactor(11) = 1.0;
-	GainWeightFactor(12) = 0.8;
-	GainWeightFactor(13) = 1.0;
+    GainWeightFactor(4.0);
 
 	Kp = GainWeightFactor.cwiseProduct(Kp);
 	Kd = GainWeightFactor.cwiseProduct(Kd);
@@ -678,13 +684,22 @@ void Controller::FrictionIdentification( const VectorXd &_q, const VectorXd &_qd
 
 	FrictionCompensator(_qdot, _dqdot);
 
-	_Toq.setZero(m_Jnum);
 	//ToqOut = M.diagonal().cwiseProduct(dqddot) + Kp.cwiseProduct(e) + Kd.cwiseProduct(e_dev) + G + FrictionTorque;
 	//ToqOut = M.diagonal().cwiseProduct(dqddot) + Kp.cwiseProduct(e) + Kd.cwiseProduct(e_dev) + G;
-    _Toq.noalias() += Kp.cwiseProduct(e) + Kd.cwiseProduct(e_dev) + G;
+
+	VectorXd u0;
+    u0.setZero(m_Jnum);
+    u0.noalias() += _dqddot;
+    u0.noalias() += Kd.cwiseProduct(e_dev);
+    u0.noalias() += Kp.cwiseProduct(e);
+
+    _Toq.setZero(m_Jnum);
+    _Toq = G;
+    _Toq.noalias() += M*u0;
+    _Toq.noalias() += FrictionTorque;
 }
 
-void Controller::FrictionCompensator( const VectorXd &_qdot,  const VectorXd &_dqdot )
+void Controller::FrictionCompensator( const VectorXd &_qdot, const VectorXd &_dqdot )
 {
 	FrictionTorque.setZero(m_Jnum);
 

@@ -272,7 +272,7 @@ void Master::activateWithDC( uint8_t RefPosition, uint32_t SyncCycleNano )
     for (SlaveInfo& slave : m_slave_info)
     {
         // `sync0_shift` is determined by twice the calculation time.
-    	ecrt_slave_config_dc(slave.config, 0x0300, SyncCycleNano, 500000, 0, 0 );
+    	ecrt_slave_config_dc(slave.config, 0x0300, SyncCycleNano, 400000, 0, 0 );
     }
     fprintf(stdout, "\n-- activeWithDC: ecrt_slave config dc is done");
 
@@ -362,10 +362,9 @@ void Master::TxUpdate(unsigned int domain, unsigned long _time)
         }
     }
 
-    SyncEcatMaster(_time);
-
     // send process data
     ecrt_domain_queue(domain_info->domain);
+    SyncEcatMaster(_time);
     ecrt_master_send(p_master);
 }
 

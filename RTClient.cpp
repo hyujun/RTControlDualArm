@@ -17,8 +17,19 @@ hyuEcat::EcatElmo ecat_elmo[ELMO_TOTAL];
 int system_ready = 0;
 bool break_flag = false;
 // Global time (beginning from zero)
-double double_gt=0; //real global time
-double double_dt=0;
+double double_gt=0.0; //real global time
+double double_dt=0.0;
+
+// For RT thread management
+unsigned long fault_count=0;
+unsigned long down_count=0;
+unsigned long calculation_time=0;
+unsigned long worst_time=0;
+
+double double_dt_tcp=0.0;
+unsigned long fault_count_tcp=0;
+unsigned long calculation_time_tcp=0;
+unsigned long worst_time_tcp=0;
 
 // EtherCAT Data (Dual-Arm)
 UINT16	        StatusWord[DUAL_ARM_DOF] = {0,};
@@ -40,11 +51,6 @@ RT_QUEUE msg_event;
 
 void signal_handler(int signum);
 
-// For RT thread management
-unsigned long fault_count=0;
-unsigned long calculation_time=0;
-unsigned long worst_time=0;
-
 VectorXd ActualPos_Rad;
 VectorXd ActualVel_Rad;
 VectorXd TargetPos_Rad;
@@ -55,10 +61,7 @@ VectorXd TargetToq;
 VectorXd TargetPos_Task;
 VectorXd TargetVel_Task;
 VectorXd TargetAcc_Task;
-
-static int hand_motion;
-static int hand_state;
-
+VectorXd ActualPos_Task;
 int isSlaveInit()
 {
 #if defined(_ECAT_ON_)
@@ -113,10 +116,10 @@ void RTRArm_run( void *arg )
 	RTIME p3 = 0;
 
 	short MaxTor = 1200;
-	hand_motion = 0x00;
 
-	uint16_t ControlMotion = SYSTEM_BEGIN;
-	uint16_t JointState = SYSTEM_BEGIN;
+	unsigned char ControlMotion = SYSTEM_BEGIN;
+    unsigned char JointState = SYSTEM_BEGIN;
+    unsigned char ControlMode = CTRLMODE_IDY_JOINT;
 
     ActualPos_Rad.setZero(DUAL_ARM_DOF);
     ActualVel_Rad.setZero(DUAL_ARM_DOF);
@@ -128,6 +131,7 @@ void RTRArm_run( void *arg )
     TargetPos_Task.setZero(12);
     TargetVel_Task.setZero(12);
     TargetAcc_Task.setZero(12);
+    ActualPos_Task.setZero(12);
 	VectorXd finPos = VectorXd::Zero(DUAL_ARM_DOF);
 
 	std::shared_ptr<SerialManipulator> DualArm = std::make_shared<SerialManipulator>();
@@ -135,6 +139,15 @@ void RTRArm_run( void *arg )
     std::unique_ptr<HYUControl::Motion> motion = std::make_unique<HYUControl::Motion>(DualArm);
 
 	DualArm->UpdateManipulatorParam();
+    int len, err;
+    void *msg;
+
+    TCP_Packet_Task packet_task;
+    err = rt_queue_bind(&msg_tcpip, "tcp_queue", TM_NONBLOCK);
+    if(err)
+    {
+        fprintf(stderr, "Failed to queue bind, code %d\n", err);
+    }
 
 	/* Arguments: &task (NULL=self),
 	 *            start time,
@@ -167,30 +180,42 @@ void RTRArm_run( void *arg )
 
 		if( system_ready )
 		{
-			DualArm->pKin->PrepareJacobian(ActualPos_Rad);
-            DualArm->pDyn->PrepareDynamics(ActualPos_Rad, ActualVel_Rad);
+			DualArm->pKin->PrepareJacobian( ActualPos_Rad );
+            DualArm->pDyn->PrepareDynamics( ActualPos_Rad, ActualVel_Rad );
 			DualArm->pKin->GetForwardKinematics( ForwardPos, ForwardOri, NumChain );
+            ActualPos_Task.segment(0,3) = ForwardOri[0];
+            ActualPos_Task.segment(3,3) = ForwardPos[0];
+            ActualPos_Task.segment(6,3) = ForwardOri[1];
+            ActualPos_Task.segment(9,3) = ForwardPos[1];
 
-			DualArm->StateMachine( ActualPos_Rad, ActualVel_Rad, finPos, JointState, ControlMotion );
-			motion->JointMotion( TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad,finPos,
-                        ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlMotion );
+            if((len = rt_queue_receive(&msg_tcpip, &msg, TM_NONBLOCK)) > 0)
+            {
+                memcpy(&packet_task.data, msg, sizeof(TCP_Packet_Task));
+                printf("received message> len=%d bytes, ptr=%p, index1=0x%02X, index2=0x%02X, subindex=0x%02X\n",
+                       len, msg, packet_task.info.index1, packet_task.info.index2, packet_task.info.subindex);
+                ControlMode = packet_task.info.index1;
+                ControlMotion = packet_task.info.subindex;
+                rt_queue_free(&msg_tcpip, msg);
+            }
 
-			//if(JointState == MOVE_CUSTOMIZE1)
-
-            //    hand_motion == 0x11;
-            //else if(JointState == MOVE_CUSTOMIZE9)
-            //    hand_motion == 0x00;
-
-			if( ControlMotion == MOVE_FRICTION )
+			if( ControlMode == CTRLMODE_FRICTIONID )
             {
                 Control->FrictionIdentification( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_gt );
             }
-			else if( ControlMotion == MOVE_CLIK_JOINT )
+			else if( ControlMode == CTRLMODE_CLIK )
             {
+                motion->TaskMotion( TargetPos_Task, TargetVel_Task, TargetAcc_Task, finPos, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlMotion );
                 Control->CLIKTaskController( ActualPos_Rad, ActualVel_Rad, TargetPos_Task, TargetVel_Task, TargetToq, double_dt, 6 );
+            }
+			else if( ControlMode == CTRLMODE_TASK)
+            {
+                motion->TaskMotion( TargetPos_Task, TargetVel_Task, TargetAcc_Task, finPos, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlMotion );
+			    Control->TaskInvDynController(TargetPos_Task, TargetVel_Task, TargetAcc_Task, ActualPos_Rad, ActualVel_Rad, TargetToq, double_dt, 1);
             }
 			else
 			{
+                DualArm->StateMachine( ActualPos_Rad, ActualVel_Rad, finPos, JointState, ControlMotion );
+                motion->JointMotion( TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad,finPos, ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlMotion );
 				Control->InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_dt );
 			}
 
@@ -199,9 +224,9 @@ void RTRArm_run( void *arg )
 			//write the motor data
 			for(int j=0; j < DUAL_ARM_DOF; ++j)
 			{
-				if(double_gt >= 1.0 && JointState != SYSTEM_BEGIN)
+				if( double_gt >= 0.1 /*&& JointState != SYSTEM_BEGIN*/ )
 				{
-					//ecat_elmo[j].writeTorque(TargetTor[j]);
+					ecat_elmo[j].writeTorque(TargetTor[j]);
 				}
 				else
 				{
@@ -217,7 +242,7 @@ void RTRArm_run( void *arg )
 		p3 = rt_timer_read();
 		now = rt_timer_read();
 
-		if ( isSlaveInit() == 1 )
+		if ( isSlaveInit() )
 		{
             double_dt = (static_cast<double>(p3 - p1))*1e-3; 	// us
 			double_gt = (static_cast<double>(p3 - start))*1e-9; // s
@@ -241,6 +266,9 @@ void RTRArm_run( void *arg )
 				//signal_handler(1);
 			}
 
+			if(system_ready)
+			    down_count++;
+
 			system_ready = 0;
 			double_gt = 0;
 			worst_time = 0;
@@ -248,6 +276,96 @@ void RTRArm_run( void *arg )
 			start = rt_timer_read();
 		}
 	}
+    rt_queue_unbind(&msg_tcpip);
+}
+
+void tcpip_run(void *arg)
+{
+    RTIME p1, p2, p3;
+
+    PacketHandler packet;
+    Poco::Net::SocketAddress server_addr(SERVER_PORT);
+    Poco::Net::ServerSocket server_sock(server_addr);
+
+    Poco::Net::Socket::SocketList connectedSockList;
+    connectedSockList.push_back(server_sock);
+
+    TCP_Packet_Task packet_task;
+    TCP_Packet_Task packet_task_send;
+    void *msg;
+
+    RTIME tcp_cycle_ns = 5000e3;
+    rt_task_set_periodic(nullptr, TM_NOW, tcp_cycle_ns); //ms
+    while(true)
+    {
+        rt_task_wait_period(nullptr);
+        if(break_flag)
+            break;
+
+        p1 = rt_timer_read();
+        Poco::Net::Socket::SocketList readList(connectedSockList.begin(), connectedSockList.end());
+        Poco::Net::Socket::SocketList writeList(connectedSockList.begin(), connectedSockList.end());
+        Poco::Net::Socket::SocketList exceptList(connectedSockList.begin(), connectedSockList.end());
+
+        Poco::Timespan timeout;
+        if( Poco::Net::Socket::select(readList, writeList, exceptList, timeout) != 0 && system_ready )
+        {
+            Poco::Net::Socket::SocketList delSockList;
+
+            for (auto& readSock : readList)
+            {
+                if (server_sock == readSock)
+                {
+                    auto newSock = server_sock.acceptConnection();
+                    connectedSockList.push_back(newSock);
+                    //std::cout << "New Client connected" << std::endl;
+                }
+                else
+                {
+                    auto n = ((Poco::Net::StreamSocket*)&readSock)->receiveBytes(packet_task.data, sizeof(TCP_Packet_Task));
+                    if (n > 0)
+                    {
+                        packet_task_send = packet_task;
+                        msg = rt_queue_alloc(&msg_tcpip, sizeof(TCP_Packet_Task));
+                        if(msg == nullptr)
+                            rt_printf("rt_queue_alloc Failed to allocate\n");
+                        memcpy(msg, &packet_task.data, sizeof(TCP_Packet_Task));
+                        rt_queue_send(&msg_tcpip, msg, sizeof(TCP_Packet_Task), Q_NORMAL);
+
+                        ((Poco::Net::StreamSocket*)&readSock)->sendBytes(packet_task_send.data, sizeof(TCP_Packet_Task));
+                    }
+                    else
+                    {
+                        //std::cout << "Client Disconnected" << std::endl;
+                        delSockList.push_back(readSock);
+                    }
+                }
+            }
+
+            for (auto& delSock : delSockList)
+            {
+                auto delIter = std::find_if(connectedSockList.begin(),connectedSockList.end(),[&delSock](auto& sock){return delSock == sock ? true : false;});
+                if (delIter != connectedSockList.end())
+                {
+                    connectedSockList.erase(delIter);
+                    //std::cout << "Remove the Client from connectedSockList" << std::endl;
+                }
+            }
+        }
+        p3 = p2;
+        p2 = rt_timer_read();
+        calculation_time_tcp = (long)(p2 - p1);
+        double_dt_tcp = (static_cast<double>(p2 - p3))*1e-3; 	// us
+
+        if ( worst_time_tcp < calculation_time_tcp )
+            worst_time_tcp = calculation_time_tcp;
+
+        if( calculation_time_tcp >= tcp_cycle_ns )
+        {
+            fault_count_tcp++;
+            worst_time_tcp = 0;
+        }
+    }
 }
 
 void print_run(void *arg)
@@ -273,9 +391,12 @@ void print_run(void *arg)
 		if ( system_ready )
 		{
 			rt_printf("Time=%0.2fs\n", double_gt);
-			rt_printf("Calculation= %0.2fus, DesisredTask_dt=%0.2fus, WorstCalculation= %0.2fus, Fault=%d\n",
-					static_cast<double>(calculation_time)*1e-3, double_dt, static_cast<double>(worst_time)*1e-3, fault_count);
-
+			rt_printf("DesiredTask=%0.2fus, Calculation= %0.2fus, WorstCalculation= %0.2fus, RTFault=%d, EcatDown=%d\n",
+                      double_dt, static_cast<double>(calculation_time)*1e-3, static_cast<double>(worst_time)*1e-3, fault_count, down_count);
+#if defined(_TCPIP_ON_)
+            rt_printf("DesiredTask(tcp)=%0.2fus, Calculation(tcp)= %0.2fus, WorstCalculation(tcp)= %0.2fus, RTFault(tcp)=%d\n",
+                      double_dt_tcp, static_cast<double>(calculation_time_tcp)*1e-3, static_cast<double>(worst_time_tcp)*1e-3, fault_count_tcp);
+#endif
 			for(int j=0; j<DUAL_ARM_DOF; ++j)
 			{
 				rt_printf("\t \nID: %d,", j+1);
@@ -286,20 +407,20 @@ void print_run(void *arg)
 				rt_printf(" ModeOfOp: %d,",			ModeOfOperationDisplay[j]);
 				//rt_printf("\n");
 #endif
-				rt_printf("\tActPos(Deg): %0.2lf,", 	ActualPos_Rad(j)*RADtoDEG);
-				//rt_printf("\tTarPos(Deg): %0.2lf,",	TargetPos_Rad(j))*RADtoDEG);
-				rt_printf("\tActPos(inc): %d,", 		ActualPos[j]);
+				rt_printf("\tActPos(Deg): %0.2lf,", ActualPos_Rad(j)*RADtoDEG);
+				rt_printf("\tTarPos(Deg): %0.2lf,", TargetPos_Rad(j)*RADtoDEG);
+				//rt_printf("\tActPos(inc): %d,", ActualPos[j]);
 				//rt_printf("\n");
-				rt_printf("\tActVel(Deg/s): %0.1lf,", 	ActualVel_Rad(j)*RADtoDEG);
-				//rt_printf("\tTarVel(Deg/s): %0.1lf,",	TargetVel_Rad(j)*RADtoDEG);
-				//rt_printf("\tActVel(inc/s): %d,", 	ActualVel[j]);
+				rt_printf("\tActVel(Deg/s): %0.1lf,", ActualVel_Rad(j)*RADtoDEG);
+				rt_printf("\tTarVel(Deg/s): %0.1lf,", TargetVel_Rad(j)*RADtoDEG);
+				//rt_printf("\tActVel(inc/s): %d,", ActualVel[j]);
 				//rt_printf("\n");
-				rt_printf("\tActTor(%): %d,",			ActualTor[j]);
-				rt_printf("\tCtrlTor(Nm): %0.1lf", 	TargetToq(j));
-				//rt_printf("\tTarTor(%): %d", 			TargetTor[j]);
+				rt_printf("\tActTor(%): %d,", ActualTor[j]);
+				rt_printf("\tCtrlTor(Nm): %0.1lf", TargetToq(j));
+				//rt_printf("\tTarTor(%): %d", TargetTor[j]);
 				//rt_printf("\n");
 			}
-
+            rt_printf("\n");
 			rt_printf("\nForward Kinematics -->");
 			for(int cNum = 0; cNum < NumChain; cNum++)
 			{
@@ -333,23 +454,6 @@ void print_run(void *arg)
 				rt_printf("\n");
 			}
 		}
-	}
-}
-
-void tcpip_run(void *arg)
-{
-	Poco::Net::SocketAddress server_addr(SERVER_PORT);
-    Poco::Net::ServerSocket server_sock(server_addr);
-    SocketHandler server(server_sock);
-
-	rt_task_set_periodic(nullptr, TM_NOW, 10e6); //ms
-	while(true)
-	{
-		rt_task_wait_period(nullptr);
-		if(break_flag)
-		    break;
-
-        server.TXRXUpdate();
 	}
 }
 
@@ -427,9 +531,11 @@ void signal_handler(int signum)
     rt_printf("\nTCPIP RTTask Closing Success....");
 #endif
 
+#if defined(_PRINT_ON_)
     rt_printf("\nConsolPrint RTTask Closing....");
     rt_task_delete(&print_task);
     rt_printf("\nConsolPrint RTTask Closing Success....");
+#endif
 
 	rt_printf("\nControl RTTask Closing....");
 	rt_task_delete(&RTArm_task);
@@ -442,9 +548,6 @@ void signal_handler(int signum)
 /****************************************************************************/
 int main(int argc, char **argv)
 {
-    // Perform auto-init of rt_print buffers if the task doesn't do so
-    rt_print_auto_init(1);
-
     signal(SIGHUP, signal_handler);
 	signal(SIGINT, signal_handler);
     signal(SIGQUIT, signal_handler);
@@ -457,8 +560,10 @@ int main(int argc, char **argv)
 	/* Avoids memory swapping for this program */
 	mlockall( MCL_CURRENT | MCL_FUTURE );
 
+    // Perform auto-init of rt_print buffers if the task doesn't do so
+    rt_print_auto_init(1);
+
 	// TO DO: Specify the cycle period (cycle_ns) here, or use default value
-	//cycle_ns = 250e3; // nanosecond -> 4kHz
 	//cycle_ns = 500e3; // nanosecond -> 2kHz
 	cycle_ns = 1000e3; // nanosecond -> 1kHz
 	//cycle_ns = 1250e3; // nanosecond -> 800Hz
@@ -475,16 +580,19 @@ int main(int argc, char **argv)
 	// RTArm_task: create and start
 	rt_printf("\n-- Now running rt tasks ...\n");
 
+    rt_queue_create(&msg_tcpip, "tcp_queue", sizeof(TCP_Packet_Task)*5, 40, Q_FIFO|Q_SHARED);
+#if defined(_TCPIP_ON_)
+    rt_task_create(&tcpip_task, "TCPIP_proc", 0, 30, 0);
+    rt_task_start(&tcpip_task, &tcpip_run, nullptr);
+#endif
+
+#if defined(_PRINT_ON_)
     rt_task_create(&print_task, "Console_proc", 0, 20, 0);
     rt_task_start(&print_task, &print_run, nullptr);
-
-	rt_task_create(&RTArm_task, "Control_proc", 1024*1024*4, 95, 0); // MUST SET at least 4MB stack-size (MAXIMUM Stack-size ; 8192 kbytes)
-	rt_task_start(&RTArm_task, &RTRArm_run, nullptr);
-
-#if defined(_TCPIP_ON_)
-	rt_task_create(&tcpip_task, "TCPIP_proc", 0, 40, 0);
-	rt_task_start(&tcpip_task, &tcpip_run, nullptr);
 #endif
+
+	rt_task_create(&RTArm_task, "Control_proc", 1024*1024*4, 99, 0); // MUST SET at least 4MB stack-size (MAXIMUM Stack-size ; 8192 kbytes)
+	rt_task_start(&RTArm_task, &RTRArm_run, nullptr);
 
 #if defined(_KEYBOARD_ON_)
     rt_task_create(&event_task, "Event_proc", 0, 80, 0);

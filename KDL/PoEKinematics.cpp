@@ -293,6 +293,22 @@ namespace HYUMotionKinematics {
         _DampedpInvJacobian = mDampedpInvJacobian;
     }
 
+    void PoEKinematics::DampedpInvJacobian(MatrixXd &_TargetMatrix, const double sigma)
+    {
+        Mat_Tmp.setZero(12,12);
+        Mat_Tmp.noalias() += _TargetMatrix*_TargetMatrix.transpose();
+        Mat_Tmp.noalias() += sigma*Eigen::Matrix<double, 12, 12>::Identity();
+
+        mDampedpInvJacobian.setZero( m_DoF,6*m_NumChain );
+        mDampedpInvJacobian.noalias() += _TargetMatrix.transpose()*Mat_Tmp.inverse();
+    }
+
+    void PoEKinematics::GetDampedpInvJacobian(MatrixXd &_TargetMat, MatrixXd &_DampedpInvJacobian)
+    {
+        DampedpInvJacobian(_TargetMat, 0.0025);
+        _DampedpInvJacobian = mDampedpInvJacobian;
+    }
+
     void PoEKinematics::BlockpInvJacobian( Matrix<double, 6, Dynamic> &_Jacobian1, Matrix<double, 6, Dynamic> &_Jacobian2 )
     {
         MatrixXd P1 = Matrix<double, 16, 16>::Identity();

@@ -114,6 +114,8 @@ namespace HYUMotionKinematics {
 
         void GetDampedpInvJacobian( MatrixXd &_DampedpInvJacobian );
 
+        void GetDampedpInvJacobian( MatrixXd &_TargetMat, MatrixXd &_DampedpInvJacobian );
+
         void GetBlockpInvJacobian( MatrixXd &_BlockpInvJacobian );
 
         void GetRelativeJacobian( MatrixXd &_RelativeJacobian );
@@ -180,6 +182,8 @@ namespace HYUMotionKinematics {
         void pInvJacobian();
 
         void DampedpInvJacobian(const double sigma);
+
+        void DampedpInvJacobian( MatrixXd &_TargetMatrix, const double sigma);
 
         void RelativeJacobian(const int From, const int To);
 

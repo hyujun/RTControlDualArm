@@ -11,20 +11,28 @@
 #define INDEX_TASK_TARGET 0x6090
 #define Index_HandCommand_request 0x3333
 
-struct packet_data{
-    float index;
-    float subindex;
-    float _x;
-    float _y;
-    float _z;
-    float _u;
-    float _v;
-    float _w;
+struct packet_data_joint{
+    unsigned char index1;
+    unsigned char index2;
+    unsigned char subindex;
+    //float Target[16];
 };
 
-union TCP_Packet{
-    packet_data info;
-    unsigned char data[sizeof(info)];
+struct packet_data_task{
+    unsigned char index1;
+    unsigned char index2;
+    unsigned char subindex;
+    //float Target[12];
+};
+
+union TCP_Packet_Joint{
+    packet_data_joint info;
+    unsigned char data[sizeof(packet_data_joint)];
+};
+
+union TCP_Packet_Task{
+    packet_data_task info;
+    unsigned char data[sizeof(packet_data_task)];
 };
 
 class PacketHandler{
@@ -33,20 +41,10 @@ public:
     PacketHandler(){}
     virtual ~PacketHandler(){}
 
-    packet_data packetlibrary(char *uint8Data, uint8_t d_size)
-    {
-        memcpy(packet.data, uint8Data, d_size);
-        return packet.info;
-    }
-
-    packet_data packetlibrary(TCP_Packet &_packet)
-    {
-        packet = _packet;
-        return packet.info;
-    }
 
 private:
-    TCP_Packet packet;
+    TCP_Packet_Joint packet_joint;
+    TCP_Packet_Task packet_task;
 };
 
 #endif //RTCONTROLDUALARM_PACKETHANDLER_H

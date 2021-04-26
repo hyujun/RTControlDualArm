@@ -144,7 +144,7 @@ target_link_libraries(${PROJECT_NAME}
         sub::NETWORK
 )
 
-find_package(Xenomai 3.0.0 REQUIRED NATIVE)
+find_package(Xenomai 2.6.0 REQUIRED NATIVE)
 message(STATUS "Xenomai found with theses skins: ${Xenomai_SKINS}")
 if(Xenomai_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${KERNELHEADERS_DIR})

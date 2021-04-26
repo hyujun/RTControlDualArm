@@ -51,6 +51,7 @@
 //#define _DEBUG_ 			/**<Debug Print Parameter*/
 #define _ECAT_ON_ 			/**<EtherCAT device enable Parameter*/
 #define _TCPIP_ON_
+#define _PRINT_ON_
 //#define _PLOT_ON_
 //#define _KEYBOARD_ON_
 

@@ -87,7 +87,6 @@ private:
     Poco::Net::ServerSocket server_sock;
 	char buffer[128] = { 0, };
 	char szSendMessage[128] = { 0, };
-    TCP_Packet TxFrame, RxFrame;
     int buff_size=0;
     PacketHandler mPackethandler;
     Poco::Net::Socket::SocketList connectedSockList;
