@@ -7,7 +7,12 @@
  */
 
 
-//#define _WITH_HAND_
+#define _WITH_HAND_
+
+typedef struct{
+    double Low[16];
+    double High[16];
+}JointLimit;
 
 /**
  * @brief Kinematics Infomation
@@ -19,6 +24,9 @@ typedef struct{
 	double q_x;		/**< Twist x-axis*/
 	double q_y;		/**< Twist y-axis*/
 	double q_z;		/**< Twist z-axis*/
+	double r;       /**< Initial Configuration roll-angle*/
+	double p;       /**< Initial Configuration pitch-angle*/
+	double y;       /**< Initial Configuration yaw-angle*/
 	double l_x;		/**< Initial Configuration x-axis*/
 	double l_y;		/**< Initial Configuration y-axis*/
 	double l_z;		/**< Initial Configuration z-axis*/
@@ -83,3 +91,5 @@ extern robot_motor_info serial_Motor_info[];
 extern FrictionMap frictionmap[];
 
 extern FrictionTanh frictiontanh[];
+
+extern JointLimit joint_limit;

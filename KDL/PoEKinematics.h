@@ -44,7 +44,7 @@ namespace HYUMotionKinematics {
          * @param[in] _l link length
          * @param[in] _link_num number of link attached to base-coordinate
          */
-        void UpdateKinematicInfo( const Vector3d &_w, const Vector3d &_p, const Vector3d &_l, const int _link_num );
+        void UpdateKinematicInfo( const Vector3d &_w, const Vector3d &_p, const Vector3d &_Rot, const Vector3d &_l, const int _link_num );
 
         /**
          * @brief Calculate the joint velocity v
@@ -59,7 +59,7 @@ namespace HYUMotionKinematics {
          * @param[in] _link total length of robot
          * @return SE(3)
          */
-        SE3 GetM( const Vector3d &_link );
+        SE3 GetM( const Vector3d &_Rot, const Vector3d &_link );
 
         void SetTwist( const se3 &_Twist, const int _link_num );
         /**
@@ -120,7 +120,11 @@ namespace HYUMotionKinematics {
 
         void GetRelativeJacobian( MatrixXd &_RelativeJacobian );
 
-        void GetWeightDampedpInvJacobian( const VectorXd &_rdot, MatrixXd &_WDampedpInvJacobian );
+        void GetRelativeJacobianDot( const VectorXd &_qdot, MatrixXd &_RelativeJacobianDot );
+
+        void GetWeightDampedpInvJacobian( const VectorXd &_rdot, const MatrixXd &_WeightMat, MatrixXd &_WDampedpInvJacobian );
+
+        void GetWeightDampedpInvJacobian( const VectorXd &_rdot, const MatrixXd &_WeightMat, MatrixXd &_TargetMat, MatrixXd &_WDampedpInvJacobian );
 
         void GetWDampedpInvLambda(VectorXd *lambda);
 
@@ -128,18 +132,28 @@ namespace HYUMotionKinematics {
 
         double GetManipulabilityMeasure();
 
+        double GetManipulabilityMeasure(const MatrixXd &_Jacobian);
+
         void Getq0dotWithMM(const double &gain, VectorXd &q0dot);
+
+        void Getq0dotWithMM_Relative(const double &gain, const MatrixXd &_RelativeJacobian, VectorXd &q0dot);
         /**
          * @brief forward kinematics of serial robot
          * @return end-effector position x, y, z. not orientation(Working)
          */
         void GetForwardKinematics( Vector3d *_Position, Vector3d *_Orientation, int &_NumChain );
 
+        void GetForwardKinematics( VectorXd &_x );
+
+        void GetForwardKinematicsWithRelative( VectorXd &_x_rel );
+
         SE3 GetForwardKinematicsSE3( const int &_EndPosition ) const;
 
         SO3 GetForwardKinematicsSO3( const int &_EndPosition ) const;
 
         void GetAngleAxis( Vector3d *_Axis, double *_Angle, int &_NumChain );
+
+        void SO3toAngleAxis( const Matrix3d &_RotMat, Vector3d &_orientation );
 
         void SO3toRollPitchYaw( const Matrix3d &_RotMat, Vector3d &_Orientation );
 
@@ -165,6 +179,9 @@ namespace HYUMotionKinematics {
             return M[_pos];
         }
 
+        VectorXd qLimit_Low;
+        VectorXd qLimit_High;
+
     protected:
 
         void SpaceJacobian();
@@ -187,9 +204,13 @@ namespace HYUMotionKinematics {
 
         void RelativeJacobian(const int From, const int To);
 
+        void RelativeJacobianDot( const VectorXd &_qdot );
+
         void BlockpInvJacobian( Matrix<double, 6, Dynamic> &_Jacobian1, Matrix<double, 6, Dynamic> &_Jacobian2 );
 
-        void WeightpInvJacobian( const VectorXd &_rdot );
+        void WeightpInvJacobian( const VectorXd &_rdot, const MatrixXd &_WeightMat );
+
+        void WeightpInvJacobian( const VectorXd &_rdot, const MatrixXd &_WeightMat, const MatrixXd &_TargetMat );
 
         MatrixXi ChainMatrix;
         int m_NumChain;
@@ -214,6 +235,8 @@ namespace HYUMotionKinematics {
         MatrixXd mBlockpInvJacobian;
         MatrixXd mWeightDampedpInvJacobian;
         Eigen::Matrix<double, 6, Dynamic> mRelativeJacobian;
+        Eigen::Matrix<double, 6, Dynamic> mRelativeBodyJacobianDot;
+        Eigen::Matrix<double, 6, Dynamic> mRelativeJacobianDot;
 
         MatrixXd Mat_Tmp;
         VectorXd Vec_Tmp;

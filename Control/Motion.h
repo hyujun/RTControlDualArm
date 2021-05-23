@@ -26,13 +26,18 @@ public:
 private:
 
 	Eigen::VectorXd e, edot;
-	Eigen::VectorXd TargetPos;
+	Eigen::VectorXd TargetPos, TargetPos_p;
 
 	Eigen::MatrixXd omega;
 
 	Eigen::VectorXd xdot;
-	Eigen::VectorXd TargetPosTask;
+	Eigen::VectorXd TargetPosTask, TargetPosTask_p;
+	Eigen::VectorXd TargetPos_Linear;
+	Eigen::VectorXd _dx_tmp, _dxdot_tmp, _dxddot_tmp;
+	Eigen::VectorXd _x_tmp, _xdot_tmp;
 	Eigen::MatrixXd AJacobian;
+
+	Eigen::VectorXd start_pos;
 
     std::shared_ptr<SerialManipulator> pManipulator;
 
