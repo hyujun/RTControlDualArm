@@ -68,7 +68,7 @@ Controller::Controller(std::shared_ptr<SerialManipulator> Manipulator)
 
 #else
     GainWeightFactor.setZero(m_Jnum);
-    GainWeightFactor.setConstant(15.0);
+    GainWeightFactor.setConstant(30.0);
 
 	Kp = GainWeightFactor*KpBase;
 	Kd = GainWeightFactor*KdBase;
@@ -80,7 +80,7 @@ Controller::Controller(std::shared_ptr<SerialManipulator> Manipulator)
 	dq_old.setZero(m_Jnum);
 
     KpImp.setConstant(12,10.0);
-    KdImp.setConstant(12,10.0);
+    KdImp.setConstant(12,0.5);
     KpImpNull.setConstant(16,0.01);
     KdImpNull.setConstant(16,0.1);
 
@@ -179,12 +179,11 @@ void Controller::PDGravController( const VectorXd &_q, const VectorXd &_qdot, co
 	e = _dq - _q;
 	e_dev = _dqdot - _qdot;
 
-	FrictionCompensator(_qdot, _dqdot);
-
     _Toq = G;
 	_Toq.noalias() += Kp.cwiseProduct(e);
     _Toq.noalias() += Kd.cwiseProduct(e_dev);
 #if !defined(__SIMULATION__)
+    FrictionCompensator(_qdot, _dqdot);
     _Toq.noalias() += FrictionTorque;
 #endif
 }
@@ -216,7 +215,7 @@ void Controller::InvDynController(const VectorXd &_q,
     _Toq = G;
     _Toq.noalias() += M*u0;
 #if !defined(__SIMULATION__)
-    //_Toq.noalias() += FrictionTorque;
+    _Toq.noalias() += FrictionTorque;
 #endif
 }
 
@@ -349,7 +348,6 @@ void Controller::CLIKTaskController( const VectorXd &_q,
                                      const VectorXd &_qdot,
                                      const VectorXd &_dx,
                                      const VectorXd &_dxdot,
-                                     const VectorXd &_sensor,
                                      VectorXd &_Toq,
                                      const double &_dt,
                                      const int mode )

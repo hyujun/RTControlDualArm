@@ -126,8 +126,10 @@ robot_kinematic_info serial_Kinematic_info[] = {
 
 #if defined(_WITH_HAND_)
 
+                //0.0, 90.0, 0.0,
+                //0.0, 325.0e-3, 12.0e-3},		// wrist2 with hand
                 0.0, 90.0, 0.0,
-                0.0, 325.0e-3, 12.0e-3},		// wrist2 with hand
+                0.0, 325.0e-3, 50.0e-3},		// wrist2 with hand
 #else
                 0.0, 90.0, 0.0,
                 0.0, 325.0e-3, 122.0e-3},		// wrist2 w.o hand
@@ -201,9 +203,12 @@ robot_dynamic_info serial_Dynamic_info[] = {
 				0.0039, 0.3248, 0.18},	        // left-arm6, Joint15
 
 #if defined(_WITH_HAND_)
-		{1.15,
-				0.0066, -0.0002, -0.0006, 0.0082, 0.0007, 0.0027,
-				0.0194, 0.3117, 0.0730},		    // left-arm7, Joint16, Wrist2, KIST hand
+		//{1.15,
+		//		0.0066, -0.0002, -0.0006, 0.0082, 0.0007, 0.0027,
+		//		0.0194, 0.3117, 0.0730},		    // left-arm7, Joint16, Wrist2, KIST hand
+        {0.5,
+         0.0006, 0.0, 0.0001, 0.0010, 0.0, 0.0009,
+         0.0079, 0.3252, 0.1445},		 // left-arm7, Joint16, Wrist2
 #else
         {0.5,
                 0.0006, 0.0, 0.0001, 0.0010, 0.0, 0.0009,

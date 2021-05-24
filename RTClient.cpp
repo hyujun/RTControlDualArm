@@ -62,6 +62,11 @@ VectorXd TargetPos_Task;
 VectorXd TargetVel_Task;
 VectorXd TargetAcc_Task;
 VectorXd ActualPos_Task;
+VectorXd ExternalForce;
+
+VectorXd ErrorPos_Task;
+VectorXd finPos;
+VectorXd findPos_Task;
 int isSlaveInit()
 {
 #if defined(_ECAT_ON_)
@@ -99,6 +104,10 @@ Vector3d ForwardOri[2];
 Vector3d ForwardAxis[2];
 int NumChain;
 
+static unsigned char ControlIndex1 = CTRLMODE_IDY_JOINT;
+static unsigned char ControlIndex2 = 3;
+static unsigned char ControlSubIndex = 1;
+
 // RTArm_task
 void RTRArm_run( void *arg )
 {
@@ -117,26 +126,46 @@ void RTRArm_run( void *arg )
 
 	short MaxTor = 1200;
 
-	unsigned char ControlMotion = SYSTEM_BEGIN;
-    unsigned char JointState = SYSTEM_BEGIN;
-    unsigned char ControlMode = CTRLMODE_IDY_JOINT;
+
+    unsigned char JointState = ControlSubIndex;
 
     ActualPos_Rad.setZero(DUAL_ARM_DOF);
     ActualVel_Rad.setZero(DUAL_ARM_DOF);
     TargetPos_Rad.setZero(DUAL_ARM_DOF);
     TargetVel_Rad.setZero(DUAL_ARM_DOF);
     TargetAcc_Rad.setZero(DUAL_ARM_DOF);
+    finPos.setZero(DUAL_ARM_DOF);
     TargetToq.setZero(DUAL_ARM_DOF);
 
     TargetPos_Task.setZero(12);
     TargetVel_Task.setZero(12);
     TargetAcc_Task.setZero(12);
     ActualPos_Task.setZero(12);
-	VectorXd finPos = VectorXd::Zero(DUAL_ARM_DOF);
+    ExternalForce.setZero(12);
+    ErrorPos_Task.setZero(12);
+    findPos_Task.setZero(12);
 
 	std::shared_ptr<SerialManipulator> DualArm = std::make_shared<SerialManipulator>();
 	std::unique_ptr<HYUControl::Controller> Control = std::make_unique<HYUControl::Controller>(DualArm);
     std::unique_ptr<HYUControl::Motion> motion = std::make_unique<HYUControl::Motion>(DualArm);
+
+    VectorXd des_mass = VectorXd::Constant(2, 5.0);
+    VectorXd KpTask = VectorXd::Zero(12);
+    VectorXd KdTask = VectorXd::Zero(12);
+    VectorXd KpNull = VectorXd::Constant(16, 0.001);
+    VectorXd KdNull = VectorXd::Constant(16, 3.0);
+
+    KpTask.segment(0,3).setConstant(120.0);
+    KpTask.segment(3,3).setConstant(360.0);
+    KpTask.segment(6,3).setConstant(200.0);
+    KpTask.segment(9,3).setConstant(500.0);
+
+    KdTask.segment(0,3).setConstant(6.0);
+    KdTask.segment(3,3).setConstant(16.0);
+    KdTask.segment(6,3).setConstant(10.0);
+    KdTask.segment(9,3).setConstant(25.0);
+
+    Control->SetImpedanceGain(KpTask, KdTask, KpNull, KdNull, des_mass);
 
 	DualArm->UpdateManipulatorParam();
     int len, err;
@@ -183,39 +212,60 @@ void RTRArm_run( void *arg )
 			DualArm->pKin->PrepareJacobian( ActualPos_Rad );
             DualArm->pDyn->PrepareDynamics( ActualPos_Rad, ActualVel_Rad );
 			DualArm->pKin->GetForwardKinematics( ForwardPos, ForwardOri, NumChain );
-            ActualPos_Task.segment(0,3) = ForwardOri[0];
-            ActualPos_Task.segment(3,3) = ForwardPos[0];
-            ActualPos_Task.segment(6,3) = ForwardOri[1];
-            ActualPos_Task.segment(9,3) = ForwardPos[1];
+
 
             if((len = rt_queue_receive(&msg_tcpip, &msg, TM_NONBLOCK)) > 0)
             {
                 memcpy(&packet_task.data, msg, sizeof(TCP_Packet_Task));
                 printf("received message> len=%d bytes, ptr=%p, index1=0x%02X, index2=0x%02X, subindex=0x%02X\n",
                        len, msg, packet_task.info.index1, packet_task.info.index2, packet_task.info.subindex);
-                ControlMode = packet_task.info.index1;
-                ControlMotion = packet_task.info.subindex;
+                ControlIndex1 = packet_task.info.index1;
+                ControlIndex2 = packet_task.info.index2;
+                ControlSubIndex = packet_task.info.subindex;
+                JointState = ControlSubIndex;
                 rt_queue_free(&msg_tcpip, msg);
             }
 
-			if( ControlMode == CTRLMODE_FRICTIONID )
+			if( ControlIndex1 == CTRLMODE_FRICTIONID )
             {
                 Control->FrictionIdentification( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_gt );
             }
-			else if( ControlMode == CTRLMODE_CLIK )
+			else if( ControlIndex1 == CTRLMODE_CLIK )
             {
-                motion->TaskMotion( TargetPos_Task, TargetVel_Task, TargetAcc_Task, finPos, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlMotion );
-                Control->CLIKTaskController( ActualPos_Rad, ActualVel_Rad, TargetPos_Task, TargetVel_Task, TargetToq, double_dt, 6 );
+                if( ControlIndex2 == 7 )
+                {
+                    DualArm->pKin->GetForwardKinematicsWithRelative(ActualPos_Task);
+                }
+                else
+                {
+                    DualArm->pKin->GetForwardKinematics(ActualPos_Task);
+                }
+                motion->TaskMotion( TargetPos_Task, TargetVel_Task, TargetAcc_Task, findPos_Task, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
+                Control->CLIKTaskController( ActualPos_Rad, ActualVel_Rad, TargetPos_Task, TargetVel_Task,TargetToq, double_dt, ControlIndex2 );
             }
-			else if( ControlMode == CTRLMODE_TASK)
+			else if( ControlIndex1 == CTRLMODE_TASK )
             {
-                motion->TaskMotion( TargetPos_Task, TargetVel_Task, TargetAcc_Task, finPos, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlMotion );
-			    Control->TaskInvDynController(TargetPos_Task, TargetVel_Task, TargetAcc_Task, ActualPos_Rad, ActualVel_Rad, TargetToq, double_dt, 1);
+                DualArm->pKin->GetForwardKinematics(ActualPos_Task);
+                motion->TaskMotion( TargetPos_Task, TargetVel_Task, TargetAcc_Task, findPos_Task, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
+			    Control->TaskInvDynController(TargetPos_Task, TargetVel_Task, TargetAcc_Task, ActualPos_Rad, ActualVel_Rad, TargetToq, double_dt, ControlIndex2 );
+            }
+			else if( ControlIndex1 == CTRLMODE_IMPEDANCE_TASK )
+            {
+			    if( ControlIndex2 == 3 )
+                {
+                    DualArm->pKin->GetForwardKinematicsWithRelative(ActualPos_Task);
+                }
+			    else
+                {
+                    DualArm->pKin->GetForwardKinematics(ActualPos_Task);
+                }
+			    motion->TaskMotion(TargetPos_Task, TargetVel_Task, TargetAcc_Task, findPos_Task, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
+			    Control->TaskImpedanceController(ActualPos_Rad, ActualVel_Rad, TargetPos_Task, TargetVel_Task, TargetAcc_Task, ExternalForce, TargetToq, ControlIndex2 );
+			    Control->GetControllerStates(TargetPos_Rad, TargetVel_Rad, ErrorPos_Task );
             }
 			else
 			{
-                DualArm->StateMachine( ActualPos_Rad, ActualVel_Rad, finPos, JointState, ControlMotion );
-                motion->JointMotion( TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad,finPos, ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlMotion );
+                motion->JointMotion( TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, finPos, ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
 				Control->InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_dt );
 			}
 
@@ -397,6 +447,7 @@ void print_run(void *arg)
             rt_printf("DesiredTask(tcp)=%0.2fus, Calculation(tcp)= %0.2fus, WorstCalculation(tcp)= %0.2fus, RTFault(tcp)=%d\n",
                       double_dt_tcp, static_cast<double>(calculation_time_tcp)*1e-3, static_cast<double>(worst_time_tcp)*1e-3, fault_count_tcp);
 #endif
+            rt_printf("\nIndex1:0x%02X, Index2:0x%02X, SubIndex:0x%02X", ControlIndex1, ControlIndex2, ControlSubIndex);
 			for(int j=0; j<DUAL_ARM_DOF; ++j)
 			{
 				rt_printf("\t \nID: %d,", j+1);
@@ -424,8 +475,15 @@ void print_run(void *arg)
 			rt_printf("\nForward Kinematics -->");
 			for(int cNum = 0; cNum < NumChain; cNum++)
 			{
-				rt_printf("\n Num:%d: x:%0.3lf, y:%0.3lf, z:%0.3lf, u:%0.3lf, v:%0.3lf, w:%0.3lf",cNum, ForwardPos[cNum](0), ForwardPos[cNum](1), ForwardPos[cNum](2),
-						ForwardOri[cNum](0)*RADtoDEG, ForwardOri[cNum](1)*RADtoDEG, ForwardOri[cNum](2)*RADtoDEG);
+				rt_printf("\n Num:%d: x:%0.3lf, y:%0.3lf, z:%0.3lf, u:%0.3lf, v:%0.3lf, w:%0.3lf",cNum,
+              ForwardPos[cNum](0), ForwardPos[cNum](1), ForwardPos[cNum](2),
+              ForwardOri[cNum](0)*RADtoDEG, ForwardOri[cNum](1)*RADtoDEG, ForwardOri[cNum](2)*RADtoDEG);
+                rt_printf("\n Num:%d: dx:%0.3lf, dy:%0.3lf, dz:%0.3lf, du:%0.3lf, dv:%0.3lf, dw:%0.3lf",cNum,
+                          TargetPos_Task(6*cNum+3), TargetPos_Task(6*cNum+4), TargetPos_Task(6*cNum+5),
+                          TargetPos_Task(6*cNum)*RADtoDEG, TargetPos_Task(6*cNum+1)*RADtoDEG, TargetPos_Task(6*cNum+2)*RADtoDEG);
+                rt_printf("\n Num:%d: e_x:%0.3lf, e_y:%0.3lf, e_z:%0.3lf, e_u:%0.3lf, e_v:%0.3lf, e_w:%0.3lf\n",cNum,
+                          ErrorPos_Task(6*cNum+3), ErrorPos_Task(6*cNum+4), ErrorPos_Task(6*cNum+5),
+                          ErrorPos_Task(6*cNum)*RADtoDEG, ErrorPos_Task(6*cNum+1)*RADtoDEG, ErrorPos_Task(6*cNum+2)*RADtoDEG);
 				//rt_printf("\n Manipulability: Task:%0.2lf, Orient:%0.2lf", TaskCondNumber[cNum], OrientCondNumber[cNum]);
 			}
 			rt_printf("\n\n");
@@ -567,7 +625,7 @@ int main(int argc, char **argv)
 	//cycle_ns = 500e3; // nanosecond -> 2kHz
 	cycle_ns = 1000e3; // nanosecond -> 1kHz
 	//cycle_ns = 1250e3; // nanosecond -> 800Hz
-	//cycle_ns = 2000ee; // nanosecond -> 500Hz
+	//cycle_ns = 2000e3; // nanosecond -> 500Hz
 
 #if defined(_ECAT_ON_)
 	for(int SlaveNum=0; SlaveNum < ELMO_TOTAL; SlaveNum++)
