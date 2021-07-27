@@ -68,7 +68,11 @@ Controller::Controller(std::shared_ptr<SerialManipulator> Manipulator)
 
 #else
     GainWeightFactor.setZero(m_Jnum);
-    GainWeightFactor.setConstant(30.0);
+    GainWeightFactor.setConstant(90.0);
+    GainWeightFactor(7) = 200.0;
+    GainWeightFactor(8) = 200.0;
+    GainWeightFactor(14) = 200.0;
+    GainWeightFactor(15) = 200.0;
 
 	Kp = GainWeightFactor*KpBase;
 	Kd = GainWeightFactor*KdBase;
@@ -215,7 +219,7 @@ void Controller::InvDynController(const VectorXd &_q,
     _Toq = G;
     _Toq.noalias() += M*u0;
 #if !defined(__SIMULATION__)
-    _Toq.noalias() += FrictionTorque;
+    //_Toq.noalias() += FrictionTorque;
 #endif
 }
 

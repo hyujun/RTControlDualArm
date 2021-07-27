@@ -1,32 +1,32 @@
 #include "PropertyDefinition.h"
 
 #define ENC_OFFSET_J1 6443714
-#define ENC_OFFSET_J2 16471556
+#define ENC_OFFSET_J2 17508097
 
-#define ENC_OFFSET_J3 104451305
-#define ENC_OFFSET_J4 503984552
-#define ENC_OFFSET_J5 14440820
-#define ENC_OFFSET_J6 10826499
-#define ENC_OFFSET_J7 -73395968
-#define ENC_OFFSET_J8 -50066312
-#define ENC_OFFSET_J9 -56655936
+#define ENC_OFFSET_J3 120539145
+#define ENC_OFFSET_J4 507168693
+#define ENC_OFFSET_J5 22474269
+#define ENC_OFFSET_J6 31320639
+#define ENC_OFFSET_J7 -75424534
+#define ENC_OFFSET_J8 -49866485
+#define ENC_OFFSET_J9 -58845668
 
-#define ENC_OFFSET_J10 185817973
-#define ENC_OFFSET_J11 11773655
-#define ENC_OFFSET_J12 -14601156
-#define ENC_OFFSET_J13 12819473
-#define ENC_OFFSET_J14 20458028
-#define ENC_OFFSET_J15 45791808
-#define ENC_OFFSET_J16 100306038
+#define ENC_OFFSET_J10 183583133
+#define ENC_OFFSET_J11 1409766
+#define ENC_OFFSET_J12 -14544852
+#define ENC_OFFSET_J13 13501007
+#define ENC_OFFSET_J14 -456050
+#define ENC_OFFSET_J15 103801247
+#define ENC_OFFSET_J16 152721989
 
 #define HARMONIC_100 101
 #define ABS_ENC_19 524288
 
-#define MAX_CURRENT_TYPE1 4.3
-#define MAX_CURRENT_TYPE2 2.46
-#define MAX_CURRENT_TYPE3 2.78
-#define MAX_CURRENT_TYPE4 3.79
-#define MAX_CURRENT_WRIST 2.31
+#define MAX_CURRENT_TYPE1 3.8
+#define MAX_CURRENT_TYPE2 2.2
+#define MAX_CURRENT_TYPE3 2.5
+#define MAX_CURRENT_TYPE4 3.4
+#define MAX_CURRENT_WRIST 2.0
 
 #define TORQUE_CONST_TYPE1 0.341 // Nm/A Arm 1,2,3
 #define TORQUE_CONST_TYPE2 0.426 // Nm/A Arm 4
@@ -203,12 +203,12 @@ robot_dynamic_info serial_Dynamic_info[] = {
 				0.0039, 0.3248, 0.18},	        // left-arm6, Joint15
 
 #if defined(_WITH_HAND_)
-		//{1.15,
-		//		0.0066, -0.0002, -0.0006, 0.0082, 0.0007, 0.0027,
-		//		0.0194, 0.3117, 0.0730},		    // left-arm7, Joint16, Wrist2, KIST hand
-        {0.5,
-         0.0006, 0.0, 0.0001, 0.0010, 0.0, 0.0009,
-         0.0079, 0.3252, 0.1445},		 // left-arm7, Joint16, Wrist2
+		{1.15,
+				0.0066, -0.0002, -0.0006, 0.0082, 0.0007, 0.0027,
+				0.0194, 0.3117, 0.0730},		    // left-arm7, Joint16, Wrist2, KIST hand
+        //{0.5,
+        // 0.0006, 0.0, 0.0001, 0.0010, 0.0, 0.0009,
+        // 0.0079, 0.3252, 0.1445},		 // left-arm7, Joint16, Wrist2
 #else
         {0.5,
                 0.0006, 0.0, 0.0001, 0.0010, 0.0, 0.0009,

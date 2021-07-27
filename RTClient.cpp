@@ -67,6 +67,7 @@ VectorXd ExternalForce;
 VectorXd ErrorPos_Task;
 VectorXd finPos;
 VectorXd findPos_Task;
+
 int isSlaveInit()
 {
 #if defined(_ECAT_ON_)
@@ -155,15 +156,15 @@ void RTRArm_run( void *arg )
     VectorXd KpNull = VectorXd::Constant(16, 0.001);
     VectorXd KdNull = VectorXd::Constant(16, 3.0);
 
-    KpTask.segment(0,3).setConstant(120.0);
-    KpTask.segment(3,3).setConstant(360.0);
-    KpTask.segment(6,3).setConstant(200.0);
-    KpTask.segment(9,3).setConstant(500.0);
+    KpTask.segment(0,3).setConstant(100.0);
+    KpTask.segment(3,3).setConstant(1100.0);
+    KpTask.segment(6,3).setConstant(100.0);
+    KpTask.segment(9,3).setConstant(1100.0);
 
-    KdTask.segment(0,3).setConstant(6.0);
-    KdTask.segment(3,3).setConstant(16.0);
-    KdTask.segment(6,3).setConstant(10.0);
-    KdTask.segment(9,3).setConstant(25.0);
+    KdTask.segment(0,3).setConstant(5.0);
+    KdTask.segment(3,3).setConstant(55.0);
+    KdTask.segment(6,3).setConstant(5.0);
+    KdTask.segment(9,3).setConstant(55.0);
 
     Control->SetImpedanceGain(KpTask, KdTask, KpNull, KdNull, des_mass);
 
@@ -274,7 +275,7 @@ void RTRArm_run( void *arg )
 			//write the motor data
 			for(int j=0; j < DUAL_ARM_DOF; ++j)
 			{
-				if( double_gt >= 0.1 /*&& JointState != SYSTEM_BEGIN*/ )
+				if( double_gt >= 0.1 )
 				{
 					ecat_elmo[j].writeTorque(TargetTor[j]);
 				}
