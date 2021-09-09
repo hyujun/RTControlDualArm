@@ -101,7 +101,7 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
 			TargetPos(4) = -0.0*DEGtoRAD;
 			TargetPos(4+7) = -TargetPos(4);
 			TargetPos(5) = 0.0*DEGtoRAD;
-            TargetPos(5) = -TargetPos(5);
+            TargetPos(5+7) = -TargetPos(5);
 			TargetPos(6) = -70.00*DEGtoRAD;
 			TargetPos(6+7) = -TargetPos(6);
 			TargetPos(7) = 0.0*DEGtoRAD;
@@ -574,6 +574,7 @@ uint16_t Motion::TaskMotion( VectorXd &_dx, VectorXd &_dxdot, VectorXd &_dxddot,
             TargetPosTask(1) = 13.89*DEGtoRAD;
             TargetPosTask(2) = 41.36*DEGtoRAD;
             TargetPosTask(3) = 0.447;
+
             TargetPosTask(4) = -0.1;
             TargetPosTask(5) = 0.35;
 

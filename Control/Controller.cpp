@@ -70,9 +70,9 @@ Controller::Controller(std::shared_ptr<SerialManipulator> Manipulator)
     GainWeightFactor.setZero(m_Jnum);
     GainWeightFactor.setConstant(90.0);
     GainWeightFactor(7) = 200.0;
-    GainWeightFactor(8) = 200.0;
+    GainWeightFactor(8) = 250.0;
     GainWeightFactor(14) = 200.0;
-    GainWeightFactor(15) = 200.0;
+    GainWeightFactor(15) = 250.0;
 
 	Kp = GainWeightFactor*KpBase;
 	Kd = GainWeightFactor*KdBase;
