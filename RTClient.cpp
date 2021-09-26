@@ -157,9 +157,9 @@ void RTRArm_run( void *arg )
     VectorXd KdNull = VectorXd::Constant(16, 3.0);
 
     KpTask.segment(0,3).setConstant(100.0);
-    KpTask.segment(3,3).setConstant(1100.0);
+    KpTask.segment(3,3).setConstant(1300.0);
     KpTask.segment(6,3).setConstant(100.0);
-    KpTask.segment(9,3).setConstant(1100.0);
+    KpTask.segment(9,3).setConstant(1300.0);
 
     KdTask.segment(0,3).setConstant(5.0);
     KdTask.segment(3,3).setConstant(55.0);
@@ -277,7 +277,7 @@ void RTRArm_run( void *arg )
 			{
 				if( double_gt >= 0.1 )
 				{
-					ecat_elmo[j].writeTorque(TargetTor[j]);
+					//ecat_elmo[j].writeTorque(TargetTor[j]);
 				}
 				else
 				{

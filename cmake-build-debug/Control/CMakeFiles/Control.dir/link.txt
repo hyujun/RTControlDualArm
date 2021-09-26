@@ -1,0 +1,2 @@
+/usr/bin/ar qc libControld.a  CMakeFiles/Control.dir/Controller.cpp.o CMakeFiles/Control.dir/KistHand.cpp.o CMakeFiles/Control.dir/Motion.cpp.o CMakeFiles/Control.dir/Trajectory.cpp.o CMakeFiles/Control.dir/slerp.cpp.o CMakeFiles/Control.dir/slerpHandler.cpp.o
+/usr/bin/ranlib libControld.a

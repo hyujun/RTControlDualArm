@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="RTControlDualArm"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\Control\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\usr\;CMake Files\..\..\usr\lib\;CMake Files\..\..\usr\lib\cmake\;CMake Files\..\..\usr\lib\cmake\eigen3\;CMake Files\EcatSystem\;CMake Files\modules\;CMake Files\KDL\;CMake Files\Network\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/baek/cmake-build-release"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/strip">
+				<Option working_dir="/home/baek/cmake-build-release"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 install/strip"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/baek/cmake-build-release"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="RTControlDualArm">
+				<Option output="/home/baek/cmake-build-release/RTControlDualArm" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/cmake-build-release"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
+					<Add directory="/home/baek/Control"/>
+					<Add directory="/home/baek/EcatSystem"/>
+					<Add directory="/home/baek/KDL"/>
+					<Add directory="/home/baek/Network"/>
+					<Add directory="/usr/xenomai/include/trank"/>
+					<Add directory="/usr/xenomai/include/cobalt"/>
+					<Add directory="/usr/xenomai/include"/>
+					<Add directory="/usr/xenomai/include/alchemy"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/opt/etherlab/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 RTControlDualArm"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="RTControlDualArm/fast">
+				<Option output="/home/baek/cmake-build-release/RTControlDualArm" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/cmake-build-release"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
+					<Add directory="/home/baek/Control"/>
+					<Add directory="/home/baek/EcatSystem"/>
+					<Add directory="/home/baek/KDL"/>
+					<Add directory="/home/baek/Network"/>
+					<Add directory="/usr/xenomai/include/trank"/>
+					<Add directory="/usr/xenomai/include/cobalt"/>
+					<Add directory="/usr/xenomai/include"/>
+					<Add directory="/usr/xenomai/include/alchemy"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/opt/etherlab/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 RTControlDualArm/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/baek/cmake-build-release"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="list_install_components">
+				<Option working_dir="/home/baek/cmake-build-release"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 list_install_components"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/local">
+				<Option working_dir="/home/baek/cmake-build-release"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 install/local"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install">
+				<Option working_dir="/home/baek/cmake-build-release"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 install"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Control">
+				<Option output="/home/baek/cmake-build-release/Control/libControl.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/cmake-build-release/Control"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
+					<Add directory="/home/baek/Control"/>
+					<Add directory="/home/baek/EcatSystem"/>
+					<Add directory="/home/baek/KDL"/>
+					<Add directory="/home/baek/Network"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Control/Makefile&quot;  VERBOSE=1 Control"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Control/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Control/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Control/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Control/fast">
+				<Option output="/home/baek/cmake-build-release/Control/libControl.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/cmake-build-release/Control"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
+					<Add directory="/home/baek/Control"/>
+					<Add directory="/home/baek/EcatSystem"/>
+					<Add directory="/home/baek/KDL"/>
+					<Add directory="/home/baek/Network"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Control/Makefile&quot;  VERBOSE=1 Control/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Control/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Control/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Control/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="EcatSystem">
+				<Option output="/home/baek/cmake-build-release/EcatSystem/libEcatSystem.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/cmake-build-release/EcatSystem"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
+					<Add directory="/home/baek/Control"/>
+					<Add directory="/home/baek/EcatSystem"/>
+					<Add directory="/home/baek/KDL"/>
+					<Add directory="/home/baek/Network"/>
+					<Add directory="/opt/etherlab/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/EcatSystem/Makefile&quot;  VERBOSE=1 EcatSystem"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/EcatSystem/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="EcatSystem/fast">
+				<Option output="/home/baek/cmake-build-release/EcatSystem/libEcatSystem.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/cmake-build-release/EcatSystem"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
+					<Add directory="/home/baek/Control"/>
+					<Add directory="/home/baek/EcatSystem"/>
+					<Add directory="/home/baek/KDL"/>
+					<Add directory="/home/baek/Network"/>
+					<Add directory="/opt/etherlab/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/EcatSystem/Makefile&quot;  VERBOSE=1 EcatSystem/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/EcatSystem/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="KDL">
+				<Option output="/home/baek/cmake-build-release/KDL/libKDL.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/cmake-build-release/KDL"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
+					<Add directory="/home/baek/Control"/>
+					<Add directory="/home/baek/EcatSystem"/>
+					<Add directory="/home/baek/KDL"/>
+					<Add directory="/home/baek/Network"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/KDL/Makefile&quot;  VERBOSE=1 KDL"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/KDL/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/KDL/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/KDL/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="KDL/fast">
+				<Option output="/home/baek/cmake-build-release/KDL/libKDL.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/cmake-build-release/KDL"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
+					<Add directory="/home/baek/Control"/>
+					<Add directory="/home/baek/EcatSystem"/>
+					<Add directory="/home/baek/KDL"/>
+					<Add directory="/home/baek/Network"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/KDL/Makefile&quot;  VERBOSE=1 KDL/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/KDL/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/KDL/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/KDL/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Network">
+				<Option output="/home/baek/cmake-build-release/Network/libNetwork.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/cmake-build-release/Network"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
+					<Add directory="/home/baek/Control"/>
+					<Add directory="/home/baek/EcatSystem"/>
+					<Add directory="/home/baek/KDL"/>
+					<Add directory="/home/baek/Network"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Network/Makefile&quot;  VERBOSE=1 Network"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Network/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Network/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Network/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Network/fast">
+				<Option output="/home/baek/cmake-build-release/Network/libNetwork.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/cmake-build-release/Network"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
+					<Add directory="/home/baek/Control"/>
+					<Add directory="/home/baek/EcatSystem"/>
+					<Add directory="/home/baek/KDL"/>
+					<Add directory="/home/baek/Network"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Network/Makefile&quot;  VERBOSE=1 Network/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Network/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Network/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-release/Network/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/baek/Control/Controller.cpp">
+			<Option target="Control"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/Controller.h">
+			<Option target="Control"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/KistHand.cpp">
+			<Option target="Control"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/KistHand.h">
+			<Option target="Control"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/Motion.cpp">
+			<Option target="Control"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/Motion.h">
+			<Option target="Control"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/Trajectory.cpp">
+			<Option target="Control"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/Trajectory.h">
+			<Option target="Control"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/slerp.cpp">
+			<Option target="Control"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/slerp.h">
+			<Option target="Control"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/slerpHandler.cpp">
+			<Option target="Control"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/slerpHandler.h">
+			<Option target="Control"/>
+		</Unit>
+		<Unit filename="/home/baek/EcatSystem/Ecat_Master.cpp">
+			<Option target="EcatSystem"/>
+		</Unit>
+		<Unit filename="/home/baek/EcatSystem/Ecat_Master.h">
+			<Option target="EcatSystem"/>
+		</Unit>
+		<Unit filename="/home/baek/EcatSystem/PDOConfig.c">
+			<Option target="EcatSystem"/>
+		</Unit>
+		<Unit filename="/home/baek/EcatSystem/PDOConfig.h">
+			<Option target="EcatSystem"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/LieDynamics.cpp">
+			<Option target="KDL"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/LieDynamics.h">
+			<Option target="KDL"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/LieOperator.cpp">
+			<Option target="KDL"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/LieOperator.h">
+			<Option target="KDL"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/PoEKinematics.cpp">
+			<Option target="KDL"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/PoEKinematics.h">
+			<Option target="KDL"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/PropertyDefinition.cpp">
+			<Option target="KDL"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/PropertyDefinition.h">
+			<Option target="KDL"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/SerialManipulator.cpp">
+			<Option target="KDL"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/SerialManipulator.h">
+			<Option target="KDL"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/motionlibrary.h">
+			<Option target="KDL"/>
+		</Unit>
+		<Unit filename="/home/baek/Network/KRISSSensorHandler.h">
+			<Option target="Network"/>
+		</Unit>
+		<Unit filename="/home/baek/Network/PacketHandler.h">
+			<Option target="Network"/>
+		</Unit>
+		<Unit filename="/home/baek/Network/SocketHandler.h">
+			<Option target="Network"/>
+		</Unit>
+		<Unit filename="/home/baek/RTClient.cpp">
+			<Option target="RTControlDualArm"/>
+		</Unit>
+		<Unit filename="/home/baek/RTClient.h">
+			<Option target="RTControlDualArm"/>
+		</Unit>
+		<Unit filename="/home/baek/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\Control\"/>
+		</Unit>
+		<Unit filename="/home/baek/../../usr/lib/cmake/eigen3/Eigen3Config.cmake">
+			<Option virtualFolder="CMake Files\..\..\usr\lib\cmake\eigen3\"/>
+		</Unit>
+		<Unit filename="/home/baek/../../usr/lib/cmake/eigen3/Eigen3ConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\..\usr\lib\cmake\eigen3\"/>
+		</Unit>
+		<Unit filename="/home/baek/../../usr/lib/cmake/eigen3/Eigen3Targets.cmake">
+			<Option virtualFolder="CMake Files\..\..\usr\lib\cmake\eigen3\"/>
+		</Unit>
+		<Unit filename="/home/baek/EcatSystem/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\EcatSystem\"/>
+		</Unit>
+		<Unit filename="/home/baek/modules/CMakeFunctions.cmake">
+			<Option virtualFolder="CMake Files\modules\"/>
+		</Unit>
+		<Unit filename="/home/baek/modules/FindEtherlab.cmake">
+			<Option virtualFolder="CMake Files\modules\"/>
+		</Unit>
+		<Unit filename="/home/baek/modules/FindKernelHeaders.cmake">
+			<Option virtualFolder="CMake Files\modules\"/>
+		</Unit>
+		<Unit filename="/home/baek/modules/FindPoco.cmake">
+			<Option virtualFolder="CMake Files\modules\"/>
+		</Unit>
+		<Unit filename="/home/baek/modules/FindXenomai.cmake">
+			<Option virtualFolder="CMake Files\modules\"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\KDL\"/>
+		</Unit>
+		<Unit filename="/home/baek/Network/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\Network\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="Network"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\Control\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\usr\;CMake Files\..\..\usr\lib\;CMake Files\..\..\usr\lib\cmake\;CMake Files\..\..\usr\lib\cmake\eigen3\;CMake Files\EcatSystem\;CMake Files\modules\;CMake Files\KDL\;CMake Files\Network\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/baek/cmake-build-debug/Network"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/Network/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/Network/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/Network/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/Network/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Network">
+				<Option output="/home/baek/cmake-build-debug/Network/libNetworkd.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/cmake-build-debug/Network"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
+					<Add directory="/home/baek/Control"/>
+					<Add directory="/home/baek/EcatSystem"/>
+					<Add directory="/home/baek/KDL"/>
+					<Add directory="/home/baek/Network"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/Network/Makefile&quot;  VERBOSE=1 Network"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/Network/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/Network/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/Network/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Network/fast">
+				<Option output="/home/baek/cmake-build-debug/Network/libNetworkd.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/cmake-build-debug/Network"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
+					<Add directory="/home/baek/Control"/>
+					<Add directory="/home/baek/EcatSystem"/>
+					<Add directory="/home/baek/KDL"/>
+					<Add directory="/home/baek/Network"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/Network/Makefile&quot;  VERBOSE=1 Network/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/Network/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/Network/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/Network/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/baek/Network/KRISSSensorHandler.h">
+			<Option target="Network"/>
+		</Unit>
+		<Unit filename="/home/baek/Network/PacketHandler.h">
+			<Option target="Network"/>
+		</Unit>
+		<Unit filename="/home/baek/Network/SocketHandler.h">
+			<Option target="Network"/>
+		</Unit>
+		<Unit filename="/home/baek/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/baek/Control/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\Control\"/>
+		</Unit>
+		<Unit filename="/home/baek/../../usr/lib/cmake/eigen3/Eigen3Config.cmake">
+			<Option virtualFolder="CMake Files\..\..\usr\lib\cmake\eigen3\"/>
+		</Unit>
+		<Unit filename="/home/baek/../../usr/lib/cmake/eigen3/Eigen3ConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\..\usr\lib\cmake\eigen3\"/>
+		</Unit>
+		<Unit filename="/home/baek/../../usr/lib/cmake/eigen3/Eigen3Targets.cmake">
+			<Option virtualFolder="CMake Files\..\..\usr\lib\cmake\eigen3\"/>
+		</Unit>
+		<Unit filename="/home/baek/EcatSystem/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\EcatSystem\"/>
+		</Unit>
+		<Unit filename="/home/baek/modules/CMakeFunctions.cmake">
+			<Option virtualFolder="CMake Files\modules\"/>
+		</Unit>
+		<Unit filename="/home/baek/modules/FindEtherlab.cmake">
+			<Option virtualFolder="CMake Files\modules\"/>
+		</Unit>
+		<Unit filename="/home/baek/modules/FindKernelHeaders.cmake">
+			<Option virtualFolder="CMake Files\modules\"/>
+		</Unit>
+		<Unit filename="/home/baek/modules/FindPoco.cmake">
+			<Option virtualFolder="CMake Files\modules\"/>
+		</Unit>
+		<Unit filename="/home/baek/modules/FindXenomai.cmake">
+			<Option virtualFolder="CMake Files\modules\"/>
+		</Unit>
+		<Unit filename="/home/baek/KDL/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\KDL\"/>
+		</Unit>
+		<Unit filename="/home/baek/Network/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\Network\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

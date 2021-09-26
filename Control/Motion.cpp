@@ -134,25 +134,27 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         {
             TargetPos.setZero(16);
             TargetPos(0) = 0.0*DEGtoRAD;
-            TargetPos(1) = -1.16*DEGtoRAD;
-            TargetPos(2) = -17.82*DEGtoRAD;
-            TargetPos(3) = -14.54*DEGtoRAD;
-            TargetPos(4) = -3.63*DEGtoRAD;
-            TargetPos(5) = 19.12*DEGtoRAD;
-            TargetPos(6) = -67.49*DEGtoRAD;
-            TargetPos(7) = 17.55*DEGtoRAD;
-            TargetPos(8) = 7.75*DEGtoRAD;
-            TargetPos(9) = 11.65*DEGtoRAD;
-            TargetPos(10) = 28.74*DEGtoRAD;
-            TargetPos(11) = -1.19*DEGtoRAD;
-            TargetPos(12) = -28.56*DEGtoRAD;
-            TargetPos(13) = 45.20*DEGtoRAD;
-            TargetPos(14) = -12.25*DEGtoRAD;
-            TargetPos(15) = -6.91*DEGtoRAD;
+            TargetPos(1) = -44.17*DEGtoRAD;
+
+            TargetPos(2) = -8.15*DEGtoRAD;
+            TargetPos(3) = -44.41*DEGtoRAD;
+            TargetPos(4) = -11.91*DEGtoRAD;
+            TargetPos(5) = -4.15*DEGtoRAD;
+            TargetPos(6) = -86.02*DEGtoRAD;
+            TargetPos(7) = 88.01*DEGtoRAD;
+            TargetPos(8) = 0.11*DEGtoRAD;
+
+            TargetPos(9) = 8.15*DEGtoRAD;
+            TargetPos(10) = 44.41*DEGtoRAD;
+            TargetPos(11) = 11.91*DEGtoRAD;
+            TargetPos(12) = 4.15*DEGtoRAD;
+            TargetPos(13) = 86.02*DEGtoRAD;
+            TargetPos(14) = -88.01*DEGtoRAD;
+            TargetPos(15) = -0.11*DEGtoRAD;
 
             _Target = TargetPos;
 
-            TrajectoryTime=4.0;
+            TrajectoryTime=5.0;
             NewTarget=1;
             _StatusWord = 0;
         }
@@ -570,20 +572,23 @@ uint16_t Motion::TaskMotion( VectorXd &_dx, VectorXd &_dxdot, VectorXd &_dxddot,
         }
         else
         {
-            TargetPosTask(0) = -23.52*DEGtoRAD;
-            TargetPosTask(1) = 13.89*DEGtoRAD;
-            TargetPosTask(2) = 41.36*DEGtoRAD;
-            TargetPosTask(3) = 0.447;
+            TargetPosTask(0) = start_pos(0);
+            TargetPosTask(1) = start_pos(1);
+            TargetPosTask(2) = start_pos(2);
 
-            TargetPosTask(4) = -0.1;
-            TargetPosTask(5) = 0.35;
+            TargetPosTask(3) = start_pos(3);
+            TargetPosTask(4) = start_pos(4);
+            TargetPosTask(5) = start_pos(5);
 
-            TargetPosTask(6) = 22.206*DEGtoRAD;
-            TargetPosTask(7) = 21.876*DEGtoRAD;
-            TargetPosTask(8) = -40.67*DEGtoRAD;
-            TargetPosTask(9) = 0.479;
-            TargetPosTask(10) = 0.1;
-            TargetPosTask(11) = 0.277;
+
+            TargetPosTask(6) = start_pos(6);
+            TargetPosTask(7) = start_pos(7);
+            TargetPosTask(8) = start_pos(8);
+
+            TargetPosTask(9) = start_pos(9);
+            TargetPosTask(10) = start_pos(10);
+            TargetPosTask(11) = start_pos(11);
+
             TargetPosTask_p = TargetPosTask;
 
             TargetPos_Linear.setZero(6);
@@ -636,26 +641,29 @@ uint16_t Motion::TaskMotion( VectorXd &_dx, VectorXd &_dxdot, VectorXd &_dxddot,
         }
         else
         {
-            TargetPosTask(0) = -23.52*DEGtoRAD;
-            TargetPosTask(1) = 13.89*DEGtoRAD;
-            TargetPosTask(2) = 41.36*DEGtoRAD;
-            TargetPosTask(3) = 0.447;
-            TargetPosTask(4) = -0.091;
-            TargetPosTask(5) = 0.216;
+            TargetPosTask(0) = start_pos(0);
+            TargetPosTask(1) = start_pos(1);
+            TargetPosTask(2) = start_pos(2);
 
-            TargetPosTask(6) = 22.206*DEGtoRAD;
-            TargetPosTask(7) = 21.876*DEGtoRAD;
-            TargetPosTask(8) = -40.67*DEGtoRAD;
-            TargetPosTask(9) = 0.609;
-            TargetPosTask(10) = 0.086;
-            TargetPosTask(11) = 0.198;
+            TargetPosTask(3) = 0.7;
+            TargetPosTask(4) = start_pos(4);
+            TargetPosTask(5) = start_pos(5);
+
+
+            TargetPosTask(6) = start_pos(6);
+            TargetPosTask(7) = start_pos(7);
+            TargetPosTask(8) = start_pos(8);
+
+            TargetPosTask(9) = start_pos(9);
+            TargetPosTask(10) = start_pos(10);
+            TargetPosTask(11) = start_pos(11);
             TargetPosTask_p = TargetPosTask;
 
             TargetPos_Linear.setZero(6);
             TargetPos_Linear.head(3) = TargetPosTask.segment(3,3);
             TargetPos_Linear.tail(3) = TargetPosTask.segment(9,3);
 
-            TrajectoryTime=5.0;
+            TrajectoryTime=6.0;
             NewTarget=1;
             _StatusWord = 0;
         }

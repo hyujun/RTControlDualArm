@@ -1,0 +1,30 @@
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/baek
+-- Boost version: 106501
+-- Found Etherlab: /opt/etherlab/lib/libethercat.a;/opt/etherlab/lib/libethercat_rtdm.a
+-- Etherlab_INC_DIRS = /opt/etherlab/include
+-- Etherlab_LIB_DIRS = /opt/etherlab/lib/libethercat.a;/opt/etherlab/lib/libethercat_rtdm.a
+-- Found Poco: optimized;/usr/lib/libPocoFoundation.so;debug;/usr/lib/libPocoFoundation.so;optimized;/usr/lib/libPocoUtil.so;debug;/usr/lib/libPocoUtil.so;optimized;/usr/lib/libPocoZip.so;debug;/usr/lib/libPocoZip.so;optimized;/usr/lib/libPocoNet.so;debug;/usr/lib/libPocoNet.so
+-- Poco_INCLUDE_DIRS = /usr/include;/usr/include;/usr/include;/usr/include;/usr/include
+-- Poco_LIBRARIES = optimized;/usr/lib/libPocoFoundation.so;debug;/usr/lib/libPocoFoundation.so;optimized;/usr/lib/libPocoUtil.so;debug;/usr/lib/libPocoUtil.so;optimized;/usr/lib/libPocoZip.so;debug;/usr/lib/libPocoZip.so;optimized;/usr/lib/libPocoNet.so;debug;/usr/lib/libPocoNet.so
+-- Kernel release: 4.9.90-xenomai-3.0.9
+-- Kernel headers: /usr/src/linux-headers-4.9.90-xenomai-3.0.9
+-- Xenomai Kernel Headers located in /usr/src/linux-headers-4.9.90-xenomai-3.0.9/include/xenomai
+-- xeno-config is found. Xenomai should be ok and version found is 3.0.9
+-- xeno-config has the --auto-init-solib option
+-- Xenomai found with theses skins: posix;vxworks;psos;alchemy;rtdm;smokey;cobalt;native
+-- 
+-- [ Build summary ]
+-- CMAKE_GENERATOR  : Unix Makefiles
+-- Compiler ID      : GNU
+-- Compiler version : 7.5.0
+-- Build type       : Debug
+-- BUILD_SHARED_LIBS: TRUE
+-- Install path     : /home/baek
+-- CXX_FLAGS        :  -std=c++17 -Wall -Wextra -fPIC
+-- CXX_FLAGS_DEBUG  : -g -fno-omit-frame-pointer -fno-inline-functions -fno-inline-functions-called-once -fno-optimize-sibling-calls
+-- CMAKE_SOURCE_DIR : /home/baek
+-- CMAKE_BINARY_DIR : /home/baek/cmake-build-debug
+-- 
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/baek/cmake-build-debug
