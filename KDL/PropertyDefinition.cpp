@@ -172,9 +172,9 @@ robot_dynamic_info serial_Dynamic_info[] = {
 				0.0039, -0.3252, 0.1805},		// right-arm6, Joint8
 
 #if defined(_WITH_HAND_)
-		{1.6,
-				0.0112, 0.0005, 0.0011, 0.0130, -0.0003, 0.0032,
-				0.0123, -0.3168, 0.0499},		// right-arm7, Joint9, Wrist1, Allegro hand
+		{1.9,
+				0.0125, -0.0016, 0.0002, 0.0226, -0.0442, 0.1995,
+				0.0028, -0.3271, 0.0711},		// right-arm7, Joint9, Wrist1, Allegro hand
 #else
         {0.5,
                 0.0006, 0.0, 0.0001, 0.0010, 0.0, 0.0009,

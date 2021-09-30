@@ -603,7 +603,7 @@ uint16_t Motion::TaskMotion( VectorXd &_dx, VectorXd &_dxdot, VectorXd &_dxddot,
             TargetPosTask(1) = start_pos(1);
             TargetPosTask(2) = start_pos(2);
 
-            TargetPosTask(3) = 0.6;
+            TargetPosTask(3) = 0.4;
             TargetPosTask(4) = start_pos(4);
             TargetPosTask(5) = start_pos(5);
 
