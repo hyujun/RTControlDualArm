@@ -83,7 +83,7 @@ robot_kinematic_info serial_Kinematic_info[] = {
 				0.0, -325.0e-3, 260.0e-3,
 				0.0, 0.0, 0.0,
                 0.0, -325.0e-3, 169.0e-3},		// 8
-		{1, 0, 0,
+		{0, -1, 0,
 				0.0, -325.0e-3, 169.0e-3,
 
 #if defined(_WITH_HAND_)
