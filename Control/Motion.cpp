@@ -69,7 +69,9 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
 		else
 		{
 			TargetPos.setZero(16);
-			TargetPos(6) = -60.0*DEGtoRAD;
+            TargetPos(0) = -0.1*DEGtoRAD;
+
+            TargetPos(6) = -60.0*DEGtoRAD;
             TargetPos(13) = 60.0*DEGtoRAD;
 			TrajectoryTime=4.0;
 			NewTarget=1;
@@ -135,23 +137,23 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         {
             TargetPos.setZero(16);
             TargetPos(0) = 0.0*DEGtoRAD;
-            TargetPos(1) = -44.17*DEGtoRAD;
+            TargetPos(1) = -7.81*DEGtoRAD;
 
-            TargetPos(2) = -8.15*DEGtoRAD;
-            TargetPos(3) = -44.41*DEGtoRAD;
-            TargetPos(4) = -11.91*DEGtoRAD;
-            TargetPos(5) = -4.15*DEGtoRAD;
-            TargetPos(6) = -86.02*DEGtoRAD;
-            TargetPos(7) = 88.01*DEGtoRAD;
-            TargetPos(8) = 0.11*DEGtoRAD;
+            TargetPos(2) = -1.84*DEGtoRAD;
+            TargetPos(2+7)=-TargetPos(2);
+            TargetPos(3) = -29.04*DEGtoRAD;
+            TargetPos(3+7)=-TargetPos(3);
+            TargetPos(4) = -4.68*DEGtoRAD;
+            TargetPos(4+7)=-TargetPos(4);
+            TargetPos(5) = -2.64*DEGtoRAD;
+            TargetPos(5+7)=-TargetPos(5);
+            TargetPos(6) = -62.28*DEGtoRAD;
+            TargetPos(6+7)=-TargetPos(6);
+            TargetPos(7) = -0.56*DEGtoRAD;
+            TargetPos(7+7)=-TargetPos(7);
+            TargetPos(8) = -12.31*DEGtoRAD;
+            TargetPos(8+7)=-TargetPos(8);
 
-            TargetPos(9) = 8.15*DEGtoRAD;
-            TargetPos(10) = 44.41*DEGtoRAD;
-            TargetPos(11) = 11.91*DEGtoRAD;
-            TargetPos(12) = 4.15*DEGtoRAD;
-            TargetPos(13) = 86.02*DEGtoRAD;
-            TargetPos(14) = -88.01*DEGtoRAD;
-            TargetPos(15) = -0.11*DEGtoRAD;
 
             _Target = TargetPos;
 
@@ -388,17 +390,17 @@ uint16_t Motion::TaskMotion( VectorXd &_dx, VectorXd &_dxdot, VectorXd &_dxddot,
             _dx(6) = start_pos(6);
             _dx(7) = start_pos(7);
             _dx(8) = start_pos(8);
-            _dx(9) = -A * sin(f * M_PI * (_Time - MotionInitTime)) + start_pos(9);
+            _dx(9) = start_pos(9);
             _dx(10) = start_pos(10);
             _dx(11) = start_pos(11);
 
             _dxdot.setZero(12);
             _dxdot(3) = (f * M_PI) * A * cos(f * M_PI * (_Time - MotionInitTime));
-            _dxdot(9) = -(f * M_PI) * A * cos(f * M_PI * (_Time - MotionInitTime));
+//            _dxdot(9) = -(f * M_PI) * A * cos(f * M_PI * (_Time - MotionInitTime));
 
             _dxddot.setZero(12);
             _dxddot(3) = -(f * M_PI) * (f * M_PI) * A * sin(f * M_PI * (_Time - MotionInitTime));
-            _dxddot(9) = (f * M_PI) * (f * M_PI) * A * sin(f * M_PI * (_Time - MotionInitTime));
+//            _dxddot(9) = (f * M_PI) * (f * M_PI) * A * sin(f * M_PI * (_Time - MotionInitTime));
             _StatusWord = 0;
 		}
 	}
@@ -424,17 +426,44 @@ uint16_t Motion::TaskMotion( VectorXd &_dx, VectorXd &_dxdot, VectorXd &_dxddot,
             _dx(7) = start_pos(7);
             _dx(8) = start_pos(8);
             _dx(9) = start_pos(9);
-            _dx(10) = -A * sin(f * M_PI * (_Time - MotionInitTime)) + start_pos(10);
+            _dx(10) = start_pos(10);
             _dx(11) = start_pos(11);
 
             _dxdot(4) = (f * M_PI) * A * cos(f * M_PI * (_Time - MotionInitTime));
-            _dxdot(10) = -(f * M_PI) * A * cos(f * M_PI * (_Time - MotionInitTime));
-
             _dxddot(4) = -(f * M_PI) * (f * M_PI) * A * sin(f * M_PI * (_Time - MotionInitTime));
-            _dxddot(10) = (f * M_PI) * (f * M_PI) * A * sin(f * M_PI * (_Time - MotionInitTime));
         }
     }
+
     else if( MotionCommandTask == MOVE_TASK_CUSTOM3 )
+    {
+        if( _StatusWord == MotionCommandTask )
+        {
+            MotionInitTime = _Time;
+            _StatusWord=0;
+            start_pos.setZero(12);
+            start_pos = x;
+        }
+        else
+        {
+            _dx(0) = start_pos(0);
+            _dx(1) = start_pos(1);
+            _dx(2) = start_pos(2);
+            _dx(3) = start_pos(3);
+            _dx(4) = start_pos(4);
+            _dx(5) = A * sin(f * M_PI * (_Time - MotionInitTime)) + start_pos(5);
+
+            _dx(6) = start_pos(6);
+            _dx(7) = start_pos(7);
+            _dx(8) = start_pos(8);
+            _dx(9) = start_pos(9);
+            _dx(10) = start_pos(10);
+            _dx(11) = start_pos(11);
+
+            _dxdot(5) = (f * M_PI) * A * cos(f * M_PI * (_Time - MotionInitTime));
+            _dxddot(5) = -(f * M_PI) * (f * M_PI) * A * sin(f * M_PI * (_Time - MotionInitTime));
+        }
+    }
+    else if( MotionCommandTask == MOVE_TASK_CUSTOM4 )
     {
         if( _StatusWord == MotionCommandTask )
         {
@@ -468,37 +497,6 @@ uint16_t Motion::TaskMotion( VectorXd &_dx, VectorXd &_dxdot, VectorXd &_dxddot,
             _dxddot(9) = (2*f * M_PI) * (2*f * M_PI) * A * cos(2*f * M_PI * (_Time - MotionInitTime));
             _dxddot(10) = (2*f * M_PI) * (2*f * M_PI) * A * sin(2*f * M_PI * (_Time - MotionInitTime));
 
-        }
-    }
-    else if( MotionCommandTask == MOVE_TASK_CUSTOM4 )
-    {
-        if( _StatusWord == MotionCommandTask )
-        {
-            MotionInitTime = _Time;
-            _StatusWord=0;
-            start_pos.setZero(12);
-            start_pos = x;
-        }
-        else
-        {
-            A = 0.10;
-            _dx(0) = start_pos(0);
-            _dx(1) = start_pos(1);
-            _dx(2) = start_pos(2);
-            _dx(3) = A * sin(f * M_PI * (_Time - MotionInitTime)) + start_pos(3);
-            _dx(4) = start_pos(4);
-            _dx(5) = start_pos(5);
-
-            _dx(6) = start_pos(6);
-            _dx(7) = start_pos(7);
-            _dx(8) = start_pos(8);
-            _dx(9) = start_pos(9);
-            _dx(10) = start_pos(10);
-            _dx(11) = start_pos(11);
-
-            _dxdot(3) = (f * M_PI) * A * cos(f * M_PI * (_Time - MotionInitTime));
-
-            _dxddot(3) = -(f * M_PI) * (f * M_PI) * A * sin(f * M_PI * (_Time - MotionInitTime));
         }
     }
     else if( MotionCommandTask == MOVE_TASK_CUSTOM5 )
@@ -603,9 +601,9 @@ uint16_t Motion::TaskMotion( VectorXd &_dx, VectorXd &_dxdot, VectorXd &_dxddot,
             TargetPosTask(1) = start_pos(1);
             TargetPosTask(2) = start_pos(2);
 
-            TargetPosTask(3) = 0.4;
+            TargetPosTask(3) = start_pos(3);
             TargetPosTask(4) = start_pos(4);
-            TargetPosTask(5) = start_pos(5);
+            TargetPosTask(5) = 0.35;
 
 
             TargetPosTask(6) = start_pos(6);
@@ -664,6 +662,75 @@ uint16_t Motion::TaskMotion( VectorXd &_dx, VectorXd &_dxdot, VectorXd &_dxddot,
             _dxddot.segment(9,3) = _dxddot_tmp.tail(3);
 
             MotionProcess = MOVE_TASK_CUSTOM8;
+        }
+        else
+        {
+            TargetPosTask(0) = start_pos(0);
+            TargetPosTask(1) = start_pos(1);
+            TargetPosTask(2) = start_pos(2);
+
+            TargetPosTask(3) = 0.527;
+            TargetPosTask(4) = -0.172;
+            TargetPosTask(5) = 0.550;
+
+
+            TargetPosTask(6) = start_pos(6);
+            TargetPosTask(7) = start_pos(7);
+            TargetPosTask(8) = start_pos(8);
+
+            TargetPosTask(9) = 0.527;
+            TargetPosTask(10) = start_pos(10);
+            TargetPosTask(11) = start_pos(11);
+
+            TargetPosTask_p = TargetPosTask;
+
+            TargetPos_Linear.setZero(6);
+            TargetPos_Linear.head(3) = TargetPosTask.segment(3,3);
+            TargetPos_Linear.tail(3) = TargetPosTask.segment(9,3);
+
+            TrajectoryTime=5.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommandTask == MOVE_TASK_CUSTOM9 )
+    {
+        if( _StatusWord != MotionCommandTask )
+        {
+            if( NewTarget==1 )
+            {
+                int target_size = 6;
+                _dx_tmp.setZero(target_size);
+                _dxdot_tmp.setZero(target_size);
+                _dxddot_tmp.setZero(target_size);
+
+                _x_tmp.setZero(target_size);
+                _xdot_tmp.setZero(target_size);
+
+                _x_tmp.head(3) = x.segment(3,3);
+                _x_tmp.tail(3) = x.segment(9,3);
+
+                _xdot_tmp.head(3) = xdot.segment(3,3);
+                _xdot_tmp.tail(3) = xdot.segment(9,3);
+
+                TaskPoly5th.SetPoly5th(_Time, _x_tmp, _xdot_tmp, TargetPos_Linear, TrajectoryTime, target_size);
+                TaskPoly5th.Poly5th(_Time, _dx_tmp, _dxdot_tmp, _dxddot_tmp);
+                NewTarget=0;
+            }
+            else
+            {
+                TaskPoly5th.Poly5th(_Time, _dx_tmp, _dxdot_tmp, _dxddot_tmp);
+            }
+
+            _dx = TargetPosTask;
+            _dx.segment(3,3) = _dx_tmp.head(3);
+            _dx.segment(9,3) = _dx_tmp.tail(3);
+            _dxdot.segment(3,3) = _dxdot_tmp.head(3);
+            _dxdot.segment(9,3) = _dxdot_tmp.tail(3);
+            _dxddot.segment(3,3) = _dxddot_tmp.head(3);
+            _dxddot.segment(9,3) = _dxddot_tmp.tail(3);
+
+            MotionProcess = MOVE_TASK_CUSTOM9;
         }
         else
         {

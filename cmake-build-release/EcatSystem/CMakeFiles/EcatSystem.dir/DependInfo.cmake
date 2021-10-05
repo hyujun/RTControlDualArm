@@ -1,3 +1,7 @@
+
+# Consider dependencies only in project.
+set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
+
 # The set of languages for which implicit dependencies are needed:
 set(CMAKE_DEPENDS_LANGUAGES
   "C"
@@ -5,7 +9,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/baek/EcatSystem/PDOConfig.c" "/home/baek/cmake-build-release/EcatSystem/CMakeFiles/EcatSystem.dir/PDOConfig.c.o"
+  "/home/baek/Git/RTControlDualArm/EcatSystem/PDOConfig.c" "/home/baek/Git/RTControlDualArm/cmake-build-release/EcatSystem/CMakeFiles/EcatSystem.dir/PDOConfig.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 
@@ -20,7 +24,7 @@ set(CMAKE_C_TARGET_INCLUDE_PATH
   "/opt/etherlab/include"
   )
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/baek/EcatSystem/Ecat_Master.cpp" "/home/baek/cmake-build-release/EcatSystem/CMakeFiles/EcatSystem.dir/Ecat_Master.cpp.o"
+  "/home/baek/Git/RTControlDualArm/EcatSystem/Ecat_Master.cpp" "/home/baek/Git/RTControlDualArm/cmake-build-release/EcatSystem/CMakeFiles/EcatSystem.dir/Ecat_Master.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -33,6 +37,10 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "../KDL"
   "../Network"
   "/opt/etherlab/include"
+  )
+
+# The set of dependency files which are needed:
+set(CMAKE_DEPENDS_DEPENDENCY_FILES
   )
 
 # Targets to which this target links.

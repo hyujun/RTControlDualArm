@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/baek/Git/RTControlDualArm/EcatSystem/PDOConfig.c
+PDOConfig.h
+/home/baek/Git/RTControlDualArm/EcatSystem/PDOConfig.h
+
+/home/baek/Git/RTControlDualArm/EcatSystem/PDOConfig.h
+ecrt.h
+/home/baek/Git/RTControlDualArm/EcatSystem/ecrt.h
+
+/opt/etherlab/include/ecrt.h
+asm/byteorder.h
+-
+linux/types.h
+-
+linux/time.h
+-
+stdlib.h
+-
+stdint.h
+-
+sys/time.h
+-
+

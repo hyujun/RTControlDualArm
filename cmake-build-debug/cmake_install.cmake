@@ -1,8 +1,8 @@
-# Install script for directory: /home/baek
+# Install script for directory: /home/baek/Git/RTControlDualArm
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/baek")
+  set(CMAKE_INSTALL_PREFIX "/home/baek/Git/RTControlDualArm")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -37,12 +37,17 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
+# Set default install directory permissions.
+if(NOT DEFINED CMAKE_OBJDUMP)
+  set(CMAKE_OBJDUMP "/usr/bin/objdump")
+endif()
+
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/baek/cmake-build-debug/Control/cmake_install.cmake")
-  include("/home/baek/cmake-build-debug/EcatSystem/cmake_install.cmake")
-  include("/home/baek/cmake-build-debug/KDL/cmake_install.cmake")
-  include("/home/baek/cmake-build-debug/Network/cmake_install.cmake")
+  include("/home/baek/Git/RTControlDualArm/cmake-build-debug/Control/cmake_install.cmake")
+  include("/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/cmake_install.cmake")
+  include("/home/baek/Git/RTControlDualArm/cmake-build-debug/KDL/cmake_install.cmake")
+  include("/home/baek/Git/RTControlDualArm/cmake-build-debug/Network/cmake_install.cmake")
 
 endif()
 
@@ -54,5 +59,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/baek/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/baek/Git/RTControlDualArm/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

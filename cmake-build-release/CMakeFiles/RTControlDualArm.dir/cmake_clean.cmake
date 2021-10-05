@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/RTControlDualArm.dir/RTClient.cpp.o"
-  "RTControlDualArm.pdb"
   "RTControlDualArm"
+  "RTControlDualArm.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

@@ -5,31 +5,31 @@
 		<Option title="EcatSystem"/>
 		<Option makefile_is_custom="1"/>
 		<Option compiler="gcc"/>
-		<Option virtualFolders="CMake Files\;CMake Files\Control\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\usr\;CMake Files\..\..\usr\lib\;CMake Files\..\..\usr\lib\cmake\;CMake Files\..\..\usr\lib\cmake\eigen3\;CMake Files\EcatSystem\;CMake Files\modules\;CMake Files\KDL\;CMake Files\Network\;"/>
+		<Option virtualFolders="CMake Files\;CMake Files\Control\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\usr\;CMake Files\..\..\..\..\usr\lib\;CMake Files\..\..\..\..\usr\lib\cmake\;CMake Files\..\..\..\..\usr\lib\cmake\eigen3\;CMake Files\EcatSystem\;CMake Files\modules\;CMake Files\KDL\;CMake Files\Network\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="/home/baek/cmake-build-debug/EcatSystem"/>
+				<Option working_dir="/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="EcatSystem">
-				<Option output="/home/baek/cmake-build-debug/EcatSystem/libEcatSystemd.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/baek/cmake-build-debug/EcatSystem"/>
+				<Option output="/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/libEcatSystemd.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem"/>
 				<Option object_output="./"/>
 				<Option type="2"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/home/baek/Git/RTControlDualArm/bin/inc"/>
 					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
-					<Add directory="/home/baek/Control"/>
-					<Add directory="/home/baek/EcatSystem"/>
-					<Add directory="/home/baek/KDL"/>
-					<Add directory="/home/baek/Network"/>
+					<Add directory="/home/baek/Git/RTControlDualArm/Control"/>
+					<Add directory="/home/baek/Git/RTControlDualArm/EcatSystem"/>
+					<Add directory="/home/baek/Git/RTControlDualArm/KDL"/>
+					<Add directory="/home/baek/Git/RTControlDualArm/Network"/>
 					<Add directory="/opt/etherlab/include"/>
 					<Add directory="/usr/include/c++/7"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
@@ -41,25 +41,25 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 EcatSystem"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 EcatSystem"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="EcatSystem/fast">
-				<Option output="/home/baek/cmake-build-debug/EcatSystem/libEcatSystemd.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/baek/cmake-build-debug/EcatSystem"/>
+				<Option output="/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/libEcatSystemd.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem"/>
 				<Option object_output="./"/>
 				<Option type="2"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/baek/bin/inc"/>
+					<Add directory="/home/baek/Git/RTControlDualArm/bin/inc"/>
 					<Add directory="/usr/src/linux-headers-4.9.90-xenomai-3.0.9"/>
-					<Add directory="/home/baek/Control"/>
-					<Add directory="/home/baek/EcatSystem"/>
-					<Add directory="/home/baek/KDL"/>
-					<Add directory="/home/baek/Network"/>
+					<Add directory="/home/baek/Git/RTControlDualArm/Control"/>
+					<Add directory="/home/baek/Git/RTControlDualArm/EcatSystem"/>
+					<Add directory="/home/baek/Git/RTControlDualArm/KDL"/>
+					<Add directory="/home/baek/Git/RTControlDualArm/Network"/>
 					<Add directory="/opt/etherlab/include"/>
 					<Add directory="/usr/include/c++/7"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
@@ -71,62 +71,62 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 EcatSystem/fast"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 EcatSystem/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/EcatSystem/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/baek/EcatSystem/Ecat_Master.cpp">
+		<Unit filename="/home/baek/Git/RTControlDualArm/EcatSystem/Ecat_Master.cpp">
 			<Option target="EcatSystem"/>
 		</Unit>
-		<Unit filename="/home/baek/EcatSystem/Ecat_Master.h">
+		<Unit filename="/home/baek/Git/RTControlDualArm/EcatSystem/Ecat_Master.h">
 			<Option target="EcatSystem"/>
 		</Unit>
-		<Unit filename="/home/baek/EcatSystem/PDOConfig.c">
+		<Unit filename="/home/baek/Git/RTControlDualArm/EcatSystem/PDOConfig.c">
 			<Option target="EcatSystem"/>
 		</Unit>
-		<Unit filename="/home/baek/EcatSystem/PDOConfig.h">
+		<Unit filename="/home/baek/Git/RTControlDualArm/EcatSystem/PDOConfig.h">
 			<Option target="EcatSystem"/>
 		</Unit>
-		<Unit filename="/home/baek/CMakeLists.txt">
+		<Unit filename="/home/baek/Git/RTControlDualArm/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
-		<Unit filename="/home/baek/Control/CMakeLists.txt">
+		<Unit filename="/home/baek/Git/RTControlDualArm/Control/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Control\"/>
 		</Unit>
-		<Unit filename="/home/baek/../../usr/lib/cmake/eigen3/Eigen3Config.cmake">
-			<Option virtualFolder="CMake Files\..\..\usr\lib\cmake\eigen3\"/>
+		<Unit filename="/home/baek/Git/RTControlDualArm/../../../../usr/lib/cmake/eigen3/Eigen3Config.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\cmake\eigen3\"/>
 		</Unit>
-		<Unit filename="/home/baek/../../usr/lib/cmake/eigen3/Eigen3ConfigVersion.cmake">
-			<Option virtualFolder="CMake Files\..\..\usr\lib\cmake\eigen3\"/>
+		<Unit filename="/home/baek/Git/RTControlDualArm/../../../../usr/lib/cmake/eigen3/Eigen3ConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\cmake\eigen3\"/>
 		</Unit>
-		<Unit filename="/home/baek/../../usr/lib/cmake/eigen3/Eigen3Targets.cmake">
-			<Option virtualFolder="CMake Files\..\..\usr\lib\cmake\eigen3\"/>
+		<Unit filename="/home/baek/Git/RTControlDualArm/../../../../usr/lib/cmake/eigen3/Eigen3Targets.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\cmake\eigen3\"/>
 		</Unit>
-		<Unit filename="/home/baek/EcatSystem/CMakeLists.txt">
+		<Unit filename="/home/baek/Git/RTControlDualArm/EcatSystem/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\EcatSystem\"/>
 		</Unit>
-		<Unit filename="/home/baek/modules/CMakeFunctions.cmake">
+		<Unit filename="/home/baek/Git/RTControlDualArm/modules/CMakeFunctions.cmake">
 			<Option virtualFolder="CMake Files\modules\"/>
 		</Unit>
-		<Unit filename="/home/baek/modules/FindEtherlab.cmake">
+		<Unit filename="/home/baek/Git/RTControlDualArm/modules/FindEtherlab.cmake">
 			<Option virtualFolder="CMake Files\modules\"/>
 		</Unit>
-		<Unit filename="/home/baek/modules/FindKernelHeaders.cmake">
+		<Unit filename="/home/baek/Git/RTControlDualArm/modules/FindKernelHeaders.cmake">
 			<Option virtualFolder="CMake Files\modules\"/>
 		</Unit>
-		<Unit filename="/home/baek/modules/FindPoco.cmake">
+		<Unit filename="/home/baek/Git/RTControlDualArm/modules/FindPoco.cmake">
 			<Option virtualFolder="CMake Files\modules\"/>
 		</Unit>
-		<Unit filename="/home/baek/modules/FindXenomai.cmake">
+		<Unit filename="/home/baek/Git/RTControlDualArm/modules/FindXenomai.cmake">
 			<Option virtualFolder="CMake Files\modules\"/>
 		</Unit>
-		<Unit filename="/home/baek/KDL/CMakeLists.txt">
+		<Unit filename="/home/baek/Git/RTControlDualArm/KDL/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\KDL\"/>
 		</Unit>
-		<Unit filename="/home/baek/Network/CMakeLists.txt">
+		<Unit filename="/home/baek/Git/RTControlDualArm/Network/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Network\"/>
 		</Unit>
 	</Project>

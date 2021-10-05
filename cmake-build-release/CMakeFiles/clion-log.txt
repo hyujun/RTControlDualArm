@@ -1,4 +1,4 @@
-/usr/bin/cmake -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - Unix Makefiles" /home/baek
+/snap/clion/164/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" /home/baek/Git/RTControlDualArm
 -- Boost version: 106501
 -- Found Etherlab: /opt/etherlab/lib/libethercat.a;/opt/etherlab/lib/libethercat_rtdm.a
 -- Etherlab_INC_DIRS = /opt/etherlab/include
@@ -19,12 +19,12 @@
 -- Compiler version : 7.5.0
 -- Build type       : Release
 -- BUILD_SHARED_LIBS: TRUE
--- Install path     : /home/baek
+-- Install path     : /home/baek/Git/RTControlDualArm
 -- CXX_FLAGS        :  -std=c++17 -Wall -Wextra -fPIC
 -- CXX_FLAGS_RELEASE: -O2 -DNDEBUG
--- CMAKE_SOURCE_DIR : /home/baek
--- CMAKE_BINARY_DIR : /home/baek/cmake-build-release
+-- CMAKE_SOURCE_DIR : /home/baek/Git/RTControlDualArm
+-- CMAKE_BINARY_DIR : /home/baek/Git/RTControlDualArm/cmake-build-release
 -- 
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/baek/cmake-build-release
+-- Build files have been written to: /home/baek/Git/RTControlDualArm/cmake-build-release

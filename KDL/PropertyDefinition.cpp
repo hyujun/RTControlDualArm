@@ -4,18 +4,18 @@
 #define ENC_OFFSET_J2 17508097
 
 #define ENC_OFFSET_J3 -105635
-#define ENC_OFFSET_J4 -48224
+#define ENC_OFFSET_J4 -551155
 #define ENC_OFFSET_J5 -43757
 #define ENC_OFFSET_J6 -937000
-#define ENC_OFFSET_J7 120231
+#define ENC_OFFSET_J7 -3565478
 #define ENC_OFFSET_J8 -135011
 #define ENC_OFFSET_J9 -34455
 
 #define ENC_OFFSET_J10 183583133
-#define ENC_OFFSET_J11 3993371
-#define ENC_OFFSET_J12 -16688222
+#define ENC_OFFSET_J11 189692
+#define ENC_OFFSET_J12 218371
 #define ENC_OFFSET_J13 26603885
-#define ENC_OFFSET_J14 -2320241
+#define ENC_OFFSET_J14 -344443
 #define ENC_OFFSET_J15 -431090
 #define ENC_OFFSET_J16 -161350
 
@@ -83,7 +83,7 @@ robot_kinematic_info serial_Kinematic_info[] = {
 				0.0, -325.0e-3, 260.0e-3,
 				0.0, 0.0, 0.0,
                 0.0, -325.0e-3, 169.0e-3},		// 8
-		{0, -1, 0,
+		{0, 1, 0,
 				0.0, -325.0e-3, 169.0e-3,
 
 #if defined(_WITH_HAND_)
@@ -121,7 +121,7 @@ robot_kinematic_info serial_Kinematic_info[] = {
 				0.0, 325.0e-3, 260.0e-3,
                 0.0, 0.0, 0.0,
                 0.0, 325.0e-3, 169.0e-3},	// 14
-		{1, 0, 0,
+		{0, -1, 0,
 				0.0, 325.0e-3, 169.0e-3,
 
 #if defined(_WITH_HAND_)

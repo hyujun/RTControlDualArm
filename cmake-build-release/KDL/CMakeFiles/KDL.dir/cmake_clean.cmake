@@ -4,8 +4,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/KDL.dir/PoEKinematics.cpp.o"
   "CMakeFiles/KDL.dir/PropertyDefinition.cpp.o"
   "CMakeFiles/KDL.dir/SerialManipulator.cpp.o"
-  "libKDL.pdb"
   "libKDL.a"
+  "libKDL.pdb"
 )
 
 # Per-language clean rules from dependency scanning.
