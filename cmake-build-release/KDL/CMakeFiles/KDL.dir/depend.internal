@@ -583,11 +583,6 @@ KDL/CMakeFiles/KDL.dir/PoEKinematics.cpp.o
  /usr/include/eigen3/Eigen/src/Core/util/ReenableStupidWarnings.h
  /usr/include/eigen3/Eigen/src/Core/util/StaticAssert.h
  /usr/include/eigen3/Eigen/src/Core/util/XprHelper.h
- /usr/include/eigen3/Eigen/src/Eigenvalues/./ComplexSchur.h
- /usr/include/eigen3/Eigen/src/Eigenvalues/./HessenbergDecomposition.h
- /usr/include/eigen3/Eigen/src/Eigenvalues/./RealQZ.h
- /usr/include/eigen3/Eigen/src/Eigenvalues/./RealSchur.h
- /usr/include/eigen3/Eigen/src/Eigenvalues/./Tridiagonalization.h
  /usr/include/eigen3/Eigen/src/Eigenvalues/ComplexEigenSolver.h
  /usr/include/eigen3/Eigen/src/Eigenvalues/ComplexSchur.h
  /usr/include/eigen3/Eigen/src/Eigenvalues/ComplexSchur_LAPACKE.h

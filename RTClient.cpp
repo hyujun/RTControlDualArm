@@ -1,4 +1,5 @@
 
+
 #ifndef __XENO__
 #define __XENO__
 #endif
@@ -157,9 +158,9 @@ void RTRArm_run( void *arg )
     VectorXd KdNull = VectorXd::Constant(16, 3.0);
 
     KpTask.segment(0,3).setConstant(100.0);
-    KpTask.segment(3,3).setConstant(1300.0);
+    KpTask.segment(3,3).setConstant(1100.0);
     KpTask.segment(6,3).setConstant(100.0);
-    KpTask.segment(9,3).setConstant(1300.0);
+    KpTask.segment(9,3).setConstant(1100.0);
 
     KdTask.segment(0,3).setConstant(5.0);
     KdTask.segment(3,3).setConstant(55.0);
@@ -249,6 +250,8 @@ void RTRArm_run( void *arg )
                 DualArm->pKin->GetForwardKinematics(ActualPos_Task);
                 motion->TaskMotion( TargetPos_Task, TargetVel_Task, TargetAcc_Task, findPos_Task, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
 			    Control->TaskInvDynController(TargetPos_Task, TargetVel_Task, TargetAcc_Task, ActualPos_Rad, ActualVel_Rad, TargetToq, double_dt, ControlIndex2 );
+                Control->GetControllerStates(TargetPos_Rad, TargetVel_Rad, ErrorPos_Task );
+
             }
 			else if( ControlIndex1 == CTRLMODE_IMPEDANCE_TASK )
             {
@@ -277,7 +280,7 @@ void RTRArm_run( void *arg )
 			{
 				if( double_gt >= 0.1 )
 				{
-					//ecat_elmo[j].writeTorque(TargetTor[j]);
+					ecat_elmo[j].writeTorque(TargetTor[j]);
 				}
 				else
 				{
@@ -345,7 +348,7 @@ void tcpip_run(void *arg)
     TCP_Packet_Task packet_task_send;
     void *msg;
 
-    RTIME tcp_cycle_ns = 5000e3;
+    RTIME tcp_cycle_ns = 8000e3;
     rt_task_set_periodic(nullptr, TM_NOW, tcp_cycle_ns); //ms
     while(true)
     {

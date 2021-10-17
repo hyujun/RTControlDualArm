@@ -6,18 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/baek/Git/RTControlDualArm/KDL/LieDynamics.h
-cmath
--
-Eigen/Dense
--
-Eigen/SVD
--
-PropertyDefinition.h
-/home/baek/Git/RTControlDualArm/KDL/PropertyDefinition.h
-PoEKinematics.h
-/home/baek/Git/RTControlDualArm/KDL/PoEKinematics.h
-
 /home/baek/Git/RTControlDualArm/KDL/LieOperator.h
 iostream
 -
@@ -25,6 +13,10 @@ Eigen/Dense
 -
 omp.h
 -
+
+/home/baek/Git/RTControlDualArm/KDL/PoEKinematics.cpp
+PoEKinematics.h
+/home/baek/Git/RTControlDualArm/KDL/PoEKinematics.h
 
 /home/baek/Git/RTControlDualArm/KDL/PoEKinematics.h
 cmath
@@ -34,31 +26,7 @@ LieOperator.h
 PropertyDefinition.h
 /home/baek/Git/RTControlDualArm/KDL/PropertyDefinition.h
 
-/home/baek/Git/RTControlDualArm/KDL/PropertyDefinition.cpp
-PropertyDefinition.h
 /home/baek/Git/RTControlDualArm/KDL/PropertyDefinition.h
-
-/home/baek/Git/RTControlDualArm/KDL/PropertyDefinition.h
-
-/home/baek/Git/RTControlDualArm/KDL/SerialManipulator.cpp
-SerialManipulator.h
-/home/baek/Git/RTControlDualArm/KDL/SerialManipulator.h
-
-/home/baek/Git/RTControlDualArm/KDL/SerialManipulator.h
-cmath
--
-memory
--
-LieDynamics.h
-/home/baek/Git/RTControlDualArm/KDL/LieDynamics.h
-PoEKinematics.h
-/home/baek/Git/RTControlDualArm/KDL/PoEKinematics.h
-PropertyDefinition.h
-/home/baek/Git/RTControlDualArm/KDL/PropertyDefinition.h
-motionlibrary.h
-/home/baek/Git/RTControlDualArm/KDL/motionlibrary.h
-
-/home/baek/Git/RTControlDualArm/KDL/motionlibrary.h
 
 /usr/include/eigen3/Eigen/Cholesky
 Core

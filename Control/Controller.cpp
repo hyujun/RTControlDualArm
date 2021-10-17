@@ -69,7 +69,8 @@ Controller::Controller(std::shared_ptr<SerialManipulator> Manipulator)
 #else
     GainWeightFactor.setZero(m_Jnum);
     GainWeightFactor.setConstant(95.0);
-    GainWeightFactor(0) = 120.0;
+    GainWeightFactor(0) = 100.0;
+
     GainWeightFactor(7) = 300.0;
     GainWeightFactor(8) = 300.0;
     GainWeightFactor(14) = 300.0;
@@ -207,7 +208,7 @@ void Controller::InvDynController(const VectorXd &_q,
 
 	e = _dq - _q;
 	e_dev = _dqdot - _qdot;
-	//e_int += e*_dt*1e-6;
+	//e_int += e*_dt;
 	//e_int_sat = tanh(e_int);
 
 	FrictionCompensator(_qdot, _dqdot);
@@ -217,6 +218,7 @@ void Controller::InvDynController(const VectorXd &_q,
 	u0.noalias() += _dqddot;
 	u0.noalias() += Kd.cwiseProduct(e_dev);
 	u0.noalias() += Kp.cwiseProduct(e);
+    //	u0.noalias() += Ki.cwiseProduct(e_int);
     _Toq = G;
     _Toq.noalias() += M*u0;
 #if !defined(__SIMULATION__)
@@ -598,8 +600,8 @@ void Controller::TaskImpedanceController(const VectorXd &_q, const VectorXd &_qd
         u04.noalias() += KdImpNull.cwiseProduct(dqdotN - _qdot);
 
         MatrixXd weight;
-        //weight.setIdentity(16,16);
-        weight = M;
+        weight.setIdentity(16,16);
+        //weight = M;
         pManipulator->pKin->GetWeightDampedpInvJacobian(_dx, weight, AnalyticJacobian, pInvMat);
 
         Matrix_temp = Eigen::MatrixXd::Identity(16,16);

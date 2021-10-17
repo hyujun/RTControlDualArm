@@ -6,23 +6,23 @@
 
 #IncludeRegexTransform: 
 
-/home/baek/Git/RTControlDualArm/Control/Motion.cpp
-Motion.h
-/home/baek/Git/RTControlDualArm/Control/Motion.h
+/home/baek/Git/RTControlDualArm/Control/Controller.cpp
+Controller.h
+/home/baek/Git/RTControlDualArm/Control/Controller.h
+utility
+-
 
-/home/baek/Git/RTControlDualArm/Control/Motion.h
-Trajectory.h
-/home/baek/Git/RTControlDualArm/Control/Trajectory.h
+/home/baek/Git/RTControlDualArm/Control/Controller.h
+cmath
+-
+Eigen/Dense
+-
+../KDL/PropertyDefinition.h
+/home/baek/Git/RTControlDualArm/KDL/PropertyDefinition.h
 ../KDL/SerialManipulator.h
 /home/baek/Git/RTControlDualArm/KDL/SerialManipulator.h
 ../KDL/LieOperator.h
 /home/baek/Git/RTControlDualArm/KDL/LieOperator.h
-
-/home/baek/Git/RTControlDualArm/Control/Trajectory.h
-Eigen/Dense
--
-cmath
--
 
 /home/baek/Git/RTControlDualArm/KDL/LieDynamics.h
 cmath
