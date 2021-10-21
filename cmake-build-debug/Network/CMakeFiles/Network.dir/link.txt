@@ -1,2 +1,2 @@
-/usr/bin/ar qc libNetworkd.a 
+/usr/bin/ar qc libNetworkd.a  
 /usr/bin/ranlib libNetworkd.a

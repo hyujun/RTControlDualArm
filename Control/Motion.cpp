@@ -69,13 +69,13 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
 		else
 		{
 			TargetPos.setZero(16);
-            TargetPos(0) = -0.2*DEGtoRAD;
+            TargetPos(0) = 0.2*DEGtoRAD;
 
             TargetPos(5) = -6.0*DEGtoRAD;
             TargetPos(12) = 6.0*DEGtoRAD;
             TargetPos(6) = -60.0*DEGtoRAD;
             TargetPos(13) = 60.0*DEGtoRAD;
-			TrajectoryTime=4.0;
+			TrajectoryTime=5.0;
 			NewTarget=1;
             _Target = TargetPos;
 			_StatusWord = 0;
@@ -119,7 +119,7 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
 
             _Target = TargetPos;
 
-			TrajectoryTime=4.0;
+			TrajectoryTime=6.0;
 			NewTarget=1;
 			_StatusWord = 0;
 		}
@@ -142,28 +142,29 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         else
         {
             TargetPos.setZero(16);
-            TargetPos(0) = -0.01*DEGtoRAD;
-            TargetPos(1) = -15.18*DEGtoRAD;
 
-            TargetPos(2) = -1.67*DEGtoRAD;
+            TargetPos(0) = 0.0*DEGtoRAD;
+            TargetPos(1) = -10.99*DEGtoRAD;
+
+            TargetPos(2) = -12.27*DEGtoRAD;
             TargetPos(2+7)=-TargetPos(2);
-            TargetPos(3) = -37.17*DEGtoRAD;
+            TargetPos(3) = -37.84*DEGtoRAD;
             TargetPos(3+7)=-TargetPos(3);
-            TargetPos(4) = -1.01*DEGtoRAD;
+            TargetPos(4) = -5.99*DEGtoRAD;
             TargetPos(4+7)=-TargetPos(4);
-            TargetPos(5) = -6.22*DEGtoRAD;
+            TargetPos(5) = -8.87*DEGtoRAD;
             TargetPos(5+7)=-TargetPos(5);
-            TargetPos(6) = -74.76*DEGtoRAD;
+            TargetPos(6) = -75.95*DEGtoRAD;
             TargetPos(6+7)=-TargetPos(6);
-            TargetPos(7) = -0.23*DEGtoRAD;
+            TargetPos(7) = 1.31*DEGtoRAD;
             TargetPos(7+7)=-TargetPos(7);
-            TargetPos(8) = 6.70*DEGtoRAD;
+            TargetPos(8) = 18.79*DEGtoRAD;
             TargetPos(8+7)=-TargetPos(8);
 
 
             _Target = TargetPos;
 
-            TrajectoryTime=5.0;
+            TrajectoryTime=6.0;
             NewTarget=1;
             _StatusWord = 0;
         }
@@ -552,7 +553,7 @@ uint16_t Motion::TaskMotion( VectorXd &_dx, VectorXd &_dxdot, VectorXd &_dxddot,
             TargetPosTask(2) = start_pos(2);
 
             TargetPosTask(3) = start_pos(3);
-            TargetPosTask(4) = -0.5;
+            TargetPosTask(4) = -0.41;
             TargetPosTask(5) = start_pos(5);
 
 
@@ -647,7 +648,7 @@ uint16_t Motion::TaskMotion( VectorXd &_dx, VectorXd &_dxdot, VectorXd &_dxddot,
 
             TargetPosTask(3) = start_pos(3);
             TargetPosTask(4) = start_pos(4);
-            TargetPosTask(5) = 0.37;
+            TargetPosTask(5) = 0.34;
 
 
             TargetPosTask(6) = start_pos(6);

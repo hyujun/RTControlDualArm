@@ -1,4 +1,4 @@
-/snap/clion/169/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" /home/baek/Git/RTControlDualArm
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - Unix Makefiles" /home/baek/Git/RTControlDualArm
 -- Boost version: 106501
 -- Found Etherlab: /opt/etherlab/lib/libethercat.a;/opt/etherlab/lib/libethercat_rtdm.a
 -- Etherlab_INC_DIRS = /opt/etherlab/include

@@ -27,16 +27,6 @@
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="install/local">
-				<Option working_dir="/home/baek/Git/RTControlDualArm/cmake-build-debug"/>
-				<Option type="4"/>
-				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 install/local"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
 			<Target title="edit_cache">
 				<Option working_dir="/home/baek/Git/RTControlDualArm/cmake-build-debug"/>
 				<Option type="4"/>
@@ -64,8 +54,8 @@
 					<Add directory="/usr/xenomai/include/cobalt"/>
 					<Add directory="/usr/xenomai/include"/>
 					<Add directory="/usr/xenomai/include/alchemy"/>
-					<Add directory="/opt/etherlab/include"/>
 					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/opt/etherlab/include"/>
 					<Add directory="/usr/include/c++/7"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
 					<Add directory="/usr/include/c++/7/backward"/>
@@ -99,8 +89,8 @@
 					<Add directory="/usr/xenomai/include/cobalt"/>
 					<Add directory="/usr/xenomai/include"/>
 					<Add directory="/usr/xenomai/include/alchemy"/>
-					<Add directory="/opt/etherlab/include"/>
 					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/opt/etherlab/include"/>
 					<Add directory="/usr/include/c++/7"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
 					<Add directory="/usr/include/c++/7/backward"/>
@@ -127,21 +117,31 @@
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="install">
-				<Option working_dir="/home/baek/Git/RTControlDualArm/cmake-build-debug"/>
-				<Option type="4"/>
-				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 install"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
 			<Target title="list_install_components">
 				<Option working_dir="/home/baek/Git/RTControlDualArm/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
 					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 list_install_components"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/local">
+				<Option working_dir="/home/baek/Git/RTControlDualArm/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 install/local"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install">
+				<Option working_dir="/home/baek/Git/RTControlDualArm/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 install"/>
 					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/baek/Git/RTControlDualArm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>

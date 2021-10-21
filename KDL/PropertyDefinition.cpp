@@ -7,7 +7,8 @@
 #define ENC_OFFSET_J4 -551155
 #define ENC_OFFSET_J5 -43757
 #define ENC_OFFSET_J6 -937000
-#define ENC_OFFSET_J7 137319
+#define ENC_OFFSET_J7 -9250000
+
 #define ENC_OFFSET_J8 -135011
 #define ENC_OFFSET_J9 -34455
 
@@ -15,7 +16,7 @@
 #define ENC_OFFSET_J11 -278506
 #define ENC_OFFSET_J12 218371
 #define ENC_OFFSET_J13 26603885
-#define ENC_OFFSET_J14 -107615
+#define ENC_OFFSET_J14 10100000
 #define ENC_OFFSET_J15 -431090
 #define ENC_OFFSET_J16 -161350
 
@@ -203,7 +204,7 @@ robot_dynamic_info serial_Dynamic_info[] = {
 				0.0039, 0.3248, 0.18},	        // left-arm6, Joint15
 
 #if defined(_WITH_HAND_)
-		{1.15,
+		{1.8,
 				0.0066, -0.0002, -0.0006, 0.0082, 0.0007, 0.0027,
 				0.0194, 0.3117, 0.0730},		    // left-arm7, Joint16, Wrist2, KIST hand
         //{0.5,

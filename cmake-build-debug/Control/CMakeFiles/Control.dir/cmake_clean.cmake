@@ -3,8 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/Control.dir/KistHand.cpp.o"
   "CMakeFiles/Control.dir/Motion.cpp.o"
   "CMakeFiles/Control.dir/Trajectory.cpp.o"
-  "libControld.a"
   "libControld.pdb"
+  "libControld.a"
 )
 
 # Per-language clean rules from dependency scanning.
