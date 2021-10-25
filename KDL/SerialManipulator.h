@@ -18,7 +18,6 @@
 #define RADtoDEG 180/M_PI		/**<constant of radian to degree*/
 #define DEGtoRAD M_PI/180		/**<constant of degree to radian*/
 
-#define sign(a) (((a)<0) ? -1 : ((a)>0))  /**<Definition of Signum function*/
 
 /**
  * @brief Seria lManipulator info update

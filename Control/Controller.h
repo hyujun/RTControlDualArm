@@ -13,11 +13,13 @@
 #include "../KDL/PropertyDefinition.h"
 #include "../KDL/SerialManipulator.h"
 #include "../KDL/LieOperator.h"
+#include <math.h>       /* tanh, log */
 
 #define KpBase 		20    	/**<Inital value of Kp*/
 #define KdBase 		1		/**<Inital value of Kd*/
 #define KiBase 		100		/**<Inital value of Ki*/
 #define HinfBase 	5		/**<Inital value of H-infinity Gain*/
+
 
 /**
  * @brief control and trajecotry namespace for manipulator
@@ -85,7 +87,9 @@ public:
 	void TaskImpedanceController( const VectorXd &_q, const VectorXd &_qdot, const VectorXd &_dx, const VectorXd &_dxdot, const VectorXd &_dxddot, const VectorXd &_sensor, VectorXd &_Toq, const int mode );
 	void FrictionIdentification( const VectorXd &_q, const VectorXd &_qdot, VectorXd &_dq, VectorXd &_dqdot, VectorXd &_dqddot, VectorXd &_Toq, const double &gt );
 	void FrictionCompensator( const VectorXd &_qdot, const VectorXd &_dqdot );
-	/**
+    void FrictionCompensator2( const VectorXd &_dqdot);
+
+    /**
 	 * @brief joint input torque saturator
 	 * @param[in] p_toq joint input torque as control input
 	 * @param[in] maxtoq maximum torque motor can handle

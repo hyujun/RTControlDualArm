@@ -69,18 +69,56 @@ Controller::Controller(std::shared_ptr<SerialManipulator> Manipulator)
 #else
     GainWeightFactor.setZero(m_Jnum);
     GainWeightFactor.setConstant(95.0);
-    GainWeightFactor(0) = 100.0;
 
-    GainWeightFactor(7) = 300.0;
-    GainWeightFactor(8) = 300.0;
-    GainWeightFactor(14) = 300.0;
-    GainWeightFactor(15) = 300.0;
+    GainWeightFactor(5) = 150.0;
+    GainWeightFactor(12) = 150.0;
+    GainWeightFactor(3) = 100.0;
+
+    GainWeightFactor(6) = 110.0;
+    GainWeightFactor(7) = 200.0;//R_forearm
+    GainWeightFactor(8) = 200.0;//R_wrist
+    GainWeightFactor(9) = 95.0;
+
+    GainWeightFactor(6) = 110.0;
+    GainWeightFactor(14) = 250.0;//L_forearm
+    GainWeightFactor(15) = 200.0;//L_wrist
 
 	Kp = GainWeightFactor*KpBase;
 	Kd = GainWeightFactor*KdBase;
-	Ki = GainWeightFactor*KiBase;
 
-	dq.resize(m_Jnum);
+    Kd(0) =Kd(0)*0.5;
+    Kd(1) =Kd(1)*0.5;
+    Kd(6) =Kd(6)*0.5;
+    Kd(13) =Kd(13)*0.5;
+
+//    Kd(3,3) =Kd(3,3)*0.87;
+//    Kd(10,10) =Kd(10,10)*0.87;
+//
+//    Kd(5,5) =Kd(5,5)*1.3;
+//    Kd(12,12) =Kd(12,12)*1.3;
+//
+//    Kd(7) =Kd(7)*1;//R_forearm
+//    Kd(8) =Kd(8)*1.2;//R_wrist
+    Kd(9) =Kd(9)*0.5;
+    Kd(10) =Kd(10)*0.5;
+    Kd(12) =Kd(12)*0.5;
+
+
+//    Kd(14) =Kd(14)*1.2;//L_forearm
+//    Kd(15) =Kd(15)*1.2;//L_wrist
+
+
+
+
+
+    Ki = GainWeightFactor*KiBase;
+
+
+
+
+
+
+    dq.resize(m_Jnum);
 	dqdot.resize(m_Jnum);
 	dqddot.resize(m_Jnum);
 	dq_old.setZero(m_Jnum);
@@ -193,6 +231,41 @@ void Controller::PDGravController( const VectorXd &_q, const VectorXd &_qdot, co
     _Toq.noalias() += FrictionTorque;
 #endif
 }
+    double SignFunction(double value)
+    {
+        if (value<0.0f)
+        {
+            return -1.0f;
+        }
+        else if(value>0.0f)
+        {
+            return 1.0f;
+        }
+        else return 0.0f;
+        return 0.0f;
+    }
+
+    void Controller::FrictionCompensator2( const VectorXd &_dqdot)
+    {
+        FrictionTorque.setZero(m_Jnum);
+
+//    FrictionTorque(0) = 18.3f*0.8*SignFunction(_dqdot(0));
+//    FrictionTorque(1) = 25.6f*0.5*SignFunction(_dqdot(1));
+    FrictionTorque(2) = 6.8f*SignFunction(_dqdot(2));
+    FrictionTorque(3) = 4.3f*SignFunction(_dqdot(3));
+    FrictionTorque(4) = 7.2f*SignFunction(_dqdot(4));
+    FrictionTorque(5) = 4.08f*SignFunction(_dqdot(5));
+    FrictionTorque(6) = 4.24f*SignFunction(_dqdot(6));
+    FrictionTorque(7) = 3.04f*SignFunction(_dqdot(7));
+    FrictionTorque(8) = 2.56f*SignFunction(_dqdot(8));
+    FrictionTorque(9) = 9.2f*SignFunction(_dqdot(9));
+    FrictionTorque(10) = 5.2f*SignFunction(_dqdot(10));
+    FrictionTorque(11) = 7.2f*SignFunction(_dqdot(11));
+    FrictionTorque(12) = 4.4*SignFunction(_dqdot(12));
+    FrictionTorque(13) = 2.4*SignFunction(_dqdot(13));
+    FrictionTorque(14) = 3.6f*SignFunction(_dqdot(14));
+    FrictionTorque(15) = 2.24f*SignFunction(_dqdot(15));
+    }
 
 void Controller::InvDynController(const VectorXd &_q,
                                   const VectorXd &_qdot,
@@ -211,16 +284,24 @@ void Controller::InvDynController(const VectorXd &_q,
 	//e_int += e*_dt;
 	//e_int_sat = tanh(e_int);
 
-	FrictionCompensator(_qdot, _dqdot);
+//	FrictionCompensator(_qdot, _dqdot);
+   FrictionCompensator2( _dqdot);
 
     VectorXd u0;
 	u0.setZero(m_Jnum);
 	u0.noalias() += _dqddot;
 	u0.noalias() += Kd.cwiseProduct(e_dev);
 	u0.noalias() += Kp.cwiseProduct(e);
-    //	u0.noalias() += Ki.cwiseProduct(e_int);
+   // u0.noalias() += Ki.cwiseProduct(e_int);
+
+
     _Toq = G;
     _Toq.noalias() += M*u0;
+    _Toq.noalias() += FrictionTorque;
+//    _Toq.setZero(m_Jnum);
+//    _Toq(1)= ;
+
+
 #if !defined(__SIMULATION__)
     //_Toq.noalias() += FrictionTorque;
 #endif
@@ -815,6 +896,5 @@ void Controller::OutputSaturation(double *pInput , double &_MaxInput)
 		}
 	}
 }
-
 
 } /* namespace HYUCtrl */

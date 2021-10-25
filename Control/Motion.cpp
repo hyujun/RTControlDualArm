@@ -69,13 +69,16 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
 		else
 		{
 			TargetPos.setZero(16);
-            TargetPos(0) = 0.2*DEGtoRAD;
+//            TargetPos(0) = -0.0*DEGtoRAD;
+//            TargetPos(7) = -20.0*DEGtoRAD;
+//            TargetPos(8) = 15.0*DEGtoRAD;
+//            TargetPos(8+7) = -15.0*DEGtoRAD;
 
-            TargetPos(5) = -6.0*DEGtoRAD;
-            TargetPos(12) = 6.0*DEGtoRAD;
-            TargetPos(6) = -60.0*DEGtoRAD;
-            TargetPos(13) = 60.0*DEGtoRAD;
-			TrajectoryTime=5.0;
+//            TargetPos(5) = -10.0*DEGtoRAD;
+//            TargetPos(5+7)=-TargetPos(5);
+//            TargetPos(6) = -30.00*DEGtoRAD;
+//            TargetPos(6+7)=-TargetPos(6);
+			TrajectoryTime=6.0;
 			NewTarget=1;
             _Target = TargetPos;
 			_StatusWord = 0;
@@ -99,23 +102,16 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
 		else
 		{
 			TargetPos.setZero(16);
-            TargetPos(0) = -0.1*DEGtoRAD;
-            TargetPos(1) = -5.31*DEGtoRAD;
 
-            TargetPos(2) = -2.58*DEGtoRAD;
-            TargetPos(2+7)=-TargetPos(2);
-            TargetPos(3) = -0.56*DEGtoRAD;
-            TargetPos(3+7)=-TargetPos(3);
-            TargetPos(4) = -12.30*DEGtoRAD;
-            TargetPos(4+7)=-TargetPos(4);
-            TargetPos(5) = -18.71*DEGtoRAD;
-            TargetPos(5+7)=-TargetPos(5);
-            TargetPos(6) = -86.26*DEGtoRAD;
-            TargetPos(6+7)=-TargetPos(6);
-            TargetPos(7) = -48.84*DEGtoRAD;
-            TargetPos(7+7)=-TargetPos(7);
-            TargetPos(8) = -2.06*DEGtoRAD;
-            TargetPos(8+7)=-TargetPos(8);
+//            TargetPos(5) = -30.0*DEGtoRAD;
+//            TargetPos(5+7) =-TargetPos(5);
+
+            TargetPos(6) = -45.0*DEGtoRAD;
+            TargetPos(6+7) =-TargetPos(6);
+
+
+            TargetPos(6) = -30.0*DEGtoRAD;
+            TargetPos(6+7) =-TargetPos(6);
 
             _Target = TargetPos;
 
@@ -143,23 +139,102 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         {
             TargetPos.setZero(16);
 
-            TargetPos(0) = 0.0*DEGtoRAD;
-            TargetPos(1) = -10.99*DEGtoRAD;
 
-            TargetPos(2) = -12.27*DEGtoRAD;
-            TargetPos(2+7)=-TargetPos(2);
-            TargetPos(3) = -37.84*DEGtoRAD;
-            TargetPos(3+7)=-TargetPos(3);
-            TargetPos(4) = -5.99*DEGtoRAD;
-            TargetPos(4+7)=-TargetPos(4);
-            TargetPos(5) = -8.87*DEGtoRAD;
-            TargetPos(5+7)=-TargetPos(5);
-            TargetPos(6) = -75.95*DEGtoRAD;
-            TargetPos(6+7)=-TargetPos(6);
-            TargetPos(7) = 1.31*DEGtoRAD;
-            TargetPos(7+7)=-TargetPos(7);
-            TargetPos(8) = 18.79*DEGtoRAD;
-            TargetPos(8+7)=-TargetPos(8);
+
+
+            TargetPos(6) = -45.0*DEGtoRAD;
+            TargetPos(6+7) =-TargetPos(6);
+
+            TargetPos(8) = -45.0*DEGtoRAD;
+            TargetPos(8+7) =-TargetPos(8);
+
+
+
+            _Target = TargetPos;
+
+            TrajectoryTime=7.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE2 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE2;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+
+            TargetPos(2) = -1.26*DEGtoRAD;
+            TargetPos(3) = -3.15*DEGtoRAD;
+            TargetPos(4) = 0.04*DEGtoRAD;
+            TargetPos(5) = -4.02*DEGtoRAD;
+            TargetPos(6) = -39.09*DEGtoRAD;
+            TargetPos(7) = 0.09*DEGtoRAD;
+            TargetPos(8) = -49.31*DEGtoRAD;
+
+            TargetPos(9) = 0.05*DEGtoRAD;
+            TargetPos(10) = 8.07*DEGtoRAD;
+            TargetPos(11) = 1.03*DEGtoRAD;
+            TargetPos(12) = -0.08*DEGtoRAD;
+            TargetPos(13) = 37.77*DEGtoRAD;
+            TargetPos(14) = 6.72*DEGtoRAD;
+            TargetPos(15) = 45.25*DEGtoRAD;
+
+
+            _Target = TargetPos;
+
+            TrajectoryTime=7.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE3 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE3;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = -1.28*DEGtoRAD;
+            TargetPos(3) = -8.20*DEGtoRAD;
+            TargetPos(4) = 8.04*DEGtoRAD;
+            TargetPos(5) = 1.28*DEGtoRAD;
+            TargetPos(6) = -36.43*DEGtoRAD;
+            TargetPos(7) = 6.10*DEGtoRAD;
+            TargetPos(8) = -45.53*DEGtoRAD;
+
+            TargetPos(9) = 0.06*DEGtoRAD;
+            TargetPos(10) = 11.04*DEGtoRAD;
+            TargetPos(11) = -12.82*DEGtoRAD;
+            TargetPos(12) = -0.08*DEGtoRAD;
+            TargetPos(13) = 40.23*DEGtoRAD;
+            TargetPos(14) = 3.00*DEGtoRAD;
+            TargetPos(15) = 44.72*DEGtoRAD;
 
 
             _Target = TargetPos;
@@ -169,131 +244,479 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
             _StatusWord = 0;
         }
     }
-	else if( MotionCommand == MOVE_CUSTOMIZE )
-	{
+    else if( MotionCommand == MOVE_CUSTOMIZE4 )
+    {
         if( _StatusWord != MotionCommand )
-		{
-			if( NewTarget == 1 )
-			{
-				JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
                 JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
-				NewTarget=0;
-			}
-			else
-				JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
 
-			MotionProcess = MOVE_CUSTOMIZE;
-		}
-		else
-		{
-			TargetPos.setZero();
-            TargetPos = _Target;
-            TargetPos_p = TargetPos;
-			TrajectoryTime=5.0;
-			NewTarget=1;
-			_StatusWord = 0;
-		}
-	}
-	else if( MotionCommand == MOVE_JOINT_CYCLIC )
-	{
-        if( _StatusWord == MotionCommand )
-		{
-			MotionInitTime = _Time;
-			_StatusWord = 0;
-		}
-		else
-		{
-			_T = 18.0;
-			_omega = 2.0*M_PI/_T;
-			_amp = 70;
+            MotionProcess = MOVE_CUSTOMIZE4;
+        }
+        else
+        {
+            TargetPos.setZero(16);
 
-			dq(0) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime));
-			dqdot(0) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime));
-			dqddot(0) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime));
+            TargetPos(2) = -1.27*DEGtoRAD;
+            TargetPos(3) = -7.88*DEGtoRAD;
+            TargetPos(4) = 9.63*DEGtoRAD;
+            TargetPos(5) = 15.76*DEGtoRAD;
+            TargetPos(6) = -44.12*DEGtoRAD;
+            TargetPos(7) = 4.30*DEGtoRAD;
+            TargetPos(8) = -18.37*DEGtoRAD;
 
-			_T = 10.0;
-			_omega = 2.0*M_PI/_T;
-			_amp = 20;
+            TargetPos(9) = 0.06*DEGtoRAD;
+            TargetPos(10) = 10.62*DEGtoRAD;
+            TargetPos(11) = -19.53*DEGtoRAD;
+            TargetPos(12) = -0.08*DEGtoRAD;
+            TargetPos(13) = 26.68*DEGtoRAD;
+            TargetPos(14) = -11.86*DEGtoRAD;
+            TargetPos(15) = 54.39*DEGtoRAD;
 
-			dq(1) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime)+0.8481) - 15*M_PI/180.0;
-			dqdot(1) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime)+0.8481);
-			dqddot(1) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime)+0.8481);
 
-			_T = 7.0;
-			_omega = 2.0*M_PI/_T;
-			_amp = 50;
+            _Target = TargetPos;
 
-			dq(2) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime)+0.6435) - 30*M_PI/180.0;
-			dqdot(2) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime)+0.6435);
-			dqddot(2) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime)+0.6435);
+            TrajectoryTime=10.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE5 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
 
-			dq(2+6) = -dq(2);
-			dqdot(2+6) = -dqdot(2);
-			dqddot(2+6) = -dqddot(2);
+            MotionProcess = MOVE_CUSTOMIZE5;
+        }
+        else
+        {
+            TargetPos.setZero(16);
 
-			_T = 7.0;
-			_omega = 2.0*M_PI/_T;
-			_amp = 50;
+            TargetPos(3) = 20.0*DEGtoRAD;
+            TargetPos(3+7) =-TargetPos(3);
 
-			dq(3) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime)+0.4115) - 20*M_PI/180.0;
-			dqdot(3) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime)+0.4115);
-			dqddot(3) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime)+0.4115);
+            TargetPos(6) =-70.0*DEGtoRAD;
+            TargetPos(6+7) =70.0*DEGtoRAD;
 
-			dq(3+6) = -dq(3);
-			dqdot(3+6) = -dqdot(3);
-			dqddot(3+6) = -dqddot(3);
+            TargetPos(7) =-90.0*DEGtoRAD;
 
-			_T = 7.0;
-			_omega = 2.0*M_PI/_T;
-			_amp = 45;
 
-			dq(4) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime)+0.729) - 30*M_PI/180.0;
-			dqdot(4) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime)+0.729);
-			dqddot(4) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime)+0.729);
 
-			dq(4+6) = -dq(4);
-			dqdot(4+6) = -dqdot(4);
-			dqddot(4+6) = -dqddot(4);
 
-			_T = 7.0;
-			_omega = 2.0*M_PI/_T;
-			_amp = 70.0;
 
-			dq(5) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime));
-			dqdot(5) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime));
-			dqddot(5) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime));
 
-			dq(5+6) = -dq(5);
-			dqdot(5+6) = -dqdot(5);
-			dqddot(5+6) = -dqddot(5);
+            _Target = TargetPos;
 
-			_T = 7.0;
-			_omega = 2.0*M_PI/_T;
-			_amp = 40.0;
+            TrajectoryTime=8.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE6)
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
 
-			dq(6) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime));
-			dqdot(6) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime));
-			dqddot(6) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime));
+            MotionProcess = MOVE_CUSTOMIZE6;
+        }
+        else
+        {
+            TargetPos.setZero(16);
 
-			dq(6+6) = -dq(6);
-			dqdot(6+6) = -dqdot(6);
-			dqddot(6+6) = -dqddot(6);
+            TargetPos(2) = 1.11*DEGtoRAD;
+            TargetPos(3) = 13.26*DEGtoRAD;
+            TargetPos(4) = -1.78*DEGtoRAD;
+            TargetPos(5) = -4.45*DEGtoRAD;
+            TargetPos(6) = -58.74*DEGtoRAD;
+            TargetPos(7) = -90.23*DEGtoRAD;
+            TargetPos(8) = 3.52*DEGtoRAD;
 
-			_T = 7.0;
-			_omega = 2.0*M_PI/_T;
-			_amp = 40.0;
+            TargetPos(3+7) =-13.26*DEGtoRAD;
+            TargetPos(6+7) = 58.74*DEGtoRAD;
 
-			dq(7) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime));
-			dqdot(7) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime));
-			dqddot(7) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime));
 
-			dq(7+6) = dq(7);
-			dqdot(7+6) = dqdot(7);
-			dqddot(7+6) = dqddot(7);
+            _Target = TargetPos;
 
-			MotionProcess = MOVE_JOINT_CYCLIC;
-		}
-	}
+            TrajectoryTime=7.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE7 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE7;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = 0.04*DEGtoRAD;
+            TargetPos(3) = 4.36*DEGtoRAD;
+            TargetPos(4) = -4.66*DEGtoRAD;
+            TargetPos(5) = -8.86*DEGtoRAD;
+            TargetPos(6) = -48.34*DEGtoRAD;
+            TargetPos(7) = -89.77*DEGtoRAD;
+            TargetPos(8) = 8.57*DEGtoRAD;
+
+            TargetPos(3+7) =-4.36*DEGtoRAD;
+            TargetPos(6+7) = 48.34*DEGtoRAD;
+
+            _Target = TargetPos;
+
+            TrajectoryTime=6.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE8 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE8;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = 0.03*DEGtoRAD;
+            TargetPos(3) = -2.68*DEGtoRAD;
+            TargetPos(4) = -4.66*DEGtoRAD;
+            TargetPos(5) = -8.86*DEGtoRAD;
+            TargetPos(6) = -38.31*DEGtoRAD;
+            TargetPos(7) = -89.77*DEGtoRAD;
+            TargetPos(8) = 8.55*DEGtoRAD;
+
+            TargetPos(3+7) =2.68*DEGtoRAD;
+            TargetPos(6+7) = 38.31*DEGtoRAD;
+
+
+
+            _Target = TargetPos;
+
+            TrajectoryTime=10.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE9 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE9;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = 0.65*DEGtoRAD;
+            TargetPos(3) = 1.32*DEGtoRAD;
+            TargetPos(4) = -4.66*DEGtoRAD;
+            TargetPos(5) = -8.77*DEGtoRAD;
+            TargetPos(6) = -44.27*DEGtoRAD;
+            TargetPos(7) = -89.77*DEGtoRAD;
+            TargetPos(8) = 9.09*DEGtoRAD;
+
+            TargetPos(3+7) = -1.32*DEGtoRAD;
+            TargetPos(6+7) = 44.27*DEGtoRAD;
+
+
+            _Target = TargetPos;
+
+            TrajectoryTime=5.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE10 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE10;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = 1.10*DEGtoRAD;
+            TargetPos(3) = 6.86*DEGtoRAD;
+            TargetPos(4) = 0.72*DEGtoRAD;
+            TargetPos(5) = 1.27*DEGtoRAD;
+            TargetPos(6) = -52.79*DEGtoRAD;
+            TargetPos(7) = -89.95*DEGtoRAD;
+            TargetPos(8) = -2.63*DEGtoRAD;
+
+            TargetPos(3+7) = -6.86*DEGtoRAD;
+            TargetPos(6+7) = 52.79*DEGtoRAD;
+
+
+            _Target = TargetPos;
+
+            TrajectoryTime=6.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE11 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE11;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = 1.10*DEGtoRAD;
+            TargetPos(3) = -2.87*DEGtoRAD;
+            TargetPos(4) = 0.72*DEGtoRAD;
+            TargetPos(5) = 1.27*DEGtoRAD;
+            TargetPos(6) = -39.09*DEGtoRAD;
+            TargetPos(7) = -89.95*DEGtoRAD;
+            TargetPos(8) = -2.62*DEGtoRAD;
+
+            TargetPos(3+7) = 2.87*DEGtoRAD;
+            TargetPos(6+7) = 39.09*DEGtoRAD;
+
+
+            _Target = TargetPos;
+
+            TrajectoryTime=10.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE12 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE12;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = 1.10*DEGtoRAD;
+            TargetPos(3) = 1.88*DEGtoRAD;
+            TargetPos(4) = 0.72*DEGtoRAD;
+            TargetPos(5) = 1.27*DEGtoRAD;
+            TargetPos(6) = -45.40*DEGtoRAD;
+            TargetPos(7) = -89.95*DEGtoRAD;
+            TargetPos(8) = -2.62*DEGtoRAD;
+
+            TargetPos(3+7) = -1.88*DEGtoRAD;
+            TargetPos(6+7) = 45.40*DEGtoRAD;
+
+
+            _Target = TargetPos;
+
+            TrajectoryTime=5.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+//	else if( MotionCommand == MOVE_CUSTOMIZE )
+//	{
+//        if( _StatusWord != MotionCommand )
+//		{
+//			if( NewTarget == 1 )
+//			{
+//				JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+//                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+//				NewTarget=0;
+//			}
+//			else
+//				JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+//
+//			MotionProcess = MOVE_CUSTOMIZE;
+//		}
+//		else
+//		{
+//			TargetPos.setZero();
+//            TargetPos = _Target;
+//            TargetPos_p = TargetPos;
+//			TrajectoryTime=5.0;
+//			NewTarget=1;
+//			_StatusWord = 0;
+//		}
+//	}
+//	else if( MotionCommand == MOVE_JOINT_CYCLIC )
+//	{
+//        if( _StatusWord == MotionCommand )
+//		{
+//			MotionInitTime = _Time;
+//			_StatusWord = 0;
+//		}
+//		else
+//		{
+//			_T = 18.0;
+//			_omega = 2.0*M_PI/_T;
+//			_amp = 70;
+//
+//			dq(0) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime));
+//			dqdot(0) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime));
+//			dqddot(0) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime));
+//
+//			_T = 10.0;
+//			_omega = 2.0*M_PI/_T;
+//			_amp = 20;
+//
+//			dq(1) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime)+0.8481) - 15*M_PI/180.0;
+//			dqdot(1) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime)+0.8481);
+//			dqddot(1) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime)+0.8481);
+//
+//			_T = 7.0;
+//			_omega = 2.0*M_PI/_T;
+//			_amp = 50;
+//
+//			dq(2) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime)+0.6435) - 30*M_PI/180.0;
+//			dqdot(2) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime)+0.6435);
+//			dqddot(2) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime)+0.6435);
+//
+//			dq(2+6) = -dq(2);
+//			dqdot(2+6) = -dqdot(2);
+//			dqddot(2+6) = -dqddot(2);
+//
+//			_T = 7.0;
+//			_omega = 2.0*M_PI/_T;
+//			_amp = 50;
+//
+//			dq(3) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime)+0.4115) - 20*M_PI/180.0;
+//			dqdot(3) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime)+0.4115);
+//			dqddot(3) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime)+0.4115);
+//
+//			dq(3+6) = -dq(3);
+//			dqdot(3+6) = -dqdot(3);
+//			dqddot(3+6) = -dqddot(3);
+//
+//			_T = 7.0;
+//			_omega = 2.0*M_PI/_T;
+//			_amp = 45;
+//
+//			dq(4) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime)+0.729) - 30*M_PI/180.0;
+//			dqdot(4) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime)+0.729);
+//			dqddot(4) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime)+0.729);
+//
+//			dq(4+6) = -dq(4);
+//			dqdot(4+6) = -dqdot(4);
+//			dqddot(4+6) = -dqddot(4);
+//
+//			_T = 7.0;
+//			_omega = 2.0*M_PI/_T;
+//			_amp = 70.0;
+//
+//			dq(5) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime));
+//			dqdot(5) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime));
+//			dqddot(5) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime));
+//
+//			dq(5+6) = -dq(5);
+//			dqdot(5+6) = -dqdot(5);
+//			dqddot(5+6) = -dqddot(5);
+//
+//			_T = 7.0;
+//			_omega = 2.0*M_PI/_T;
+//			_amp = 40.0;
+//
+//			dq(6) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime));
+//			dqdot(6) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime));
+//			dqddot(6) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime));
+//
+//			dq(6+6) = -dq(6);
+//			dqdot(6+6) = -dqdot(6);
+//			dqddot(6+6) = -dqddot(6);
+//
+//			_T = 7.0;
+//			_omega = 2.0*M_PI/_T;
+//			_amp = 40.0;
+//
+//			dq(7) = _amp*M_PI/180.0*sin(_omega*(_Time-MotionInitTime));
+//			dqdot(7) = _amp*M_PI/180.0*_omega*cos(_omega*(_Time-MotionInitTime));
+//			dqddot(7) = -_amp*M_PI/180*pow(_omega,2)*sin(_omega*(_Time-MotionInitTime));
+//
+//			dq(7+6) = dq(7);
+//			dqdot(7+6) = dqdot(7);
+//			dqddot(7+6) = dqddot(7);
+//
+//			MotionProcess = MOVE_JOINT_CYCLIC;
+//		}
+//	}
 
 	MotionCommand_p = MotionCommand;
 	return MotionProcess;
@@ -648,7 +1071,7 @@ uint16_t Motion::TaskMotion( VectorXd &_dx, VectorXd &_dxdot, VectorXd &_dxddot,
 
             TargetPosTask(3) = start_pos(3);
             TargetPosTask(4) = start_pos(4);
-            TargetPosTask(5) = 0.34;
+            TargetPosTask(5) = 0.36;
 
 
             TargetPosTask(6) = start_pos(6);
