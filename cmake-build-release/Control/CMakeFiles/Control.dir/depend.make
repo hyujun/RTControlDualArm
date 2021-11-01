@@ -3,12 +3,9 @@
 
 Control/CMakeFiles/Control.dir/Controller.cpp.o: ../Control/Controller.cpp
 Control/CMakeFiles/Control.dir/Controller.cpp.o: ../Control/Controller.h
-Control/CMakeFiles/Control.dir/Controller.cpp.o: ../KDL/LieDynamics.h
 Control/CMakeFiles/Control.dir/Controller.cpp.o: ../KDL/LieOperator.h
-Control/CMakeFiles/Control.dir/Controller.cpp.o: ../KDL/PoEKinematics.h
 Control/CMakeFiles/Control.dir/Controller.cpp.o: ../KDL/PropertyDefinition.h
 Control/CMakeFiles/Control.dir/Controller.cpp.o: ../KDL/SerialManipulator.h
-Control/CMakeFiles/Control.dir/Controller.cpp.o: ../KDL/motionlibrary.h
 Control/CMakeFiles/Control.dir/Controller.cpp.o: /usr/include/eigen3/Eigen/Cholesky
 Control/CMakeFiles/Control.dir/Controller.cpp.o: /usr/include/eigen3/Eigen/Core
 Control/CMakeFiles/Control.dir/Controller.cpp.o: /usr/include/eigen3/Eigen/Dense
@@ -432,12 +429,8 @@ Control/CMakeFiles/Control.dir/KistHand.cpp.o: /usr/include/eigen3/Eigen/src/plu
 Control/CMakeFiles/Control.dir/Motion.cpp.o: ../Control/Motion.cpp
 Control/CMakeFiles/Control.dir/Motion.cpp.o: ../Control/Motion.h
 Control/CMakeFiles/Control.dir/Motion.cpp.o: ../Control/Trajectory.h
-Control/CMakeFiles/Control.dir/Motion.cpp.o: ../KDL/LieDynamics.h
 Control/CMakeFiles/Control.dir/Motion.cpp.o: ../KDL/LieOperator.h
-Control/CMakeFiles/Control.dir/Motion.cpp.o: ../KDL/PoEKinematics.h
-Control/CMakeFiles/Control.dir/Motion.cpp.o: ../KDL/PropertyDefinition.h
 Control/CMakeFiles/Control.dir/Motion.cpp.o: ../KDL/SerialManipulator.h
-Control/CMakeFiles/Control.dir/Motion.cpp.o: ../KDL/motionlibrary.h
 Control/CMakeFiles/Control.dir/Motion.cpp.o: /usr/include/eigen3/Eigen/Cholesky
 Control/CMakeFiles/Control.dir/Motion.cpp.o: /usr/include/eigen3/Eigen/Core
 Control/CMakeFiles/Control.dir/Motion.cpp.o: /usr/include/eigen3/Eigen/Dense

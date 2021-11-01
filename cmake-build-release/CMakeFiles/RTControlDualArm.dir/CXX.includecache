@@ -17,6 +17,8 @@ Eigen/Dense
 /home/baek/Git/RTControlDualArm/KDL/SerialManipulator.h
 ../KDL/LieOperator.h
 /home/baek/Git/RTControlDualArm/KDL/LieOperator.h
+math.h
+-
 
 /home/baek/Git/RTControlDualArm/Control/KistHand.h
 Eigen/Dense

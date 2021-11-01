@@ -70,7 +70,9 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
 		{
 			TargetPos.setZero(16);
 //            TargetPos(0) = -0.0*DEGtoRAD;
-//            TargetPos(7) = -20.0*DEGtoRAD;
+//            TargetPos(7) = -90.0*DEGtoRAD;
+//            TargetPos(7+7) = 90.0*DEGtoRAD;
+
 //            TargetPos(8) = 15.0*DEGtoRAD;
 //            TargetPos(8+7) = -15.0*DEGtoRAD;
 
@@ -78,7 +80,7 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
 //            TargetPos(5+7)=-TargetPos(5);
 //            TargetPos(6) = -30.00*DEGtoRAD;
 //            TargetPos(6+7)=-TargetPos(6);
-			TrajectoryTime=6.0;
+			TrajectoryTime=7.0;
 			NewTarget=1;
             _Target = TargetPos;
 			_StatusWord = 0;
@@ -141,7 +143,6 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
 
 
 
-
             TargetPos(6) = -45.0*DEGtoRAD;
             TargetPos(6+7) =-TargetPos(6);
 
@@ -177,21 +178,21 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
             TargetPos.setZero(16);
 
 
-            TargetPos(2) = -1.26*DEGtoRAD;
-            TargetPos(3) = -3.15*DEGtoRAD;
-            TargetPos(4) = 0.04*DEGtoRAD;
-            TargetPos(5) = -4.02*DEGtoRAD;
-            TargetPos(6) = -39.09*DEGtoRAD;
-            TargetPos(7) = 0.09*DEGtoRAD;
-            TargetPos(8) = -49.31*DEGtoRAD;
+            TargetPos(2) = -1.53*DEGtoRAD;
+            TargetPos(3) = -19.09*DEGtoRAD;
+            TargetPos(4) = 7.45*DEGtoRAD;
+            TargetPos(5) = -1.62*DEGtoRAD;
+            TargetPos(6) = -12.16*DEGtoRAD;
+            TargetPos(7) = -0.39*DEGtoRAD;
+            TargetPos(8) = -6.76*DEGtoRAD;
 
-            TargetPos(9) = 0.05*DEGtoRAD;
-            TargetPos(10) = 8.07*DEGtoRAD;
-            TargetPos(11) = 1.03*DEGtoRAD;
-            TargetPos(12) = -0.08*DEGtoRAD;
-            TargetPos(13) = 37.77*DEGtoRAD;
-            TargetPos(14) = 6.72*DEGtoRAD;
-            TargetPos(15) = 45.25*DEGtoRAD;
+            TargetPos(9) = -0.63*DEGtoRAD;
+            TargetPos(10) = 18.47*DEGtoRAD;
+            TargetPos(11) = -12.84*DEGtoRAD;
+            TargetPos(12) = -8.21*DEGtoRAD;
+            TargetPos(13) = 20.49*DEGtoRAD;
+            TargetPos(14) = -0.68*DEGtoRAD;
+            TargetPos(15) = 1.96*DEGtoRAD;
 
 
             _Target = TargetPos;
@@ -220,26 +221,26 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         {
             TargetPos.setZero(16);
 
-            TargetPos(2) = -1.28*DEGtoRAD;
-            TargetPos(3) = -8.20*DEGtoRAD;
-            TargetPos(4) = 8.04*DEGtoRAD;
-            TargetPos(5) = 1.28*DEGtoRAD;
-            TargetPos(6) = -36.43*DEGtoRAD;
-            TargetPos(7) = 6.10*DEGtoRAD;
-            TargetPos(8) = -45.53*DEGtoRAD;
+            TargetPos(2) = -1.53*DEGtoRAD;
+            TargetPos(3) = -19.09*DEGtoRAD;
+            TargetPos(4) = 11.62*DEGtoRAD;
+            TargetPos(5) = -1.62*DEGtoRAD;
+            TargetPos(6) = -12.16*DEGtoRAD;
+            TargetPos(7) = -0.39*DEGtoRAD;
+            TargetPos(8) = -6.76*DEGtoRAD;
 
-            TargetPos(9) = 0.06*DEGtoRAD;
-            TargetPos(10) = 11.04*DEGtoRAD;
-            TargetPos(11) = -12.82*DEGtoRAD;
-            TargetPos(12) = -0.08*DEGtoRAD;
-            TargetPos(13) = 40.23*DEGtoRAD;
-            TargetPos(14) = 3.00*DEGtoRAD;
-            TargetPos(15) = 44.72*DEGtoRAD;
+            TargetPos(9) = -0.63*DEGtoRAD;
+            TargetPos(10) = 18.47*DEGtoRAD;
+            TargetPos(11) = -17.29*DEGtoRAD;
+            TargetPos(12) = -8.22*DEGtoRAD;
+            TargetPos(13) = 20.78*DEGtoRAD;
+            TargetPos(14) = -0.68*DEGtoRAD;
+            TargetPos(15) = 1.96*DEGtoRAD;
 
 
             _Target = TargetPos;
 
-            TrajectoryTime=6.0;
+            TrajectoryTime=7.0;
             NewTarget=1;
             _StatusWord = 0;
         }
@@ -263,26 +264,25 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         {
             TargetPos.setZero(16);
 
-            TargetPos(2) = -1.27*DEGtoRAD;
-            TargetPos(3) = -7.88*DEGtoRAD;
-            TargetPos(4) = 9.63*DEGtoRAD;
-            TargetPos(5) = 15.76*DEGtoRAD;
-            TargetPos(6) = -44.12*DEGtoRAD;
-            TargetPos(7) = 4.30*DEGtoRAD;
-            TargetPos(8) = -18.37*DEGtoRAD;
+            TargetPos(2) = -2.53*DEGtoRAD;
+            TargetPos(3) = -19.09*DEGtoRAD;
+            TargetPos(4) = 11.62*DEGtoRAD;
+            TargetPos(5) = -1.62*DEGtoRAD;
+            TargetPos(6) = -12.16*DEGtoRAD;
+            TargetPos(7) = -0.39*DEGtoRAD;
+            TargetPos(8) = -6.76*DEGtoRAD;
 
-            TargetPos(9) = 0.06*DEGtoRAD;
-            TargetPos(10) = 10.62*DEGtoRAD;
-            TargetPos(11) = -19.53*DEGtoRAD;
-            TargetPos(12) = -0.08*DEGtoRAD;
-            TargetPos(13) = 26.68*DEGtoRAD;
-            TargetPos(14) = -11.86*DEGtoRAD;
-            TargetPos(15) = 54.39*DEGtoRAD;
-
+            TargetPos(9) =  1.63*DEGtoRAD;
+            TargetPos(10) = 18.47*DEGtoRAD;
+            TargetPos(11) = -17.29*DEGtoRAD;
+            TargetPos(12) = -8.22*DEGtoRAD;
+            TargetPos(13) = 20.78*DEGtoRAD;
+            TargetPos(14) = -0.68*DEGtoRAD;
+            TargetPos(15) = 1.96*DEGtoRAD;
 
             _Target = TargetPos;
 
-            TrajectoryTime=10.0;
+            TrajectoryTime=8.0;
             NewTarget=1;
             _StatusWord = 0;
         }
@@ -345,16 +345,21 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         {
             TargetPos.setZero(16);
 
-            TargetPos(2) = 1.11*DEGtoRAD;
-            TargetPos(3) = 13.26*DEGtoRAD;
-            TargetPos(4) = -1.78*DEGtoRAD;
-            TargetPos(5) = -4.45*DEGtoRAD;
-            TargetPos(6) = -58.74*DEGtoRAD;
-            TargetPos(7) = -90.23*DEGtoRAD;
-            TargetPos(8) = 3.52*DEGtoRAD;
+            TargetPos(2) = 0.54*DEGtoRAD;
+            TargetPos(3) = 9.43*DEGtoRAD;
+            TargetPos(4) = 1.86*DEGtoRAD;
+            TargetPos(5) = 0.7*DEGtoRAD;
+            TargetPos(6) = -63.02*DEGtoRAD;
+            TargetPos(7) = -85.16*DEGtoRAD;
+            TargetPos(8) = -7.91*DEGtoRAD;
 
-            TargetPos(3+7) =-13.26*DEGtoRAD;
-            TargetPos(6+7) = 58.74*DEGtoRAD;
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
 
 
             _Target = TargetPos;
@@ -383,17 +388,21 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         {
             TargetPos.setZero(16);
 
-            TargetPos(2) = 0.04*DEGtoRAD;
-            TargetPos(3) = 4.36*DEGtoRAD;
-            TargetPos(4) = -4.66*DEGtoRAD;
-            TargetPos(5) = -8.86*DEGtoRAD;
-            TargetPos(6) = -48.34*DEGtoRAD;
-            TargetPos(7) = -89.77*DEGtoRAD;
-            TargetPos(8) = 8.57*DEGtoRAD;
+            TargetPos(2) = 0.48*DEGtoRAD;
+            TargetPos(3) = 4.35*DEGtoRAD;
+            TargetPos(4) = 5.71*DEGtoRAD;
+            TargetPos(5) = 7.18*DEGtoRAD;
+            TargetPos(6) = -50.96*DEGtoRAD;
+            TargetPos(7) = -85.15*DEGtoRAD;
+            TargetPos(8) = -19.00*DEGtoRAD;
 
-            TargetPos(3+7) =-4.36*DEGtoRAD;
-            TargetPos(6+7) = 48.34*DEGtoRAD;
-
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
             _Target = TargetPos;
 
             TrajectoryTime=6.0;
@@ -420,17 +429,21 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         {
             TargetPos.setZero(16);
 
-            TargetPos(2) = 0.03*DEGtoRAD;
-            TargetPos(3) = -2.68*DEGtoRAD;
-            TargetPos(4) = -4.66*DEGtoRAD;
-            TargetPos(5) = -8.86*DEGtoRAD;
-            TargetPos(6) = -38.31*DEGtoRAD;
-            TargetPos(7) = -89.77*DEGtoRAD;
-            TargetPos(8) = 8.55*DEGtoRAD;
+            TargetPos(2) = 0.47*DEGtoRAD;
+            TargetPos(3) = -4.64*DEGtoRAD;
+            TargetPos(4) = 5.68*DEGtoRAD;
+            TargetPos(5) = 7.16*DEGtoRAD;
+            TargetPos(6) = -37.94*DEGtoRAD;
+            TargetPos(7) = -85.15*DEGtoRAD;
+            TargetPos(8) = -19.01*DEGtoRAD;
 
-            TargetPos(3+7) =2.68*DEGtoRAD;
-            TargetPos(6+7) = 38.31*DEGtoRAD;
-
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
 
 
             _Target = TargetPos;
@@ -459,16 +472,21 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         {
             TargetPos.setZero(16);
 
-            TargetPos(2) = 0.65*DEGtoRAD;
-            TargetPos(3) = 1.32*DEGtoRAD;
-            TargetPos(4) = -4.66*DEGtoRAD;
-            TargetPos(5) = -8.77*DEGtoRAD;
-            TargetPos(6) = -44.27*DEGtoRAD;
-            TargetPos(7) = -89.77*DEGtoRAD;
-            TargetPos(8) = 9.09*DEGtoRAD;
+            TargetPos(2) = 0.48*DEGtoRAD;
+            TargetPos(3) = 1.12*DEGtoRAD;
+            TargetPos(4) = 5.68*DEGtoRAD;
+            TargetPos(5) = 7.17*DEGtoRAD;
+            TargetPos(6) = -45.82*DEGtoRAD;
+            TargetPos(7) = -85.15*DEGtoRAD;
+            TargetPos(8) = -20.25*DEGtoRAD;
 
-            TargetPos(3+7) = -1.32*DEGtoRAD;
-            TargetPos(6+7) = 44.27*DEGtoRAD;
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
 
 
             _Target = TargetPos;
@@ -497,17 +515,21 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         {
             TargetPos.setZero(16);
 
-            TargetPos(2) = 1.10*DEGtoRAD;
-            TargetPos(3) = 6.86*DEGtoRAD;
-            TargetPos(4) = 0.72*DEGtoRAD;
-            TargetPos(5) = 1.27*DEGtoRAD;
-            TargetPos(6) = -52.79*DEGtoRAD;
-            TargetPos(7) = -89.95*DEGtoRAD;
-            TargetPos(8) = -2.63*DEGtoRAD;
+            TargetPos(2) = 0.87*DEGtoRAD;
+            TargetPos(3) = 4.75*DEGtoRAD;
+            TargetPos(4) = 1.44*DEGtoRAD;
+            TargetPos(5) = -12.87*DEGtoRAD;
+            TargetPos(6) = -66.26*DEGtoRAD;
+            TargetPos(7) = -16.70*DEGtoRAD;
+            TargetPos(8) = 1.12*DEGtoRAD;
 
-            TargetPos(3+7) = -6.86*DEGtoRAD;
-            TargetPos(6+7) = 52.79*DEGtoRAD;
-
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
 
             _Target = TargetPos;
 
@@ -535,16 +557,21 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         {
             TargetPos.setZero(16);
 
-            TargetPos(2) = 1.10*DEGtoRAD;
-            TargetPos(3) = -2.87*DEGtoRAD;
-            TargetPos(4) = 0.72*DEGtoRAD;
-            TargetPos(5) = 1.27*DEGtoRAD;
-            TargetPos(6) = -39.09*DEGtoRAD;
-            TargetPos(7) = -89.95*DEGtoRAD;
-            TargetPos(8) = -2.62*DEGtoRAD;
+            TargetPos(2) = 0.46*DEGtoRAD;
+            TargetPos(3) = -4.36*DEGtoRAD;
+            TargetPos(4) = 1.42*DEGtoRAD;
+            TargetPos(5) = -13.38*DEGtoRAD;
+            TargetPos(6) = -50.86*DEGtoRAD;
+            TargetPos(7) = -26.69*DEGtoRAD;
+            TargetPos(8) = -1.01*DEGtoRAD;
 
-            TargetPos(3+7) = 2.87*DEGtoRAD;
-            TargetPos(6+7) = 39.09*DEGtoRAD;
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
 
 
             _Target = TargetPos;
@@ -573,17 +600,21 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
         {
             TargetPos.setZero(16);
 
-            TargetPos(2) = 1.10*DEGtoRAD;
-            TargetPos(3) = 1.88*DEGtoRAD;
-            TargetPos(4) = 0.72*DEGtoRAD;
-            TargetPos(5) = 1.27*DEGtoRAD;
-            TargetPos(6) = -45.40*DEGtoRAD;
-            TargetPos(7) = -89.95*DEGtoRAD;
-            TargetPos(8) = -2.62*DEGtoRAD;
+            TargetPos(2) = 0.57*DEGtoRAD;
+            TargetPos(3) = -0.37*DEGtoRAD;
+            TargetPos(4) = 1.44*DEGtoRAD;
+            TargetPos(5) = -12.97*DEGtoRAD;
+            TargetPos(6) = -55.35*DEGtoRAD;
+            TargetPos(7) = -26.69*DEGtoRAD;
+            TargetPos(8) = -1.04*DEGtoRAD;
 
-            TargetPos(3+7) = -1.88*DEGtoRAD;
-            TargetPos(6+7) = 45.40*DEGtoRAD;
-
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
 
             _Target = TargetPos;
 
@@ -592,6 +623,339 @@ uint16_t Motion::JointMotion(VectorXd &dq, VectorXd &dqdot, VectorXd &dqddot,
             _StatusWord = 0;
         }
     }
+    else if( MotionCommand == MOVE_CUSTOMIZE13 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE13;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = 0.45*DEGtoRAD;
+            TargetPos(3) = 1.21*DEGtoRAD;
+            TargetPos(4) = 1.42*DEGtoRAD;
+            TargetPos(5) = -12.00*DEGtoRAD;
+            TargetPos(6) = -65.30*DEGtoRAD;
+            TargetPos(7) = -26.69*DEGtoRAD;
+            TargetPos(8) = -1.06*DEGtoRAD;
+
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
+
+            _Target = TargetPos;
+
+            TrajectoryTime=6.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE14 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE14;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = -0.62*DEGtoRAD;
+            TargetPos(3) = -10.28*DEGtoRAD;
+            TargetPos(4) = 1.39*DEGtoRAD;
+            TargetPos(5) = -13.07*DEGtoRAD;
+            TargetPos(6) = -63.49*DEGtoRAD;
+            TargetPos(7) = -4.48*DEGtoRAD;
+            TargetPos(8) = 16.76*DEGtoRAD;
+
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
+
+
+            _Target = TargetPos;
+
+            TrajectoryTime=10.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE15 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE15;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = -0.61*DEGtoRAD;
+            TargetPos(3) = -6,92*DEGtoRAD;
+            TargetPos(4) = 1.42*DEGtoRAD;
+            TargetPos(5) = -12.97*DEGtoRAD;
+            TargetPos(6) = -68.92*DEGtoRAD;
+            TargetPos(7) = -4.48*DEGtoRAD;
+            TargetPos(8) = 16.76*DEGtoRAD;
+
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
+
+            _Target = TargetPos;
+
+            TrajectoryTime=5.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE16 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE16;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = 3.65*DEGtoRAD;
+            TargetPos(3) = -0.99*DEGtoRAD;
+            TargetPos(4) = 4.76*DEGtoRAD;
+            TargetPos(5) = -7.24*DEGtoRAD;
+            TargetPos(6) = -68.69*DEGtoRAD;
+            TargetPos(7) = -20.40*DEGtoRAD;
+            TargetPos(8) = 8.25*DEGtoRAD;
+
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
+
+            _Target = TargetPos;
+
+            TrajectoryTime=6.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE17 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE17;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = 3.63*DEGtoRAD;
+            TargetPos(3) = -10.58*DEGtoRAD;
+            TargetPos(4) = 4.75*DEGtoRAD;
+            TargetPos(5) = -7.85*DEGtoRAD;
+            TargetPos(6) = -54.07*DEGtoRAD;
+            TargetPos(7) = -20.40*DEGtoRAD;
+            TargetPos(8) = 8.26*DEGtoRAD;
+
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
+
+
+            _Target = TargetPos;
+
+            TrajectoryTime=10.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE18 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE18;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(2) = 4.24*DEGtoRAD;
+            TargetPos(3) = -7.09*DEGtoRAD;
+            TargetPos(4) = 4.78*DEGtoRAD;
+            TargetPos(5) = -7.67*DEGtoRAD;
+            TargetPos(6) = -59.33*DEGtoRAD;
+            TargetPos(7) = -20.40*DEGtoRAD;
+            TargetPos(8) = 8.30*DEGtoRAD;
+
+            TargetPos(9) = 66.91*DEGtoRAD;
+            TargetPos(10) = 25.03*DEGtoRAD;
+            TargetPos(11) = 6.74*DEGtoRAD;
+            TargetPos(12) = 19.52*DEGtoRAD;
+            TargetPos(13) = 27.88*DEGtoRAD;
+            TargetPos(14) = 114.47*DEGtoRAD;
+            TargetPos(15) = 35.47*DEGtoRAD;
+
+            _Target = TargetPos;
+
+            TrajectoryTime=5.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE19 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE19;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+
+            TargetPos(0) = 2.01*DEGtoRAD;
+
+
+            TargetPos(2) = -10.47*DEGtoRAD;
+            TargetPos(3) = -17.42*DEGtoRAD;
+            TargetPos(4) = -30.13*DEGtoRAD;
+            TargetPos(5) = -12.45*DEGtoRAD;
+            TargetPos(6) = -55.67*DEGtoRAD;
+            TargetPos(7) = -3.91*DEGtoRAD;
+            TargetPos(8) = -28.80*DEGtoRAD;
+
+            TargetPos(12) = 45.01*DEGtoRAD;
+
+
+            _Target = TargetPos;
+
+            TrajectoryTime=7.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+    else if( MotionCommand == MOVE_CUSTOMIZE20 )
+    {
+        if( _StatusWord != MotionCommand )
+        {
+            if( NewTarget==1 )
+            {
+                JointPoly5th.SetPoly5th(_Time, q, qdot, TargetPos, TrajectoryTime, TotalDoF);
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+                NewTarget=0;
+            }
+            else
+                JointPoly5th.Poly5th(_Time, dq, dqdot, dqddot);
+
+            MotionProcess = MOVE_CUSTOMIZE20;
+        }
+        else
+        {
+            TargetPos.setZero(16);
+            TargetPos(0) = 2.01*DEGtoRAD;
+
+
+            TargetPos(2) = -35.32*DEGtoRAD;
+            TargetPos(3) = -22.79*DEGtoRAD;
+            TargetPos(4) = -25.19*DEGtoRAD;
+            TargetPos(5) = -10.80*DEGtoRAD;
+            TargetPos(6) = -50.39*DEGtoRAD;
+            TargetPos(7) = -4.02*DEGtoRAD;
+            TargetPos(8) = -49.36*DEGtoRAD;
+
+
+            _Target = TargetPos;
+
+            TrajectoryTime=7.0;
+            NewTarget=1;
+            _StatusWord = 0;
+        }
+    }
+
+
 //	else if( MotionCommand == MOVE_CUSTOMIZE )
 //	{
 //        if( _StatusWord != MotionCommand )

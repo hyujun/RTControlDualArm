@@ -11,16 +11,24 @@
 #define MOVE_CUSTOMIZE2 0x04
 #define MOVE_CUSTOMIZE3 0x05
 #define MOVE_CUSTOMIZE4 0x06
-#define MOVE_CUSTOMIZE5 0x07
-#define MOVE_CUSTOMIZE6 0x08
-#define MOVE_CUSTOMIZE7 0x09
-#define MOVE_CUSTOMIZE8 0x0a
-#define MOVE_CUSTOMIZE9 0x0b
-#define MOVE_CUSTOMIZE10 0x0c
-#define MOVE_CUSTOMIZE11 0x0d
-#define MOVE_CUSTOMIZE12 0x0e
-#define MOVE_CUSTOMIZE13 0x0f
-#define MOVE_CUSTOMIZE14 0x10
+#define MOVE_CUSTOMIZE5 0x07  //drill preposition
+#define MOVE_CUSTOMIZE6 0x08  //drill center
+#define MOVE_CUSTOMIZE7 0x09  //drill1
+#define MOVE_CUSTOMIZE8 0x0a  //drill1
+#define MOVE_CUSTOMIZE9 0x0b  //drill1
+#define MOVE_CUSTOMIZE10 0x0c  //drill2
+#define MOVE_CUSTOMIZE11 0x0d  //drill2
+#define MOVE_CUSTOMIZE12 0x0e  //drill2
+#define MOVE_CUSTOMIZE13 0x0f  //drill3
+#define MOVE_CUSTOMIZE14 0x10  //drill3
+#define MOVE_CUSTOMIZE15 0x11  //drill3
+#define MOVE_CUSTOMIZE16 0x12  //drill4
+#define MOVE_CUSTOMIZE17 0x13  //drill4
+#define MOVE_CUSTOMIZE18 0x14  //drill4
+#define MOVE_CUSTOMIZE19 0x15  //demo1
+#define MOVE_CUSTOMIZE20 0x16  //demo1
+
+
 
 
 

@@ -70,6 +70,7 @@ Controller::Controller(std::shared_ptr<SerialManipulator> Manipulator)
     GainWeightFactor.setZero(m_Jnum);
     GainWeightFactor.setConstant(95.0);
 
+
     GainWeightFactor(5) = 150.0;
     GainWeightFactor(12) = 150.0;
     GainWeightFactor(3) = 100.0;
@@ -88,6 +89,8 @@ Controller::Controller(std::shared_ptr<SerialManipulator> Manipulator)
 
     Kd(0) =Kd(0)*0.5;
     Kd(1) =Kd(1)*0.5;
+    Kd(3) =Kd(3)*0.5;
+
     Kd(6) =Kd(6)*0.5;
     Kd(13) =Kd(13)*0.5;
 
@@ -97,8 +100,8 @@ Controller::Controller(std::shared_ptr<SerialManipulator> Manipulator)
 //    Kd(5,5) =Kd(5,5)*1.3;
 //    Kd(12,12) =Kd(12,12)*1.3;
 //
-//    Kd(7) =Kd(7)*1;//R_forearm
-//    Kd(8) =Kd(8)*1.2;//R_wrist
+    Kd(7) =Kd(7)*0.5;//R_forearm
+    Kd(8) =Kd(8)*0.5;//R_wrist
     Kd(9) =Kd(9)*0.5;
     Kd(10) =Kd(10)*0.5;
     Kd(12) =Kd(12)*0.5;
@@ -249,7 +252,7 @@ void Controller::PDGravController( const VectorXd &_q, const VectorXd &_qdot, co
     {
         FrictionTorque.setZero(m_Jnum);
 
-//    FrictionTorque(0) = 18.3f*0.8*SignFunction(_dqdot(0));
+    FrictionTorque(0) = 18.3f*0.8*SignFunction(_dqdot(0));
 //    FrictionTorque(1) = 25.6f*0.5*SignFunction(_dqdot(1));
     FrictionTorque(2) = 6.8f*SignFunction(_dqdot(2));
     FrictionTorque(3) = 4.3f*SignFunction(_dqdot(3));
@@ -260,7 +263,7 @@ void Controller::PDGravController( const VectorXd &_q, const VectorXd &_qdot, co
     FrictionTorque(8) = 2.56f*SignFunction(_dqdot(8));
     FrictionTorque(9) = 9.2f*SignFunction(_dqdot(9));
     FrictionTorque(10) = 5.2f*SignFunction(_dqdot(10));
-    FrictionTorque(11) = 7.2f*SignFunction(_dqdot(11));
+    FrictionTorque(11) = 7.0f*SignFunction(_dqdot(11));
     FrictionTorque(12) = 4.4*SignFunction(_dqdot(12));
     FrictionTorque(13) = 2.4*SignFunction(_dqdot(13));
     FrictionTorque(14) = 3.6f*SignFunction(_dqdot(14));
@@ -299,7 +302,8 @@ void Controller::InvDynController(const VectorXd &_q,
     _Toq.noalias() += M*u0;
     _Toq.noalias() += FrictionTorque;
 //    _Toq.setZero(m_Jnum);
-//    _Toq(1)= ;
+//    _Toq(0)=0;
+
 
 
 #if !defined(__SIMULATION__)
