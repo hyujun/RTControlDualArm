@@ -40,7 +40,7 @@ endif()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include(FindPkgConfig)
-include(modules/CMakeFunctions.cmake)
+include(cmake/CMakeFunctions.cmake)
 
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
 set(PROJ_INSTALL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/bin/inc)
@@ -48,40 +48,7 @@ set(PROJ_INSTALL_BIN_DIR ${PROJECT_SOURCE_DIR}/bin)
 set(PROJ_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
 
 set(CMAKE_DEBUG_POSTFIX "d")
-set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/modules)
-set(BUILD_SHARED_LIBS TRUE)
-
-#===============================================================================
-# Build options
-#===============================================================================
-#option(BUILD_DOC "Build Documentation" off)
-option(Dualarm_VERBOSE "Whether print detailed information in CMake process" ON)
-option(Dualarm_SHARED_LIBS "Build shared libraries" ON)
-
-#===============================================================================
-# Build type settings
-#===============================================================================
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug | Release | RelWithDebInfo | MinSizeRel" FORCE)
-endif()
-string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UPPERCASE)
-
-set(BUILD_TYPE_DEBUG TRUE)
-set(BUILD_TYPE_RELEASE TRUE)
-set(BUILD_TYPE_RELWITHDEBINFO FALSE)
-set(BUILD_TYPE_MINSIZEREL FALSE)
-
-if("${CMAKE_BUILD_TYPE_UPPERCASE}" STREQUAL "DEBUG")
-    set(BUILD_TYPE_DEBUG TRUE)
-elseif("${CMAKE_BUILD_TYPE_UPPERCASE}" STREQUAL "RELEASE")
-    set(BUILD_TYPE_RELEASE TRUE)
-elseif("${CMAKE_BUILD_TYPE_UPPERCASE}" STREQUAL "RELWITHDEBINFO")
-    set(BUILD_TYPE_RELWITHDEBINFO TRUE)
-elseif("${CMAKE_BUILD_TYPE_UPPERCASE}" STREQUAL "MINSIZEREL")
-    set(BUILD_TYPE_MINSIZEREL TRUE)
-else()
-    message(WARNING "CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} unknown. Valid options are: Debug | Release | RelWithDebInfo | MinSizeRel")
-endif()
+set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 #===============================================================================
 # Compiler flags
@@ -114,27 +81,15 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS
 set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_DEBUG} -pg")
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
 
-set(CTRL_HEADERS_DIR ${PROJECT_SOURCE_DIR}/Control)
-set(ECAT_HEADERS_DIR ${PROJECT_SOURCE_DIR}/EcatSystem)
-set(KDL_HEADERS_DIR ${PROJECT_SOURCE_DIR}/KDL)
-set(NET_HEADERS_DIR ${PROJECT_SOURCE_DIR}/Network)
+include_directories(include)
 
-include_directories(${PROJ_INSTALL_INCLUDE_DIR})
-include_directories(
-        ${KERNELHEADERS_DIR}
-        ${CTRL_HEADERS_DIR}
-        ${ECAT_HEADERS_DIR}
-        ${KDL_HEADERS_DIR}
-        ${NET_HEADERS_DIR}
-)
-
-add_subdirectory(Control)
-add_subdirectory(EcatSystem)
-add_subdirectory(KDL)
-add_subdirectory(Network)
+add_subdirectory(src/control)
+add_subdirectory(src/ecat)
+add_subdirectory(src/kdl)
+add_subdirectory(src/net)
 
 add_executable(${PROJECT_NAME}
-        RTClient.cpp
+        src/main.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}

@@ -1,0 +1,69 @@
+/**
+ * @file RTClient.h
+ * @brief Main Client for Dual-Arm System
+ * @date 2018-11-28.
+ * @author Junho Park
+ * @version 1.0.0
+ */
+
+#ifndef RTCLIENT_H_
+#define RTCLIENT_H_
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstdint>
+#include <csignal>
+#include <cstring>		// string function definitions
+#include <cerrno>		// Error number definitions
+#include <ctime>		// time calls
+#include <cmath>
+
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>		// File control definitions
+#include <termios.h>	// POSIX terminal control definitions
+#include <sys/mman.h>
+#include <sys/ioctl.h>
+
+//-xenomai-///////////////////////////////////////////////////////////////
+#include <native/task.h>
+#include <native/timer.h>
+#include <native/mutex.h>
+#include <native/queue.h>
+#include <rtdk.h>		//The rdtk real-time printing library
+#include <alchemy/task.h>
+#include <rtdm/can.h>
+/****************************************************************************/
+
+#include "ecat/Ecat_Master.h"
+#include "ecat/Ecat_Elmo.h"
+#include "ecat/Ecat_KistFinger.h"
+#include "ecat/Ecat_KistSensor.h"
+#include "control/Controller.h"
+#include "control/Motion.h"
+#include "control/KistHand.h"
+#include "kdl/SerialManipulator.h"
+#include "net/SocketHandler.h"
+
+#define WAKEUP_TIME     (5)				/**<Initial waiting time*/
+#define NSEC_PER_SEC    (1000000000L)	/**<Expression of second in nano second*/
+
+//#define _DEBUG_ 			/**<Debug Print Parameter*/
+#define _ECAT_ON_ 			/**<EtherCAT device enable Parameter*/
+#define _TCPIP_ON_
+#define _PRINT_ON_
+//#define _PLOT_ON_
+//#define _KEYBOARD_ON_
+
+typedef unsigned int UINT32;	/**<typedef uint32_t*/
+typedef int64_t		INT64;		/**<typedef uint64_t*/
+typedef int32_t 	INT32;		/**<typedef int32_t*/
+typedef int16_t 	INT16;		/**<typedef int16_t*/
+typedef uint16_t 	UINT16;		/**<typedef uint16_t*/
+typedef uint8_t 	UINT8;		/**<typedef uint8_t*/
+typedef int8_t 		INT8;   	/**<typedef int8_t*/
+
+// Cycle time in nanosecond
+unsigned long cycle_ns = 1000e3;  	/**< 1 ms, Initial Value */
+
+#endif

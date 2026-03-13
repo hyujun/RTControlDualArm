@@ -1,2 +1,0 @@
-/usr/bin/ar qc libKDL.a  CMakeFiles/KDL.dir/LieDynamics.cpp.o CMakeFiles/KDL.dir/LieOperator.cpp.o CMakeFiles/KDL.dir/PoEKinematics.cpp.o CMakeFiles/KDL.dir/PropertyDefinition.cpp.o CMakeFiles/KDL.dir/SerialManipulator.cpp.o
-/usr/bin/ranlib libKDL.a
