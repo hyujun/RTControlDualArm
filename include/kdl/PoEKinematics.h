@@ -5,8 +5,7 @@
  * @author Junho Park
  */
 
-#ifndef POEKINEMATICS_H_
-#define POEKINEMATICS_H_
+#pragma once
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -81,18 +80,18 @@ namespace HYUMotionKinematics {
          * @brief calculate the space jacobian
          * @return 6 x n(DoF) jacobian matrix w.r.t, base coordinate
          */
-        void GetSpaceJacobian( MatrixXd &_SpaceJacobian )
+        [[nodiscard]] const MatrixXd& GetSpaceJacobian() const noexcept
         {
-            _SpaceJacobian = mSpaceJacobian;
+            return mSpaceJacobian;
         }
 
         /**
          * @brief calculate the body jacobian
          * @return 6 x n(DoF) jacobian matrix w.r.t., end-effector coordinate
          */
-        void GetBodyJacobian( MatrixXd &_BodyJacobian )
+        [[nodiscard]] const MatrixXd& GetBodyJacobian() const noexcept
         {
-            _BodyJacobian = mBodyJacobian;
+            return mBodyJacobian;
         }
 
         void GetBodyJacobianDot( MatrixXd &_BodyJacobianDot );
@@ -101,9 +100,15 @@ namespace HYUMotionKinematics {
          * @brief calcuate the analytic jacobian
          * @return 6 x n(DoF) jacobian matrix
          */
+        // Legacy copy-out overload (used by many call sites)
         void GetAnalyticJacobian( MatrixXd &_AnalyticJacobian )
         {
             _AnalyticJacobian = mAnalyticJacobian;
+        }
+        // Zero-copy const reference overload (C++17, preferred)
+        [[nodiscard]] const MatrixXd& GetAnalyticJacobian() const noexcept
+        {
+            return mAnalyticJacobian;
         }
 
         void GetAnalyticJacobianDot(const VectorXd &_qdot, MatrixXd &_AnalyticJacobianDot);
@@ -275,5 +280,3 @@ namespace HYUMotionKinematics {
     };
 
 }
-
-#endif /* POEKINEMATICS_H_ */

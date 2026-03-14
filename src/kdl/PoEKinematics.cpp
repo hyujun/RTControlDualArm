@@ -134,7 +134,7 @@ namespace HYUMotionKinematics {
 
     void PoEKinematics::SpaceJacobian()
     {
-        mSpaceJacobian.setZero(6*m_NumChain, m_DoF);
+        mSpaceJacobian.setZero();
         for(int i=0; i < this->m_NumChain; ++i)
         {
             SE3_Tmp.setIdentity();
@@ -159,7 +159,7 @@ namespace HYUMotionKinematics {
 
     void PoEKinematics::SpaceToBodyJacobian()
     {
-        mBodyJacobian.setZero(6*m_NumChain, m_DoF);
+        mBodyJacobian.setZero();
         for(int i=0; i < this->m_NumChain; i++)
         {
             mBodyJacobian.block(6*i,0,6,this->m_DoF).noalias() +=
@@ -198,7 +198,7 @@ namespace HYUMotionKinematics {
 
     void PoEKinematics::AnalyticJacobian()
     {
-        mAnalyticJacobian.setZero(6*m_NumChain, m_DoF);
+        mAnalyticJacobian.setZero();
         int aJac_case=1;
         for(int i=0; i < this->m_NumChain; i++)
         {
@@ -219,7 +219,7 @@ namespace HYUMotionKinematics {
 
     void PoEKinematics::AnalyticJacobianDot( const VectorXd &_qdot )
     {
-        mAnalyticJacobianDot.setZero(6*m_NumChain, m_DoF);
+        mAnalyticJacobianDot.setZero();
         BodyJacobianDot(_qdot);
         Matrix3d rot_tmp;
         Vector3d vec_tmp;

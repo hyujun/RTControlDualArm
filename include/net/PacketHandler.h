@@ -2,8 +2,7 @@
 // Created by parkjunho on 2020-10-24.
 //
 
-#ifndef RTCONTROLDUALARM_PACKETHANDLER_H
-#define RTCONTROLDUALARM_PACKETHANDLER_H
+#pragma once
 
 #include <cstdlib>
 #include <cstring>
@@ -47,4 +46,3 @@ private:
     TCP_Packet_Task packet_task;
 };
 
-#endif //RTCONTROLDUALARM_PACKETHANDLER_H

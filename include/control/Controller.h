@@ -1,5 +1,4 @@
-#ifndef CONTROLLER_H_
-#define CONTROLLER_H_
+#pragma once
 
 /**
  * @file Controller.h
@@ -15,10 +14,10 @@
 #include "kdl/LieOperator.h"
 #include <math.h>       /* tanh, log */
 
-#define KpBase 		20    	/**<Inital value of Kp*/
-#define KdBase 		1		/**<Inital value of Kd*/
-#define KiBase 		100		/**<Inital value of Ki*/
-#define HinfBase 	5		/**<Inital value of H-infinity Gain*/
+inline constexpr double KpBase   = 20.0;   // Initial value of Kp
+inline constexpr double KdBase   = 1.0;    // Initial value of Kd
+inline constexpr double KiBase   = 100.0;  // Initial value of Ki
+inline constexpr double HinfBase = 5.0;    // Initial value of H-infinity Gain
 
 
 /**
@@ -140,6 +139,13 @@ private:
 	Eigen::MatrixXd M, Mx;
 	Eigen::VectorXd G;
 
+	// Pre-allocated temporaries to avoid heap allocation in RT loop
+	Eigen::VectorXd m_u0;       // joint-space control input
+	Eigen::VectorXd m_u01;      // task-space feed-forward
+	Eigen::VectorXd m_u02;      // task-space feedback
+	Eigen::VectorXd m_u03;      // task-space shaped feedback
+	Eigen::VectorXd m_u04;      // null-space control
+
 	int m_Jnum;
 	double InitTime=0.0;
 
@@ -147,5 +153,3 @@ private:
 };
 
 } /* namespace HYUCtrl */
-
-#endif /* CONTROLLER_H_ */

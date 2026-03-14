@@ -1,168 +1,127 @@
-###
-# Set minimum version of CMake. Since command 'project' use
-# VERSION sub-option we need at least 3.0.
-# Note: If you use 2.6 or 2.4, God kills a kitten. Seriously.
 cmake_minimum_required(VERSION 3.8)
 
-# THIS HAS TO COME BEFORE THE PROJECT LINE
-#set(CMAKE_C_COMPILER "gcc")
-#set(CMAKE_CXX_COMPILER "gcc")
-
-####
-# Set variables:
-#   * PROJECT_NAME
-#   * PROJECT_VERSION
 project(RTControlDualArm VERSION 2.0.0 LANGUAGES C CXX)
 
-# Use MACOSX_RPATH by default on OS X. This was added in CMake 2.8.12 and
-# became default in CMake 3.0. Explicitly setting this policy is necessary to
-# suppress a warning in CMake 3.0 and above.
-if(POLICY CMP0042)
-    cmake_policy(SET CMP0042 NEW)
+# ---------------------------------------------------------------------------
+# Default build type
+# ---------------------------------------------------------------------------
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Build type not set – defaulting to Release")
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose: Debug Release RelWithDebInfo Profile" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release RelWithDebInfo Profile)
 endif()
 
-# Simplify variable reference and escape sequence evaluation. This was added in
-# CMake 3.1. Explicitly setting this policy is necessary to suppress a warning
-# in CMake 3.1 and above.
-if(POLICY CMP0053)
-    cmake_policy(SET CMP0053 NEW)
-endif()
-
-cmake_policy(SET CMP0022 NEW)
-if (POLICY CMP0048)
-    cmake_policy(SET CMP0048 NEW)
-endif()
-
-if (POLICY CMP0025)
-    cmake_policy(SET CMP0025 NEW)
-endif()
-
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
+# ---------------------------------------------------------------------------
+# Module path
+# ---------------------------------------------------------------------------
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(FindPkgConfig)
 include(cmake/CMakeFunctions.cmake)
 
-set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
+# ---------------------------------------------------------------------------
+# Install directories (in-source layout: bin/ lib/ bin/inc/)
+# ---------------------------------------------------------------------------
+set(CMAKE_INSTALL_PREFIX     ${PROJECT_SOURCE_DIR})
 set(PROJ_INSTALL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/bin/inc)
-set(PROJ_INSTALL_BIN_DIR ${PROJECT_SOURCE_DIR}/bin)
-set(PROJ_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
+set(PROJ_INSTALL_BIN_DIR     ${PROJECT_SOURCE_DIR}/bin)
+set(PROJ_INSTALL_LIB_DIR     ${PROJECT_SOURCE_DIR}/lib)
+set(CMAKE_DEBUG_POSTFIX      "d")
 
-set(CMAKE_DEBUG_POSTFIX "d")
-set(CMAKE_MODULE_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+# ---------------------------------------------------------------------------
+# C++ standard  (C++17 required for inline variables, constexpr, structured bindings)
+# ---------------------------------------------------------------------------
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-#===============================================================================
-# Compiler flags
-#===============================================================================
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag(-std=c++17 CXX17_SUPPORT)
-if(CXX17_SUPPORT)
-    set(CMAKE_CXX_STANDARD 17)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    set(CMAKE_CXX_EXTENSIONS OFF)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-else()
-    check_cxx_compiler_flag(-std=c++14 CXX14_SUPPORT)
-    set(CMAKE_CXX_STANDARD 14)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    set(CMAKE_CXX_EXTENSIONS OFF)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14" )
-endif()
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fPIC" )
+# Minimum compiler check
 execute_process(
-        COMMAND ${CMAKE_CXX_COMPILER} -dumpfullversion -dumpversion OUTPUT_VARIABLE GCC_VERSION)
+    COMMAND ${CMAKE_CXX_COMPILER} -dumpfullversion -dumpversion
+    OUTPUT_VARIABLE GCC_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
 if(GCC_VERSION VERSION_LESS 5.3.1)
-    message(FATAL_ERROR "The installed g++ version is ${GCC_VERSION}. ${PROJECT_NAME} requires g++ 5.3.1 or greater.")
+    message(FATAL_ERROR
+        "g++ ${GCC_VERSION} found; ${PROJECT_NAME} requires g++ >= 5.3.1.")
 endif()
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -fno-omit-frame-pointer -fno-inline-functions -fno-inline-functions-called-once -fno-optimize-sibling-calls")
+# ---------------------------------------------------------------------------
+# Compiler flags
+# ---------------------------------------------------------------------------
+# Common flags for all build types
+add_compile_options(-Wall -Wextra -fPIC)
+
+set(CMAKE_CXX_FLAGS_RELEASE        "-O2 -DNDEBUG -march=native -funroll-loops")
+set(CMAKE_CXX_FLAGS_DEBUG
+    "-g -fno-omit-frame-pointer -fno-inline-functions \
+-fno-inline-functions-called-once -fno-optimize-sibling-calls")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS_DEBUG}")
-set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_DEBUG} -pg")
+set(CMAKE_CXX_FLAGS_PROFILE        "${CMAKE_CXX_FLAGS_DEBUG} -pg")
+
+# Catch undefined symbols at shared-library link time
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
 
-include_directories(include)
+# ---------------------------------------------------------------------------
+# Find Xenomai early (before targets that use it)
+# ---------------------------------------------------------------------------
+find_package(Xenomai 2.6.0 REQUIRED NATIVE)
+message(STATUS "Xenomai found. Skins: ${Xenomai_SKINS}")
 
+# ---------------------------------------------------------------------------
+# Sub-libraries
+# ---------------------------------------------------------------------------
 add_subdirectory(src/control)
 add_subdirectory(src/ecat)
 add_subdirectory(src/kdl)
 add_subdirectory(src/net)
 
-add_executable(${PROJECT_NAME}
-        src/main.cpp
+# ---------------------------------------------------------------------------
+# Main executable
+# ---------------------------------------------------------------------------
+add_executable(${PROJECT_NAME} src/main.cpp)
+
+# Project-wide include root (src/ files use #include "ecat/...", "kdl/...", etc.)
+target_include_directories(${PROJECT_NAME} PRIVATE include)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    sub::CTRL
+    sub::ECAT
+    sub::KDL
+    sub::NETWORK
 )
 
-target_link_libraries(${PROJECT_NAME}
-        sub::CTRL
-        sub::ECAT
-        sub::KDL
-        sub::NETWORK
-)
-
-find_package(Xenomai 2.6.0 REQUIRED NATIVE)
-message(STATUS "Xenomai found with theses skins: ${Xenomai_SKINS}")
+# ---------------------------------------------------------------------------
+# Xenomai integration
+# set_target_properties(COMPILE_FLAGS) in a loop would overwrite on each
+# iteration.  Use target_compile_options / target_link_libraries instead.
+# ---------------------------------------------------------------------------
 if(Xenomai_FOUND)
-    target_include_directories(${PROJECT_NAME} PUBLIC ${KERNELHEADERS_DIR})
-    foreach(comp_lists ${Xenomai_FOUND_COMP})
-        #message(STATUS "Xenomai ${comp_lists} includes : ${Xenomai_${comp_lists}_INCLUDE_DIRS}" )
-        #message(STATUS "Xenomai ${comp_lists} definitions: ${Xenomai_${comp_lists}_DEFINITIONS}")
-        #message(STATUS "Xenomai ${comp_lists} LIBRARY_DIRS : ${Xenomai_${comp_lists}_LIBRARY_DIRS} ")
-        #message(STATUS "Xenomai ${comp_lists} LIBRARIES : ${Xenomai_${comp_lists}_LIBRARIES}")
-        #message(STATUS "Xenomai ${comp_lists} LDFLAGS : ${Xenomai_${comp_lists}_LDFLAGS}")
-        #message(STATUS "Xenomai ${comp_lists} DL_FLAGS : ${Xenomai_${comp_lists}_DL_FLAGS}")
+    target_include_directories(${PROJECT_NAME} PRIVATE ${KERNELHEADERS_DIR})
+    foreach(skin ${Xenomai_FOUND_COMP})
+        target_include_directories(${PROJECT_NAME} PRIVATE
+            ${Xenomai_${skin}_INCLUDE_DIRS})
+        target_compile_options(${PROJECT_NAME} PRIVATE
+            ${Xenomai_${skin}_DEFINITIONS})
+        # DL_FLAGS are raw linker flags (e.g. -Wl,--wrap=...), not libraries
+        target_link_libraries(${PROJECT_NAME} PRIVATE
+            ${Xenomai_${skin}_DL_FLAGS})
+    endforeach()
+endif()
 
-        target_include_directories(${PROJECT_NAME} PUBLIC ${Xenomai_${comp_lists}_INCLUDE_DIRS})
-        #target_link_libraries(${PROJECT_NAME} ${Xenomai_${comp_lists}_LIBRARY_DIRS} ${Xenomai_${comp_lists}_LIBRARIES})
-        target_link_libraries(${PROJECT_NAME} ${Xenomai_${comp_lists}_DL_FLAGS})
-        set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS ${Xenomai_${comp_lists}_DEFINITIONS})
-    endforeach(comp_lists ${Xenomai_SKINS})
-endif(Xenomai_FOUND)
+# ---------------------------------------------------------------------------
+# Install
+# ---------------------------------------------------------------------------
+install(TARGETS ${PROJECT_NAME}
+    RUNTIME DESTINATION bin)
 
-# check if Doxygen is installed
-#find_package(Doxygen)
-#if (DOXYGEN_FOUND)
-#    # set input and output files
-#    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/ doc/Doxyfile.in)
-#    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-#
-#    # request to configure the file
-#    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-#    message("Doxygen build started")
-#
-#    # note the option ALL which allows to build the docs together with the application
-#    add_custom_target( doc_doxygen ALL
-#                       COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-#                       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-#                       COMMENT "Generating API documentation with Doxygen"
-#                       VERBATIM )
-#else (DOXYGEN_FOUND)
-#    message("Doxygen need to be installed to generate the doxygen documentation")
-#endif (DOXYGEN_FOUND)
-
-#===============================================================================
-# Print build summary
-#===============================================================================
-if(Dualarm_VERBOSE)
-    message(STATUS "")
-    message(STATUS "[ Build summary ]")
-    message(STATUS "CMAKE_GENERATOR  : ${CMAKE_GENERATOR}")
-    message(STATUS "Compiler ID      : ${CMAKE_CXX_COMPILER_ID}")
-    message(STATUS "Compiler version : ${CMAKE_CXX_COMPILER_VERSION}")
-    message(STATUS "Build type       : ${CMAKE_BUILD_TYPE}")
-    message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
-    message(STATUS "Install path     : ${CMAKE_INSTALL_PREFIX}")
-    message(STATUS "CXX_FLAGS        : ${CMAKE_CXX_FLAGS}")
-    if(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "RELEASE")
-        message(STATUS "CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
-    elseif(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "DEBUG")
-        message(STATUS "CXX_FLAGS_DEBUG  : ${CMAKE_CXX_FLAGS_DEBUG}")
-    elseif(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "RELWITHDEBINFO")
-        message(STATUS "CXX_FLAGS_RELWITHDEBINFO: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-    elseif(${CMAKE_BUILD_TYPE_UPPERCASE} STREQUAL "PROFILE")
-        message(STATUS "CXX_FLAGS_PROFILE: ${CMAKE_CXX_FLAGS_PROFILE}")
-    endif()
-    message(STATUS "CMAKE_SOURCE_DIR : ${CMAKE_SOURCE_DIR}")
-    message(STATUS "CMAKE_BINARY_DIR : ${CMAKE_BINARY_DIR}")
-    message(STATUS "")
-endif(Dualarm_VERBOSE)
-
+# ---------------------------------------------------------------------------
+# Build summary (always shown – useful when diagnosing CI failures)
+# ---------------------------------------------------------------------------
+string(TOUPPER "${CMAKE_BUILD_TYPE}" _BUILD_TYPE_UPPER)
+message(STATUS "")
+message(STATUS "[ ${PROJECT_NAME} ${PROJECT_VERSION} – build summary ]")
+message(STATUS "  Generator  : ${CMAKE_GENERATOR}")
+message(STATUS "  Compiler   : ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "  C++ std    : ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Build type : ${CMAKE_BUILD_TYPE}")
+message(STATUS "  Install    : ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "  Flags      : ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_BUILD_TYPE_UPPER}}")
+message(STATUS "")

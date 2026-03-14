@@ -3,14 +3,22 @@
  * @author Junho Park
  */
 
-#ifndef LIEOPERATOR_H_
-#define LIEOPERATOR_H_
+#pragma once
 
-#include <iostream>
 #include <Eigen/Dense>
-using namespace Eigen;
 #include <omp.h>
-using namespace std;
+
+using Eigen::Matrix;
+using Eigen::Matrix3d;
+using Eigen::Matrix4d;
+using Eigen::Vector3d;
+using Eigen::VectorXd;
+using Eigen::VectorXi;
+using Eigen::MatrixXd;
+using Eigen::MatrixXi;
+using Eigen::AngleAxisd;
+using Eigen::Quaterniond;
+using Eigen::Dynamic;
 
 typedef Matrix<double, 6, 1> se3;		/**<Size definition of se3(vector)*/
 typedef Matrix<double, 4, 4> SE3;		/**<Size definition of SE3(matrix)*/
@@ -124,5 +132,3 @@ namespace HYUMotionBase {
     };
 
 } /* namespace HYUMotion */
-
-#endif /* LIEOPERATOR_H_ */

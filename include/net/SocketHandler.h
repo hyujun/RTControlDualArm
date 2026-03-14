@@ -5,8 +5,7 @@
  *      Author: Junho Park
  */
 
-#ifndef SOCKETHANDLER_H_
-#define SOCKETHANDLER_H_
+#pragma once
 
 #include <iostream>
 #include <algorithm>
@@ -92,4 +91,3 @@ private:
     Poco::Net::Socket::SocketList connectedSockList;
 
 };
-#endif /* SOCKETHANDLER_H_ */

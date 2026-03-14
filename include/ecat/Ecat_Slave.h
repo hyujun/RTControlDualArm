@@ -5,8 +5,7 @@
  * @author Junho Park
  */
 
-#ifndef ECATSYSTEM_ECAT_SLAVE_H_
-#define ECATSYSTEM_ECAT_SLAVE_H_
+#pragma once
 
 #include "ecrt.h"
 #include <map>
@@ -160,4 +159,3 @@ protected:
 }
 
 
-#endif /* ECATSYSTEM_ECAT_SLAVE_H_ */

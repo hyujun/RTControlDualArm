@@ -5,13 +5,14 @@
 #endif
 
 #include "RTClient.h"
+#include <array>
 
 //Modify this number to indicate the actual number of motor on the network
-#define ELMO_TOTAL 16
-#define DUAL_ARM_DOF 16
+inline constexpr int ELMO_TOTAL = 16;
+inline constexpr int DUAL_ARM_DOF = 16;
 
 hyuEcat::Master ecatmaster;
-hyuEcat::EcatElmo ecat_elmo[ELMO_TOTAL];
+std::array<hyuEcat::EcatElmo, ELMO_TOTAL> ecat_elmo{};
 
 // When all slaves or drives reach OP mode,
 // system_ready becomes 1.
@@ -33,13 +34,13 @@ unsigned long calculation_time_tcp=0;
 unsigned long worst_time_tcp=0;
 
 // EtherCAT Data (Dual-Arm)
-UINT16	        StatusWord[DUAL_ARM_DOF] = {0,};
-INT32 	        ActualPos[DUAL_ARM_DOF] = {0,};
-INT32 	        ActualVel[DUAL_ARM_DOF] = {0,};
-INT16 	        ActualTor[DUAL_ARM_DOF] = {0,};
-INT8	        ModeOfOperationDisplay[DUAL_ARM_DOF] = {0,};
-std::string 	DeviceState[DUAL_ARM_DOF];
-INT16 	        TargetTor[DUAL_ARM_DOF] = {0,};		//100.0 persentage
+std::array<UINT16, DUAL_ARM_DOF> StatusWord{};
+std::array<INT32,  DUAL_ARM_DOF> ActualPos{};
+std::array<INT32,  DUAL_ARM_DOF> ActualVel{};
+std::array<INT16,  DUAL_ARM_DOF> ActualTor{};
+std::array<INT8,   DUAL_ARM_DOF> ModeOfOperationDisplay{};
+std::array<const char*, DUAL_ARM_DOF> DeviceState{};
+std::array<INT16,  DUAL_ARM_DOF> TargetTor{};		//100.0 persentage
 /****************************************************************************/
 // Xenomai RT tasks
 RT_TASK RTArm_task;
@@ -52,22 +53,23 @@ RT_QUEUE msg_event;
 
 void signal_handler(int signum);
 
-VectorXd ActualPos_Rad;
-VectorXd ActualVel_Rad;
-VectorXd TargetPos_Rad;
-VectorXd TargetVel_Rad;
-VectorXd TargetAcc_Rad;
-VectorXd TargetToq;
+// Fixed-size vectors: avoid dynamic allocation in RT loop (C++17 inline)
+inline Eigen::Matrix<double, 16, 1> ActualPos_Rad  = Eigen::Matrix<double, 16, 1>::Zero();
+inline Eigen::Matrix<double, 16, 1> ActualVel_Rad  = Eigen::Matrix<double, 16, 1>::Zero();
+inline Eigen::Matrix<double, 16, 1> TargetPos_Rad  = Eigen::Matrix<double, 16, 1>::Zero();
+inline Eigen::Matrix<double, 16, 1> TargetVel_Rad  = Eigen::Matrix<double, 16, 1>::Zero();
+inline Eigen::Matrix<double, 16, 1> TargetAcc_Rad  = Eigen::Matrix<double, 16, 1>::Zero();
+inline Eigen::Matrix<double, 16, 1> TargetToq      = Eigen::Matrix<double, 16, 1>::Zero();
 
-VectorXd TargetPos_Task;
-VectorXd TargetVel_Task;
-VectorXd TargetAcc_Task;
-VectorXd ActualPos_Task;
-VectorXd ExternalForce;
+inline Eigen::Matrix<double, 12, 1> TargetPos_Task = Eigen::Matrix<double, 12, 1>::Zero();
+inline Eigen::Matrix<double, 12, 1> TargetVel_Task = Eigen::Matrix<double, 12, 1>::Zero();
+inline Eigen::Matrix<double, 12, 1> TargetAcc_Task = Eigen::Matrix<double, 12, 1>::Zero();
+inline Eigen::Matrix<double, 12, 1> ActualPos_Task = Eigen::Matrix<double, 12, 1>::Zero();
+inline Eigen::Matrix<double, 12, 1> ExternalForce  = Eigen::Matrix<double, 12, 1>::Zero();
 
-VectorXd ErrorPos_Task;
-VectorXd finPos;
-VectorXd findPos_Task;
+inline Eigen::Matrix<double, 12, 1> ErrorPos_Task  = Eigen::Matrix<double, 12, 1>::Zero();
+inline Eigen::Matrix<double, 16, 1> finPos         = Eigen::Matrix<double, 16, 1>::Zero();
+inline Eigen::Matrix<double, 12, 1> findPos_Task   = Eigen::Matrix<double, 12, 1>::Zero();
 
 int isSlaveInit()
 {
@@ -101,9 +103,9 @@ int isSlaveInit()
 }
 
 
-Vector3d ForwardPos[2];
-Vector3d ForwardOri[2];
-Vector3d ForwardAxis[2];
+std::array<Vector3d, 2> ForwardPos;
+std::array<Vector3d, 2> ForwardOri;
+std::array<Vector3d, 2> ForwardAxis;
 int NumChain;
 
 static unsigned char ControlIndex1 = CTRLMODE_IDY_JOINT;
@@ -131,31 +133,32 @@ void RTRArm_run( void *arg )
 
     unsigned char JointState = ControlSubIndex;
 
-    ActualPos_Rad.setZero(DUAL_ARM_DOF);
-    ActualVel_Rad.setZero(DUAL_ARM_DOF);
-    TargetPos_Rad.setZero(DUAL_ARM_DOF);
-    TargetVel_Rad.setZero(DUAL_ARM_DOF);
-    TargetAcc_Rad.setZero(DUAL_ARM_DOF);
-    finPos.setZero(DUAL_ARM_DOF);
-    TargetToq.setZero(DUAL_ARM_DOF);
+    // Fixed-size vectors are already zero-initialized at definition; just reset
+    ActualPos_Rad.setZero();
+    ActualVel_Rad.setZero();
+    TargetPos_Rad.setZero();
+    TargetVel_Rad.setZero();
+    TargetAcc_Rad.setZero();
+    finPos.setZero();
+    TargetToq.setZero();
 
-    TargetPos_Task.setZero(12);
-    TargetVel_Task.setZero(12);
-    TargetAcc_Task.setZero(12);
-    ActualPos_Task.setZero(12);
-    ExternalForce.setZero(12);
-    ErrorPos_Task.setZero(12);
-    findPos_Task.setZero(12);
+    TargetPos_Task.setZero();
+    TargetVel_Task.setZero();
+    TargetAcc_Task.setZero();
+    ActualPos_Task.setZero();
+    ExternalForce.setZero();
+    ErrorPos_Task.setZero();
+    findPos_Task.setZero();
 
 	std::shared_ptr<SerialManipulator> DualArm = std::make_shared<SerialManipulator>();
 	std::unique_ptr<HYUControl::Controller> Control = std::make_unique<HYUControl::Controller>(DualArm);
     std::unique_ptr<HYUControl::Motion> motion = std::make_unique<HYUControl::Motion>(DualArm);
 
-    VectorXd des_mass = VectorXd::Constant(2, 5.0);
-    VectorXd KpTask = VectorXd::Zero(12);
-    VectorXd KdTask = VectorXd::Zero(12);
-    VectorXd KpNull = VectorXd::Constant(16, 0.001);
-    VectorXd KdNull = VectorXd::Constant(16, 3.0);
+    Eigen::Matrix<double, 2, 1> des_mass = Eigen::Matrix<double, 2, 1>::Constant(5.0);
+    Eigen::Matrix<double, 12, 1> KpTask = Eigen::Matrix<double, 12, 1>::Zero();
+    Eigen::Matrix<double, 12, 1> KdTask = Eigen::Matrix<double, 12, 1>::Zero();
+    Eigen::Matrix<double, 16, 1> KpNull = Eigen::Matrix<double, 16, 1>::Constant(0.001);
+    Eigen::Matrix<double, 16, 1> KdNull = Eigen::Matrix<double, 16, 1>::Constant(3.0);
 
     KpTask.segment(0,3).setConstant(100.0);
     KpTask.segment(3,3).setConstant(1300.0);
@@ -170,14 +173,12 @@ void RTRArm_run( void *arg )
     Control->SetImpedanceGain(KpTask, KdTask, KpNull, KdNull, des_mass);
 
 	DualArm->UpdateManipulatorParam();
-    int len, err;
     void *msg;
 
     TCP_Packet_Task packet_task;
-    err = rt_queue_bind(&msg_tcpip, "tcp_queue", TM_NONBLOCK);
-    if(err)
+    if (auto err = rt_queue_bind(&msg_tcpip, "tcp_queue", TM_NONBLOCK); err != 0)
     {
-        fprintf(stderr, "Failed to queue bind, code %d\n", err);
+        rt_printf("Failed to queue bind, code %d\n", err);
     }
 
 	/* Arguments: &task (NULL=self),
@@ -206,20 +207,20 @@ void RTRArm_run( void *arg )
 			ActualTor[k] =				ecat_elmo[k].torque_;
 		}
 
-        DualArm->ENCtoRAD(ActualPos, ActualPos_Rad);
-        DualArm->VelocityConvert(ActualVel, ActualVel_Rad);
+        DualArm->ENCtoRAD(ActualPos.data(), ActualPos_Rad);
+        DualArm->VelocityConvert(ActualVel.data(), ActualVel_Rad);
 
 		if( system_ready )
 		{
 			DualArm->pKin->PrepareJacobian( ActualPos_Rad );
             DualArm->pDyn->PrepareDynamics( ActualPos_Rad, ActualVel_Rad );
-			DualArm->pKin->GetForwardKinematics( ForwardPos, ForwardOri, NumChain );
+			DualArm->pKin->GetForwardKinematics( ForwardPos.data(), ForwardOri.data(), NumChain );
 
 
-            if((len = rt_queue_receive(&msg_tcpip, &msg, TM_NONBLOCK)) > 0)
+            if(auto len = rt_queue_receive(&msg_tcpip, &msg, TM_NONBLOCK); len > 0)
             {
                 memcpy(&packet_task.data, msg, sizeof(TCP_Packet_Task));
-                printf("received message> len=%d bytes, ptr=%p, index1=0x%02X, index2=0x%02X, subindex=0x%02X\n",
+                rt_printf("received message> len=%d bytes, ptr=%p, index1=0x%02X, index2=0x%02X, subindex=0x%02X\n",
                        len, msg, packet_task.info.index1, packet_task.info.index2, packet_task.info.subindex);
                 ControlIndex1 = packet_task.info.index1;
                 ControlIndex2 = packet_task.info.index2;
@@ -273,7 +274,7 @@ void RTRArm_run( void *arg )
 				Control->InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_dt );
 			}
 
-			DualArm->TorqueConvert(TargetToq, TargetTor, MaxTor);
+			DualArm->TorqueConvert(TargetToq, TargetTor.data(), MaxTor);
 
 			//write the motor data
 			for(int j=0; j < DUAL_ARM_DOF; ++j)
@@ -504,12 +505,12 @@ void print_run(void *arg)
 			{
 				rt_printf("\nReady Time: %i sec", stick);
 				rt_printf("\nMaster State: %s, AL state: 0x%02X, ConnectedSlaves : %d",
-                          ecatmaster.GetEcatMasterLinkState().c_str(), ecatmaster.GetEcatMasterState(), ecatmaster.GetConnectedSlaves());
+                          ecatmaster.GetEcatMasterLinkState(), ecatmaster.GetEcatMasterState(), ecatmaster.GetConnectedSlaves());
 				for(int i=0; i<((int)ecatmaster.GetConnectedSlaves()-1); i++)
 				{
 					rt_printf("\nID: %d , SlaveState: 0x%02X, SlaveConnection: %s, SlaveNMT: %s ", i,
-                              ecatmaster.GetSlaveState(i), ecatmaster.GetSlaveConnected(i).c_str(), ecatmaster.GetSlaveNMT(i).c_str());
-					rt_printf(" SlaveStatus : %s,", DeviceState[i].c_str());
+                              ecatmaster.GetSlaveState(i), ecatmaster.GetSlaveConnected(i), ecatmaster.GetSlaveNMT(i));
+					rt_printf(" SlaveStatus : %s,", DeviceState[i]);
 					rt_printf(" StatWord: 0x%04X, ", StatusWord[i]);
 
 				}
@@ -632,9 +633,9 @@ int main(int argc, char **argv)
 	//cycle_ns = 2000e3; // nanosecond -> 500Hz
 
 #if defined(_ECAT_ON_)
-	for(int SlaveNum=0; SlaveNum < ELMO_TOTAL; SlaveNum++)
+	for(int SlaveNum=0; SlaveNum < ELMO_TOTAL; ++SlaveNum)
 	{
-		ecatmaster.addSlave(0, SlaveNum, &ecat_elmo[SlaveNum]);
+		ecatmaster.addSlave(0, SlaveNum, &ecat_elmo[static_cast<size_t>(SlaveNum)]);
 	}
     ecatmaster.activateWithDC(0, cycle_ns);
 #endif

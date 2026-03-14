@@ -4,8 +4,7 @@
  * @author Junho Park
  */
 
-#ifndef SERIALMANIPULATOR_H_
-#define SERIALMANIPULATOR_H_
+#pragma once
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -15,8 +14,8 @@
 #include "PropertyDefinition.h"
 #include "motionlibrary.h"
 
-#define RADtoDEG 180/M_PI		/**<constant of radian to degree*/
-#define DEGtoRAD M_PI/180		/**<constant of degree to radian*/
+inline constexpr double RADtoDEG = 180.0 / M_PI;  // radian to degree
+inline constexpr double DEGtoRAD = M_PI / 180.0;  // degree to radian
 
 
 /**
@@ -89,5 +88,3 @@ private:
     VectorXd q;
     VectorXd qdot;
 };
-
-#endif /* SERIALMANIPULATOR_H_ */

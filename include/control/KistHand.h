@@ -5,21 +5,20 @@
  *      Author: Administrator
  */
 
-#ifndef KISTHAND_H_
-#define KISTHAND_H_
+#pragma once
 
 #include <Eigen/Dense>
-using namespace Eigen;
+using Eigen::VectorXd;
+using Eigen::MatrixXd;
 
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include <iostream>
 
 #include "kdl/PropertyDefinition.h"
 #include "Trajectory.h"
 
-#define R2D 180.0/M_PI
-#define D2R M_PI/180.0
+inline constexpr double R2D = 180.0 / M_PI;
+inline constexpr double D2R = M_PI / 180.0;
 
 namespace HYUControl {
 
@@ -80,5 +79,3 @@ private:
 };
 
 } /* namespace hyuCtrl */
-
-#endif /* KISTHAND_H_ */

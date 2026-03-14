@@ -4,8 +4,7 @@
  * @date 2018-11-11
  * @author Junho Park
  */
-#ifndef ECATSYSTEM_ECAT_MASTER_H_
-#define ECATSYSTEM_ECAT_MASTER_H_
+#pragma once
 
 #include "ecrt.h"
 #include <string>
@@ -14,14 +13,13 @@
 #include <cstdio>
 #include <cstdint>
 #include <unistd.h>
-#include <iostream>
-#include <sstream>
 #include <sys/resource.h>
 #include <sys/mman.h>
 #include "ecat/Ecat_Slave.h"
 #include "ecat/Ecat_Elmo.h"
 
-#define CLOCK_TO_USE CLOCK_REALTIME
+// CLOCK_MONOTONIC is preferred for RT: immune to NTP/wall-clock jumps
+#define CLOCK_TO_USE CLOCK_MONOTONIC
 #define NSEC_PER_SEC (1000000000L)
 #define TIMESPEC2NS(T) ((uint64_t) (T).tv_sec * NSEC_PER_SEC + (T).tv_nsec)
 
@@ -36,7 +34,7 @@ class Slave;
 
 /**
  * @brief EtherCAT Master Client of EtherLAB API
- * @version 1.2.0
+ * @version 1.3.0
  */
 class Master {
 public:
@@ -46,83 +44,83 @@ public:
 	 */
 	Master(const int master = 0);
 	virtual ~Master();
+
 	/**
 	 * @brief Read SDO Object
 	 * @param[in] position
 	 * @param[in] index
 	 * @param[in] subindex
-	 * @param[in] *data address of data maximum 4 bytes
+	 * @param[in] data  pointer to receive buffer
+	 * @param[in] data_size  size of receive buffer in bytes
 	 * @see CiA-402 document
-	 *
 	 */
-	void SDOread(uint16_t position, uint16_t index, uint8_t subindex, uint8_t *data);
+	void SDOread(uint16_t position, uint16_t index, uint8_t subindex,
+	             uint8_t *data, size_t data_size);
+
 	/**
 	 * @brief Write SDO Object
 	 * @param[in] position
 	 * @param[in] index
 	 * @param[in] subindex
-	 * @param[in] *data address of data maximum 4 bytes
+	 * @param[in] data  pointer to data buffer
+	 * @param[in] data_size  size of data buffer in bytes
 	 * @see CiA-402 document
 	 */
-	void SDOwrite(uint16_t position, uint16_t index, uint8_t subindex, uint8_t *data);
+	void SDOwrite(uint16_t position, uint16_t index, uint8_t subindex,
+	              uint8_t *data, size_t data_size);
 
 	/**
 	 * @brief Add EtherCAT slaves to EtherCAT master
-	 * @param[in] alias alias of client
-	 * @param[in] position position of client
-	 * @param[in] slave info of client
-	 * @return void
 	 */
 	void addSlave(uint16_t alias, uint16_t position, Slave* slave);
 
 	/**
-	 * @brief Add EtherCAT Elmo slaves to EtherCAT master
-	 * @param[in] alias
-	 * @param[in] position
-	 * @param[in] slave info of Elmo client
+	 * @brief Add EtherCAT Elmo slaves with homing to EtherCAT master
 	 */
 	void addSlaveWithHoming(uint16_t alias, uint16_t position, EcatElmo* slave);
 
 	/**
-	 * @brief Start Activate the client
+	 * @brief Activate the master (no Distributed Clock)
 	 */
 	void activate();
 
 	/**
-	 * @brief Start Activate the client with Distributed Clock Mode
-	 * @param[in] RefPosition reference client's position
-	 * @param[in] SyncCycleNano Control Cycle time in nano seconds
-	 * @return void
+	 * @brief Activate the master with Distributed Clock
+	 * @param[in] RefPosition  reference slave position
+	 * @param[in] SyncCycleNano  control cycle in nanoseconds
 	 */
 	void activateWithDC(uint8_t RefPosition, uint32_t SyncCycleNano);
 
 	/**
-	 * @brief synchronize master with each client
-	 * @param[in] RefTime current time ex) rt_timer_read()
-	 * @return void
+	 * @brief Synchronize master clock with slave clocks
+	 * @param[in] _time  current application time (ns), e.g. rt_timer_read()
 	 */
 	void SyncEcatMaster(unsigned long _time);
 
 	/**
-	 * @brief deactivate the client
+	 * @brief Deactivate and release the master
 	 */
 	void deactivate();
 
 	/**
-	 * @brief RPDO process execute
-	 * @param[in] domain initial value = 0
-	 */
-	void TxUpdate(unsigned int domain, unsigned long _time);
-
-	/**
-	 * @brief TPDO process execute
-	 * @param[in] domain initial value = 0
+	 * @brief Receive PDO data from slaves (call at start of RT cycle)
+	 * @param[in] domain  domain index (default 0)
 	 */
 	void RxUpdate(unsigned int domain = 0);
 
-	std::string GetEcatMasterLinkState()
+	/**
+	 * @brief Send PDO data to slaves (call at end of RT cycle)
+	 * @param[in] domain  domain index (default 0)
+	 * @param[in] _time   current application time (ns)
+	 */
+	void TxUpdate(unsigned int domain, unsigned long _time);
+
+	// ---- Diagnostics (non-RT, safe to call from print task) ----
+
+	/** @return "up" or "down" */
+	const char* GetEcatMasterLinkState() const
 	{
-		return EcatMasterLinkState;
+		return m_link_up ? "up" : "down";
 	}
 
 	unsigned int GetEcatMasterState() const
@@ -135,122 +133,104 @@ public:
 		return ConnectedSlaves;
 	}
 
-	unsigned int GetSlaveState(int _pos)
+	unsigned int GetSlaveState(int _pos) const
 	{
 		return m_slave_info[_pos].SlaveState;
 	}
 
-	std::string GetSlaveConnected(int _pos)
+	/** @return "online" or "offline" */
+	const char* GetSlaveConnected(int _pos) const
 	{
-		return m_slave_info[_pos].SlaveConnected;
+		return m_slave_info[_pos].online ? "online" : "offline";
 	}
 
-	std::string GetSlaveNMT(int _pos)
+	/** @return "Operational" or "Not Operational" */
+	const char* GetSlaveNMT(int _pos) const
 	{
-		return m_slave_info[_pos].SlaveNMT;
+		return m_slave_info[_pos].operational ? "Operational" : "Not Operational";
 	}
 
 private:
 
-	/**
-	 * @brief Check domain state
-	 * @param[in] domain initial value = 0
-	 */
 	void checkDomainState(unsigned int domain = 0);
-
-	/**
-	 * @brief Check master state
-	 */
 	void checkMasterState();
-
-	/**
-	 * @brief Check slave state
-	 */
 	void checkSlaveStates();
 
-	/**
-	 * @brief Confirm the EtherCAT Master is Running
-	 */
 	volatile bool isRunning = false;
 
-	std::string EcatMasterLinkState="down";
-	unsigned int EcatMasterState=0;
-	unsigned int ConnectedSlaves=0;
+	// Stored as plain POD — no heap allocation in RT path
+	bool         m_link_up       = false;
+	unsigned int EcatMasterState = 0;
+	unsigned int ConnectedSlaves = 0;
 
-	/**
-	 * @brief Structure for regist PDOs
-	 */
 	struct DomainInfo;
 
-	/**
-	 * @brief resiger for PDO domain of each client
-	 * @param[in] alias  alias of client
-	 * @param[in] position  position of clinet
-	 * @param[in] channel_indices  number of pdos
-	 * @param[in] domain_info  regist each info of client
-	 * @param[in] slave  info of client
-	 * @see Ecat_Slave.h
-	 */
-	void registerPDOInDomain(uint16_t alias, uint16_t position, std::vector<unsigned int>& channel_indices,	DomainInfo* domain_info, Slave* slave);
+	void registerPDOInDomain(uint16_t alias, uint16_t position,
+	                         std::vector<unsigned int>& channel_indices,
+	                         DomainInfo* domain_info, Slave* slave);
 
+	static void printWarning(const char* message);
+	static void printWarning(const char* message, int position);
 
-	static void printWarning(const std::string& message);
-	static void printWarning(const std::string& message, int position);
+	ec_master_t       *p_master       = nullptr;
+	ec_master_state_t  m_master_state = {};
 
-	ec_master_t *p_master;
-	ec_master_state_t m_master_state = {};
+	struct timespec tp{};
 
-    struct timespec tp{};
-
-	struct DomainInfo{
+	struct DomainInfo {
 		DomainInfo(ec_master_t* master);
 		~DomainInfo();
 
-		uint32_t domainWorkingCounter=0;
-		uint32_t domainWCState=0;
+		uint32_t domainWorkingCounter = 0;
+		uint32_t domainWCState        = 0;
 
-		ec_domain_t *domain = nullptr;
-		ec_domain_state_t domain_state = {};
-		uint8_t *domain_pd = nullptr;
+		ec_domain_t       *domain     = nullptr;
+		ec_domain_state_t  domain_state = {};
+		uint8_t           *domain_pd  = nullptr;
 
 		std::vector<ec_pdo_entry_reg_t> domain_regs;
 
-		struct Entry{
-			Slave* slave = nullptr; 				/**< slave pointer*/
-			unsigned int num_pdos = 0;				/**< number of pdo entries */
-			unsigned int* offset = nullptr; 		/**< alias of slave*/
-			unsigned int* bit_position = nullptr; 	/**< position of slave*/
+		struct Entry {
+			Slave*       slave        = nullptr;
+			unsigned int num_pdos     = 0;
+			unsigned int* offset      = nullptr;
+			unsigned int* bit_position= nullptr;
 		};
 
 		std::vector<Entry> entries;
 	};
 
+	// Init-time registry (map is fine here — never accessed in RT hot path)
 	std::map<unsigned int, DomainInfo*> m_domain_info;
 
-	struct SlaveInfo{
-		Slave* slave = nullptr;
-		ec_slave_config_t* config = nullptr;
+	// Fast O(1) cache for domain 0, set during activate()
+	// Used exclusively in the 1 kHz RT hot path
+	DomainInfo* m_domain0 = nullptr;
+
+	struct SlaveInfo {
+		Slave*                  slave        = nullptr;
+		ec_slave_config_t*      config       = nullptr;
 		ec_slave_config_state_t config_state = {};
-		unsigned int SlaveState=0;
-		std::string SlaveConnected="offline";
-		std::string SlaveNMT="PreOP";
-		unsigned int alias=0;
-		unsigned int position=0;
+		unsigned int            SlaveState   = 0;
+		// bool instead of std::string: no heap allocation in RT path
+		bool                    online       = false;
+		bool                    operational  = false;
+		unsigned int            alias        = 0;
+		unsigned int            position     = 0;
 	};
 
 	std::vector<SlaveInfo> m_slave_info;
 
-	unsigned short INDEX_HOMING_METHOD = 0x6098U; 		/**<Index for homing method*/
-	unsigned short INDEX_HOMING_SPEED =	0x6099;			/**<Index for homing speed*/
-	unsigned short SUBINDEX_HOMING_HIGHSPEED = 0x01; 	/**<Subindex for homing high speed*/
-	unsigned short SUBINDEX_HOMING_LOWSPEED = 0x02; 	/**<Subindex for homing low speed*/
-	unsigned short INDEX_HOMING_OFFSET = 0x607CU;		/**<Index for homing offset*/
-	unsigned short INDEX_HOMING_CURRENT_LIMIT = 0x2020U;/**<Index for homing current limit*/
+	// Homing SDO indices (Elmo CiA 402)
+	static constexpr uint16_t INDEX_HOMING_METHOD        = 0x6098U;
+	static constexpr uint16_t INDEX_HOMING_SPEED         = 0x6099U;
+	static constexpr uint8_t  SUBINDEX_HOMING_HIGHSPEED  = 0x01U;
+	static constexpr uint8_t  SUBINDEX_HOMING_LOWSPEED   = 0x02U;
+	static constexpr uint16_t INDEX_HOMING_OFFSET        = 0x607CU;
+	static constexpr uint16_t INDEX_HOMING_CURRENT_LIMIT = 0x2020U;
 
-	unsigned int sync_ref_counter=0;
-	unsigned int masterslave_counter=0;
+	unsigned int sync_ref_counter    = 0;
+	unsigned int masterslave_counter = 0;
 };
 
 } /* namespace hyuEcat */
-
-#endif /* ECATSYSTEM_ECAT_MASTER_H_ */

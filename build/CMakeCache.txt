@@ -43,7 +43,7 @@ CMAKE_AR:FILEPATH=/usr/bin/ar
 
 //Choose the type of build, options are: None Debug Release RelWithDebInfo
 // MinSizeRel ...
-CMAKE_BUILD_TYPE:STRING=
+CMAKE_BUILD_TYPE:STRING=Release
 
 //Enable/Disable color output during build.
 CMAKE_COLOR_MAKEFILE:BOOL=ON
@@ -118,8 +118,8 @@ CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=
 //Flags used by the linker during RELWITHDEBINFO builds.
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
-//Enable/Disable output of compile commands during generation.
-CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=
+//No help, variable specified on the command line.
+CMAKE_EXPORT_COMPILE_COMMANDS:UNINITIALIZED=ON
 
 //Value Computed by CMake.
 CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=/home/junho/git/RTControlDualArm/build/CMakeFiles/pkgRedirects
@@ -326,6 +326,15 @@ Eigen3_DIR:PATH=/usr/share/eigen3/cmake
 //Path to a file.
 Etherlab_ROOT_DIR:PATH=Etherlab_ROOT_DIR-NOTFOUND
 
+//Path to a file.
+KERNELHEADERS_DIR:PATH=/usr/src/linux-headers-6.17.0-14-generic
+
+//Set to 1 if kernel headers were found
+KERNELHEADERS_FOUND:STRING=1
+
+//Kernel headers include dirs
+KERNELHEADERS_INCLUDE_DIRS:PATH=/usr/src/linux-headers-6.17.0-14-generic/include;/usr/src/linux-headers-6.17.0-14-generic/arch/x86/include
+
 //Arguments to supply to pkg-config
 PKG_CONFIG_ARGN:STRING=
 
@@ -340,6 +349,12 @@ RTControlDualArm_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 RTControlDualArm_SOURCE_DIR:STATIC=/home/junho/git/RTControlDualArm
+
+//Path to a file.
+Xenomai_KERNEL_INCLUDE_DIR:PATH=Xenomai_KERNEL_INCLUDE_DIR-NOTFOUND
+
+//Path to a program.
+Xenomai_XENO_CONFIG:FILEPATH=Xenomai_XENO_CONFIG-NOTFOUND
 
 
 ########################
@@ -492,7 +507,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=3
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -541,6 +556,8 @@ CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 CXX17_SUPPORT:INTERNAL=1
 //Details about finding PkgConfig
 FIND_PACKAGE_MESSAGE_DETAILS_PkgConfig:INTERNAL=[/usr/bin/pkg-config][v1.8.1()]
+//ADVANCED property for variable: KERNELHEADERS_FOUND
+KERNELHEADERS_FOUND-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: PKG_CONFIG_ARGN
 PKG_CONFIG_ARGN-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: PKG_CONFIG_EXECUTABLE

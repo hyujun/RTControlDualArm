@@ -9,69 +9,69 @@
 
 #define _WITH_HAND_
 
-typedef struct{
+struct JointLimit {
     double Low[16];
     double High[16];
-}JointLimit;
+};
 
 /**
- * @brief Kinematics Infomation
+ * @brief Kinematics Information
  */
-typedef struct{
-	double w_x; 	/**< Twist x-axis*/
-	double w_y;		/**< Twist y-axis*/
-	double w_z;		/**< Twist z-axis*/
-	double q_x;		/**< Twist x-axis*/
-	double q_y;		/**< Twist y-axis*/
-	double q_z;		/**< Twist z-axis*/
-	double r;       /**< Initial Configuration roll-angle*/
-	double p;       /**< Initial Configuration pitch-angle*/
-	double y;       /**< Initial Configuration yaw-angle*/
-	double l_x;		/**< Initial Configuration x-axis*/
-	double l_y;		/**< Initial Configuration y-axis*/
-	double l_z;		/**< Initial Configuration z-axis*/
-}robot_kinematic_info;
+struct robot_kinematic_info {
+	double w_x;    /**< Twist x-axis*/
+	double w_y;    /**< Twist y-axis*/
+	double w_z;    /**< Twist z-axis*/
+	double q_x;    /**< Twist x-axis*/
+	double q_y;    /**< Twist y-axis*/
+	double q_z;    /**< Twist z-axis*/
+	double r;      /**< Initial Configuration roll-angle*/
+	double p;      /**< Initial Configuration pitch-angle*/
+	double y;      /**< Initial Configuration yaw-angle*/
+	double l_x;    /**< Initial Configuration x-axis*/
+	double l_y;    /**< Initial Configuration y-axis*/
+	double l_z;    /**< Initial Configuration z-axis*/
+};
 
 /**
  * @brief Dynamic Information
  */
-typedef struct{
-	double mass_kg; 	/**< mass of each link in kg*/
-	double Ixx_kgm2; 	/**< xx direction inertia in kgm^2*/
-    double Ixy_kgm2;    /**< xy direction inertia in kgm^2*/
-    double Izx_kgm2;    /**< xz direction inertia in kgm^2*/
-    double Iyy_kgm2;     /**< yy direction inertia in kgm^2*/
-	double Iyz_kgm2; 	/**< yz direction inertia in kgm^2*/
-    double Izz_kgm2;    /**< zz direction inertia in kgm^2*/
-	double CoM_x;		/**< x direction CoM in m*/
-	double CoM_y;		/**< y direction CoM in m*/
-	double CoM_z;		/**< z direction CoM in m*/
-}robot_dynamic_info;
+struct robot_dynamic_info {
+	double mass_kg;    /**< mass of each link in kg*/
+	double Ixx_kgm2;  /**< xx direction inertia in kgm^2*/
+	double Ixy_kgm2;  /**< xy direction inertia in kgm^2*/
+	double Izx_kgm2;  /**< xz direction inertia in kgm^2*/
+	double Iyy_kgm2;  /**< yy direction inertia in kgm^2*/
+	double Iyz_kgm2;  /**< yz direction inertia in kgm^2*/
+	double Izz_kgm2;  /**< zz direction inertia in kgm^2*/
+	double CoM_x;     /**< x direction CoM in m*/
+	double CoM_y;     /**< y direction CoM in m*/
+	double CoM_z;     /**< z direction CoM in m*/
+};
 
 /**
  * @brief motor information
  */
-typedef struct{
-	int 	motor_harmonic; 		/**< gear ratio*/
-	int 	enc_size; 				/**< resolution of encoder  */
-	double 	max_current_A;			/**< maximum continuous current of motor */
-	double 	torque_const_Nm_A; 		/**< Torque constant of motor in Nm A*/
-	int 	Offset;					/**< Absolute Encoder Zero-position Offset*/
-}robot_motor_info;
+struct robot_motor_info {
+	int    motor_harmonic;     /**< gear ratio*/
+	int    enc_size;           /**< resolution of encoder  */
+	double max_current_A;      /**< maximum continuous current of motor */
+	double torque_const_Nm_A;  /**< Torque constant of motor in Nm A*/
+	int    Offset;             /**< Absolute Encoder Zero-position Offset*/
+};
 
-typedef struct{
+struct FrictionMap {
 	double VelThreshold;
 	double FrictionTorque;
-}FrictionMap;
+};
 
-typedef struct{
+struct FrictionTanh {
 	double a;
 	double b;
 	double c;
 	double d;
 	double e;
 	double f;
-}FrictionTanh;
+};
 
 /**
  * @brief Predefined kinematic object

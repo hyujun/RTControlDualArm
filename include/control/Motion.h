@@ -5,8 +5,7 @@
  *      Author: Administrator
  */
 
-#ifndef MOTION_H_
-#define MOTION_H_
+#pragma once
 
 #include "Trajectory.h"
 #include "kdl/SerialManipulator.h"
@@ -69,5 +68,3 @@ private:
 };
 
 } /* namespace hyuCtrl */
-
-#endif /* MOTION_H_ */

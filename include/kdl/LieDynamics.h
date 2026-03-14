@@ -10,7 +10,6 @@
 #include <cmath>
 #include <Eigen/Dense>
 #include <Eigen/SVD>
-using namespace Eigen;
 
 #include "kdl/PropertyDefinition.h"
 #include "kdl/PoEKinematics.h"

@@ -2,8 +2,7 @@
 // Created by parkjunho on 2020-10-24.
 //
 
-#ifndef RTCONTROLDUALARM_KRISSSENSORHANDLER_H
-#define RTCONTROLDUALARM_KRISSSENSORHANDLER_H
+#pragma once
 
 
 #include <strings.h>
@@ -59,4 +58,3 @@ private:
 
 };
 
-#endif //RTCONTROLDUALARM_KRISSSENSORHANDLER_H

@@ -6,8 +6,7 @@
  * @version 1.0.0
  */
 
-#ifndef RTCLIENT_H_
-#define RTCLIENT_H_
+#pragma once
 
 #include <cstdio>
 #include <cstdlib>
@@ -45,8 +44,8 @@
 #include "kdl/SerialManipulator.h"
 #include "net/SocketHandler.h"
 
-#define WAKEUP_TIME     (5)				/**<Initial waiting time*/
-#define NSEC_PER_SEC    (1000000000L)	/**<Expression of second in nano second*/
+inline constexpr int  WAKEUP_TIME  = 5;               // Initial waiting time (s)
+inline constexpr long NSEC_PER_SEC = 1'000'000'000L;  // 1 second in nanoseconds
 
 //#define _DEBUG_ 			/**<Debug Print Parameter*/
 #define _ECAT_ON_ 			/**<EtherCAT device enable Parameter*/
@@ -55,15 +54,15 @@
 //#define _PLOT_ON_
 //#define _KEYBOARD_ON_
 
-typedef unsigned int UINT32;	/**<typedef uint32_t*/
-typedef int64_t		INT64;		/**<typedef uint64_t*/
-typedef int32_t 	INT32;		/**<typedef int32_t*/
-typedef int16_t 	INT16;		/**<typedef int16_t*/
-typedef uint16_t 	UINT16;		/**<typedef uint16_t*/
-typedef uint8_t 	UINT8;		/**<typedef uint8_t*/
-typedef int8_t 		INT8;   	/**<typedef int8_t*/
+// Use <cstdint> standard types directly: uint32_t, int64_t, int32_t, int16_t, uint16_t, uint8_t, int8_t
+// Legacy aliases kept for backward compatibility
+using UINT32 = uint32_t;
+using INT64  = int64_t;
+using INT32  = int32_t;
+using INT16  = int16_t;
+using UINT16 = uint16_t;
+using UINT8  = uint8_t;
+using INT8   = int8_t;
 
-// Cycle time in nanosecond
-unsigned long cycle_ns = 1000e3;  	/**< 1 ms, Initial Value */
-
-#endif
+// Cycle time in nanosecond (C++17 inline variable)
+inline unsigned long cycle_ns = 1000e3;  	/**< 1 ms, Initial Value */

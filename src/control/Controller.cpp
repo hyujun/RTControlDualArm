@@ -132,6 +132,13 @@ Controller::Controller(std::shared_ptr<SerialManipulator> Manipulator)
     KdImpNull.setConstant(16,0.1);
 
 #endif
+
+	// Pre-allocate temporaries for RT loop
+	m_u0.setZero(m_Jnum);
+	m_u01.setZero(6*this->pManipulator->GetTotalChain());
+	m_u02.setZero(6*this->pManipulator->GetTotalChain());
+	m_u03.setZero(6*this->pManipulator->GetTotalChain());
+	m_u04.setZero(m_Jnum);
 }
 
 Controller::~Controller() {
@@ -290,16 +297,13 @@ void Controller::InvDynController(const VectorXd &_q,
 //	FrictionCompensator(_qdot, _dqdot);
    FrictionCompensator2( _dqdot);
 
-    VectorXd u0;
-	u0.setZero(m_Jnum);
-	u0.noalias() += _dqddot;
-	u0.noalias() += Kd.cwiseProduct(e_dev);
-	u0.noalias() += Kp.cwiseProduct(e);
-   // u0.noalias() += Ki.cwiseProduct(e_int);
-
+    m_u0.setZero();
+	m_u0.noalias() += _dqddot;
+	m_u0.noalias() += Kd.cwiseProduct(e_dev);
+	m_u0.noalias() += Kp.cwiseProduct(e);
 
     _Toq = G;
-    _Toq.noalias() += M*u0;
+    _Toq.noalias() += M*m_u0;
     _Toq.noalias() += FrictionTorque;
 //    _Toq.setZero(m_Jnum);
 //    _Toq(0)=0;
@@ -335,19 +339,12 @@ void Controller::TaskInvDynController(const VectorXd &_dx,
 
         TaskError(_dx, _dxddot, _qdot, eTask, edotTask);
 
-        VectorXd u0;
-        u0.setZero(16);
-        u0.noalias() += KpTask.cwiseProduct(eTask);
-        u0.noalias() += -KdTask.cwiseProduct(J*_qdot);
-
-        //MatrixXd mat_tmp = Matrix<double, 16, 16>::Identity();
-        //mat_tmp.noalias() += -J.transpose()*J;
-        //VectorXd q0dot;
-        //alpha=5.0;
-        //pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
+        m_u0.setZero();
+        m_u0.noalias() += KpTask.cwiseProduct(eTask);
+        m_u0.noalias() += -KdTask.cwiseProduct(J*_qdot);
 
         _Toq = G;
-        _Toq.noalias() += ScaledJT*u0;
+        _Toq.noalias() += ScaledJT*m_u0;
         //_Toq.noalias() += pInvJ*u0;
         //_Toq.noalias() += mat_tmp*q0dot;
     }
@@ -364,17 +361,15 @@ void Controller::TaskInvDynController(const VectorXd &_dx,
 
         TaskError(_dx, _dxddot, _qdot, eTask, edotTask);
 
-        Matrix<double, 12, 1> uTask;
-        uTask = _dxddot;
-        uTask.noalias() += -Jdot*_qdot;
-        uTask.noalias() += KdTask.cwiseProduct(edotTask);
-        uTask.noalias() += KpTask.cwiseProduct(eTask);
+        m_u01 = _dxddot;
+        m_u01.noalias() += -Jdot*_qdot;
+        m_u01.noalias() += KdTask.cwiseProduct(edotTask);
+        m_u01.noalias() += KpTask.cwiseProduct(eTask);
 
-        MatrixXd u0 = Matrix<double, 16,1>::Zero();
-        //u0.noalias() += DpInvJ*uTask;
-        u0.noalias() += ScaledJT*uTask;
+        m_u0.setZero();
+        m_u0.noalias() += ScaledJT*m_u01;
         _Toq = G;
-        _Toq.noalias() += M*u0;
+        _Toq.noalias() += M*m_u0;
     }
 }
 
@@ -445,9 +440,11 @@ void Controller::CLIKTaskController( const VectorXd &_q,
                                      const int mode )
 {
 
-    dq.setZero(16);
-    dqdot.setZero(16);
-    dqddot.setZero(16);
+    static const Eigen::Matrix<double, 16, 16> I16 = Eigen::Matrix<double, 16, 16>::Identity();
+
+    dq.setZero();
+    dqdot.setZero();
+    dqddot.setZero();
 
     pManipulator->pKin->GetAnalyticJacobian(AnalyticJacobian);
     pManipulator->pKin->GetpinvJacobian(pInvJacobian);
@@ -464,12 +461,11 @@ void Controller::CLIKTaskController( const VectorXd &_q,
     Vector_temp = _dxdot;
     Vector_temp.noalias() += KpTask.cwiseProduct(eTask);
 
-
     if(mode == 1) // jacobian pseudoinverse
     {
         pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
 
-        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp = I16;
         Matrix_temp += -pInvJacobian*AnalyticJacobian;
         dqdot.noalias() += pInvJacobian*Vector_temp;
         dqdot.noalias() += Matrix_temp*q0dot;
@@ -478,7 +474,7 @@ void Controller::CLIKTaskController( const VectorXd &_q,
     {
         pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
 
-        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp = I16;
         Matrix_temp += -pInvJacobian*AnalyticJacobian;
         dqdot.noalias() += AnalyticJacobian.transpose()*Vector_temp;
         dqdot.noalias() += Matrix_temp*q0dot;
@@ -488,7 +484,7 @@ void Controller::CLIKTaskController( const VectorXd &_q,
         pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
         pManipulator->pKin->GetDampedpInvJacobian(DampedpInvJacobian);
 
-        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp = I16;
         Matrix_temp += -pInvJacobian*AnalyticJacobian;
         dqdot.noalias() += DampedpInvJacobian*Vector_temp;
         dqdot.noalias() += Matrix_temp*q0dot;
@@ -498,7 +494,7 @@ void Controller::CLIKTaskController( const VectorXd &_q,
         pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
         pManipulator->pKin->GetScaledTransJacobian(ScaledTransJacobian);
 
-        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp = I16;
         Matrix_temp += -pInvJacobian*AnalyticJacobian;
         dqdot.noalias() += ScaledTransJacobian*Vector_temp;
         dqdot.noalias() += Matrix_temp*q0dot;
@@ -508,7 +504,7 @@ void Controller::CLIKTaskController( const VectorXd &_q,
         pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
         pManipulator->pKin->GetBlockpInvJacobian(BlockpInvJacobian);
 
-        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp = I16;
         Matrix_temp += -BlockpInvJacobian*AnalyticJacobian;
         dqdot.noalias() += BlockpInvJacobian*Vector_temp;
         dqdot.noalias() += Matrix_temp*q0dot;
@@ -517,14 +513,11 @@ void Controller::CLIKTaskController( const VectorXd &_q,
     {
         MatrixXd weight;
         weight.setIdentity(16,16);
-        //pManipulator->pDyn->M_Matrix(weight);
-        //pManipulator->pKin->Getq0dotWithMM(alpha, q0dot);
         pManipulator->pKin->GetWeightDampedpInvJacobian(_dx, weight, WdampedpInvJacobian);
 
-        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp = I16;
         Matrix_temp += -WdampedpInvJacobian*AnalyticJacobian;
         dqdot.noalias() += WdampedpInvJacobian*Vector_temp;
-        //dqdot.noalias() += Matrix_temp*q0dot;
     }
     else if(mode == 7) // relative jacobian
     {
@@ -582,38 +575,31 @@ void Controller::TaskImpedanceController(const VectorXd &_q, const VectorXd &_qd
 
     alpha = 7.5;
 
+    static const Eigen::Matrix<double, 16, 16> I16 = Eigen::Matrix<double, 16, 16>::Identity();
+
     if(mode == 1) // Mx = Mx_desired
     {
-        VectorXd u01 = VectorXd::Zero(AnalyticJacobian.rows());
-        VectorXd u02 = VectorXd::Zero(AnalyticJacobian.rows());
-        VectorXd u04 = VectorXd::Zero(AnalyticJacobian.cols());
-
-        u01 = _dxddot;
-        u01.noalias() += -AnalyticJacobianDot*_qdot;
+        m_u01 = _dxddot;
+        m_u01.noalias() += -AnalyticJacobianDot*_qdot;
 
         TaskError(_dx, _dxdot, _qdot, eTask, edotTask);
-        u02.noalias() += KdImp.cwiseProduct(edotTask);
-        u02.noalias() += KpImp.cwiseProduct(eTask);
+        m_u02.setZero();
+        m_u02.noalias() += KdImp.cwiseProduct(edotTask);
+        m_u02.noalias() += KpImp.cwiseProduct(eTask);
 
-        //dqN = 0.5*(pManipulator->pKin->qLimit_High - pManipulator->pKin->qLimit_Low);
         pManipulator->pKin->Getq0dotWithMM(alpha, dqdotN);
-        //dqdotN.noalias() += -0.5*(pManipulator->pKin->qLimit_Low - _q).cwiseInverse();
-        //dqdotN.noalias() += 0.5*(_q - pManipulator->pKin->qLimit_High).cwiseInverse();
-        //u04.noalias() += KpImpNull.cwiseProduct(dqN - _q);
-        u04.noalias() += KdImpNull.cwiseProduct(dqdotN - _qdot);
+        m_u04.setZero();
+        m_u04.noalias() += KdImpNull.cwiseProduct(dqdotN - _qdot);
 
-        MatrixXd weight;
-        //weight.setIdentity(16,16);
-        weight = M;
-        pManipulator->pKin->GetWeightDampedpInvJacobian(_dx, weight, AnalyticJacobian, pInvMat);
+        pManipulator->pKin->GetWeightDampedpInvJacobian(_dx, M, AnalyticJacobian, pInvMat);
 
-        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp = I16;
         Matrix_temp += -pInvMat*AnalyticJacobian;
 
         _Toq = G;
-        _Toq.noalias() += M*(pInvMat*u01);
-        _Toq.noalias() += AnalyticJacobian.transpose()*u02;
-        _Toq.noalias() += Matrix_temp*u04;
+        _Toq.noalias() += M*(pInvMat*m_u01);
+        _Toq.noalias() += AnalyticJacobian.transpose()*m_u02;
+        _Toq.noalias() += Matrix_temp*m_u04;
     }
     else if(mode == 2) // Mx != Mx_desired
     {
@@ -623,40 +609,38 @@ void Controller::TaskImpedanceController(const VectorXd &_q, const VectorXd &_qd
         pManipulator->pKin->GetDampedpInvJacobian(pInvMat);
         pManipulator->pDyn->M_Mat_Task(Mx, pInvMat);
 
-        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp = I16;
         Matrix_temp += -pInvMat*AnalyticJacobian;
 
-        VectorXd u01 = VectorXd::Zero(AnalyticJacobian.rows());
-        VectorXd u02 = VectorXd::Zero(AnalyticJacobian.rows());
-        VectorXd u03 = VectorXd::Zero(AnalyticJacobian.rows());
-        VectorXd u04 = VectorXd::Zero(AnalyticJacobian.cols());
-
-        u01 = _dxddot ;
-        u01.noalias() += -AnalyticJacobianDot*_qdot;
+        m_u01 = _dxddot;
+        m_u01.noalias() += -AnalyticJacobianDot*_qdot;
 
         TaskError(_dx, _dxdot, _qdot, eTask, edotTask);
-        u02.noalias() += KdImp.cwiseProduct(edotTask);
-        u02.noalias() += KpImp.cwiseProduct(eTask);
+        m_u02.setZero();
+        m_u02.noalias() += KdImp.cwiseProduct(edotTask);
+        m_u02.noalias() += KpImp.cwiseProduct(eTask);
 
         MatrixXd M_Shaped = MatrixXd::Zero(AnalyticJacobian.rows(),AnalyticJacobian.rows());
         M_Shaped.noalias() += Mx*MxdInv;
-        u03.noalias() += M_Shaped*u02;
-        u03.noalias() += (M_Shaped - MatrixXd::Identity(AnalyticJacobian.rows(),AnalyticJacobian.rows()))*_sensor;
+        m_u03.setZero();
+        m_u03.noalias() += M_Shaped*m_u02;
+        m_u03.noalias() += (M_Shaped - MatrixXd::Identity(AnalyticJacobian.rows(),AnalyticJacobian.rows()))*_sensor;
 
         dqN = 0.5*(pManipulator->pKin->qLimit_High - pManipulator->pKin->qLimit_Low);
         pManipulator->pKin->Getq0dotWithMM(alpha, dqdotN);
         dqdotN.noalias() += 0.5*(pManipulator->pKin->qLimit_Low - _q).cwiseInverse();
         dqdotN.noalias() += -0.5*(_q - pManipulator->pKin->qLimit_High).cwiseInverse();
-        u04.noalias() += KpImpNull.cwiseProduct(dqN - _q);
-        u04.noalias() += KdImpNull.cwiseProduct(dqdotN - _qdot);
+        m_u04.setZero();
+        m_u04.noalias() += KpImpNull.cwiseProduct(dqN - _q);
+        m_u04.noalias() += KdImpNull.cwiseProduct(dqdotN - _qdot);
 
-        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp = I16;
         Matrix_temp += -pInvMat*AnalyticJacobian;
 
         _Toq = G;
-        _Toq.noalias() += M*(pInvMat*u01);
-        _Toq.noalias() += AnalyticJacobian.transpose()*u03;
-        _Toq.noalias() += Matrix_temp*u04;
+        _Toq.noalias() += M*(pInvMat*m_u01);
+        _Toq.noalias() += AnalyticJacobian.transpose()*m_u03;
+        _Toq.noalias() += Matrix_temp*m_u04;
     }
     else if(mode == 3) // relative jacobian
     {
@@ -665,58 +649,48 @@ void Controller::TaskImpedanceController(const VectorXd &_q, const VectorXd &_qd
         AnalyticJacobian.block(6,0,6,16) = RelativeJacobian;
         AnalyticJacobianDot.block(6,0,6,16) = RelativeJacobianDot;
 
-        VectorXd u01 = VectorXd::Zero(AnalyticJacobian.rows());
-        VectorXd u02 = VectorXd::Zero(AnalyticJacobian.rows());
-        VectorXd u04 = VectorXd::Zero(AnalyticJacobian.cols());
-
-        u01 = _dxddot;
-        u01.noalias() += -AnalyticJacobianDot*_qdot;
+        m_u01 = _dxddot;
+        m_u01.noalias() += -AnalyticJacobianDot*_qdot;
 
         TaskRelativeError(_dx, _dxdot, _qdot, eTask, edotTask);
-        u02.noalias() += KdImp.cwiseProduct(edotTask);
-        u02.noalias() += KpImp.cwiseProduct(eTask);
+        m_u02.setZero();
+        m_u02.noalias() += KdImp.cwiseProduct(edotTask);
+        m_u02.noalias() += KpImp.cwiseProduct(eTask);
 
-        //dqN = 0.5*(pManipulator->pKin->qLimit_High - pManipulator->pKin->qLimit_Low);
         pManipulator->pKin->Getq0dotWithMM(alpha, dqdotN);
-        //pManipulator->pKin->Getq0dotWithMM_Relative(alpha, AnalyticJacobian, dqdotN);
-        //dqdotN.noalias() += 0.5*(pManipulator->pKin->qLimit_Low - _q).cwiseInverse();
-        //dqdotN.noalias() += -0.5*(_q - pManipulator->pKin->qLimit_High).cwiseInverse();
-        //u04.noalias() += KpImpNull.cwiseProduct(dqN - _q);
-        u04.noalias() += KdImpNull.cwiseProduct(dqdotN - _qdot);
+        m_u04.setZero();
+        m_u04.noalias() += KdImpNull.cwiseProduct(dqdotN - _qdot);
 
         MatrixXd weight;
         weight.setIdentity(16,16);
-        //weight = M;
         pManipulator->pKin->GetWeightDampedpInvJacobian(_dx, weight, AnalyticJacobian, pInvMat);
 
-        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp = I16;
         Matrix_temp += -pInvMat*AnalyticJacobian;
 
         _Toq = G;
-        _Toq.noalias() += M*(pInvMat*u01);
-        _Toq.noalias() += AnalyticJacobian.transpose()*u02;
-        _Toq.noalias() += Matrix_temp*u04;
+        _Toq.noalias() += M*(pInvMat*m_u01);
+        _Toq.noalias() += AnalyticJacobian.transpose()*m_u02;
+        _Toq.noalias() += Matrix_temp*m_u04;
     }
     else
     {
         pManipulator->pKin->GetDampedpInvJacobian(pInvMat);
 
-        Matrix_temp = Eigen::MatrixXd::Identity(16,16);
+        Matrix_temp = I16;
         Matrix_temp += -pInvMat*AnalyticJacobian;
 
-        VectorXd u01 = VectorXd::Zero(AnalyticJacobian.rows());
-        VectorXd u02 = VectorXd::Zero(AnalyticJacobian.rows());
-
-        u01 = _dxddot;
-        u01.noalias() += -AnalyticJacobianDot*_qdot;
+        m_u01 = _dxddot;
+        m_u01.noalias() += -AnalyticJacobianDot*_qdot;
 
         TaskError(_dx, _dxdot, _qdot, eTask, edotTask);
-        u02.noalias() += KdImp.cwiseProduct(edotTask);
-        u02.noalias() += KpImp.cwiseProduct(eTask);
+        m_u02.setZero();
+        m_u02.noalias() += KdImp.cwiseProduct(edotTask);
+        m_u02.noalias() += KpImp.cwiseProduct(eTask);
 
         _Toq = G;
-        _Toq.noalias() += M*(pInvMat*u01);
-        _Toq.noalias() += AnalyticJacobian.transpose()*u02;
+        _Toq.noalias() += M*(pInvMat*m_u01);
+        _Toq.noalias() += AnalyticJacobian.transpose()*m_u02;
     }
 }
 
@@ -864,15 +838,13 @@ void Controller::FrictionIdentification( const VectorXd &_q, const VectorXd &_qd
 	//ToqOut = M.diagonal().cwiseProduct(dqddot) + Kp.cwiseProduct(e) + Kd.cwiseProduct(e_dev) + G + FrictionTorque;
 	//ToqOut = M.diagonal().cwiseProduct(dqddot) + Kp.cwiseProduct(e) + Kd.cwiseProduct(e_dev) + G;
 
-	VectorXd u0;
-    u0.setZero(m_Jnum);
-    u0.noalias() += _dqddot;
-    u0.noalias() += Kd.cwiseProduct(e_dev);
-    u0.noalias() += Kp.cwiseProduct(e);
+    m_u0.setZero();
+    m_u0.noalias() += _dqddot;
+    m_u0.noalias() += Kd.cwiseProduct(e_dev);
+    m_u0.noalias() += Kp.cwiseProduct(e);
 
-    _Toq.setZero(m_Jnum);
     _Toq = G;
-    _Toq.noalias() += M*u0;
+    _Toq.noalias() += M*m_u0;
     _Toq.noalias() += FrictionTorque;
 }
 

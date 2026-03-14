@@ -31,3 +31,6 @@
 *.out
 *.app
 /Release/
+
+# AI assistant context (local only)
+CLAUDE.md

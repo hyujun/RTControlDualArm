@@ -4,8 +4,7 @@
  * @author: Junho Park
  */
 
-#ifndef CONTROL_TRAJECTORY_H_
-#define CONTROL_TRAJECTORY_H_
+#pragma once
 
 #include <Eigen/Dense>
 
@@ -63,5 +62,3 @@ private:
 };
 
 } /* namespace HYUDA */
-
-#endif /* CONTROL_TRAJECTORY_H_ */
