@@ -180,7 +180,7 @@ namespace HYUMotionKinematics {
                 if(ChainMatrix(j,i) == 1)
                 {
                     RowCount[j]++;
-                    adTmp = adjointMatrix(mBodyJacobian.col(i).segment(6*j,6));
+                    adjointMatrix(mBodyJacobian.col(i).segment(6*j,6), adTmp);
                     for(int k=RowCount[j]; k<ChainJointCount[j]; k++)
                     {
                         mBodyJacobianDot.col(i).segment(6*j,6).noalias() +=
@@ -235,7 +235,7 @@ namespace HYUMotionKinematics {
                     vec_tmp.noalias() += mSpaceJacobian.col(j).segment(6*i,3)*_qdot(j);
                 }
             }
-            rot_tmp = SkewMatrix(vec_tmp);
+            SkewMatrix(vec_tmp, rot_tmp);
             mAnalyticJacobianDot.block(6*i, 0, 3, this->m_DoF).noalias() +=
                     rot_tmp*mAnalyticJacobian.block(6*i, 0, 3, this->m_DoF);
             mAnalyticJacobianDot.block(6*i, 0, 3, this->m_DoF).noalias() +=
@@ -255,15 +255,16 @@ namespace HYUMotionKinematics {
 
     void PoEKinematics::pInvJacobian()
     {
-        mpInvJacobin.setZero(16,12);
-        //mpInvJacobin.block(0,0,9,6) = mAnalyticJacobian.block(0,0,6,9).completeOrthogonalDecomposition().pseudoInverse();
-        //mpInvJacobin.block(0,6,16,6) = mAnalyticJacobian.block(6,0,6,16).completeOrthogonalDecomposition().pseudoInverse();
-        mpInvJacobin = mAnalyticJacobian.completeOrthogonalDecomposition().pseudoInverse();
-        /*
-        Eigen::BDCSVD<MatrixXd> svd(mAnalyticJacobian, Eigen::ComputeThinU | Eigen::ComputeThinV);
-        svd.setThreshold(1e-5);
-        mpInvJacobin = svd.matrixV() * svd.singularValues().cwiseInverse().asDiagonal() * svd.matrixU().transpose();
-        */
+        mpInvJacobin.setZero(m_DoF, 6*m_NumChain);
+        mpInvSVD.compute(mAnalyticJacobian, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        double tolerance = 1e-5;
+        auto sv = mpInvSVD.singularValues();
+        Eigen::VectorXd svInv = sv;
+        for (int i = 0; i < sv.size(); ++i) {
+            if (sv(i) > tolerance) svInv(i) = 1.0 / sv(i);
+            else svInv(i) = 0.0;
+        }
+        mpInvJacobin.noalias() = mpInvSVD.matrixV() * svInv.asDiagonal() * mpInvSVD.matrixU().transpose();
     }
 
     void PoEKinematics::GetpinvJacobian( MatrixXd &_pinvJacobian )
@@ -291,12 +292,12 @@ namespace HYUMotionKinematics {
 
     void PoEKinematics::DampedpInvJacobian(const double sigma)
     {
-        Mat_Tmp.setZero(12,12);
+        Mat_Tmp.setZero(6*m_NumChain, 6*m_NumChain);
         Mat_Tmp.noalias() += mAnalyticJacobian*mAnalyticJacobian.transpose();
-        Mat_Tmp.noalias() += sigma*Eigen::Matrix<double, 12, 12>::Identity();
+        Mat_Tmp.noalias() += sigma*Eigen::MatrixXd::Identity(6*m_NumChain, 6*m_NumChain);
 
         mDampedpInvJacobian.setZero( m_DoF,6*m_NumChain );
-        mDampedpInvJacobian.noalias() += mAnalyticJacobian.transpose()*Mat_Tmp.inverse();
+        mDampedpInvJacobian.noalias() += mAnalyticJacobian.transpose()*Mat_Tmp.ldlt().solve(Eigen::MatrixXd::Identity(6*m_NumChain, 6*m_NumChain));
     }
 
     void PoEKinematics::GetDampedpInvJacobian( MatrixXd &_DampedpInvJacobian )
@@ -307,12 +308,13 @@ namespace HYUMotionKinematics {
 
     void PoEKinematics::DampedpInvJacobian(MatrixXd &_TargetMatrix, const double sigma)
     {
-        Mat_Tmp.setZero(12,12);
+        size_t r = _TargetMatrix.rows();
+        Mat_Tmp.setZero(r, r);
         Mat_Tmp.noalias() += _TargetMatrix*_TargetMatrix.transpose();
-        Mat_Tmp.noalias() += sigma*Eigen::Matrix<double, 12, 12>::Identity();
+        Mat_Tmp.noalias() += sigma*Eigen::MatrixXd::Identity(r, r);
 
         mDampedpInvJacobian.setZero( m_DoF,6*m_NumChain );
-        mDampedpInvJacobian.noalias() += _TargetMatrix.transpose()*Mat_Tmp.inverse();
+        mDampedpInvJacobian.noalias() += _TargetMatrix.transpose()*Mat_Tmp.ldlt().solve(Eigen::MatrixXd::Identity(r, r));
     }
 
     void PoEKinematics::GetDampedpInvJacobian(MatrixXd &_TargetMat, MatrixXd &_DampedpInvJacobian)
@@ -323,14 +325,16 @@ namespace HYUMotionKinematics {
 
     void PoEKinematics::BlockpInvJacobian( Matrix<double, 6, Dynamic> &_Jacobian1, Matrix<double, 6, Dynamic> &_Jacobian2 )
     {
-        MatrixXd P1 = Matrix<double, 16, 16>::Identity();
-        P1.noalias() += -_Jacobian1.transpose()*(_Jacobian1*_Jacobian1.transpose()).inverse()*_Jacobian1;
-        MatrixXd P2 = Matrix<double, 16, 16>::Identity();
-        P2.noalias() += -_Jacobian2.transpose()*(_Jacobian2*_Jacobian2.transpose()).inverse()*_Jacobian2;
+        mP1 = MatrixXd::Identity(16, 16);
+        Mat_Tmp.noalias() = _Jacobian1*_Jacobian1.transpose();
+        mP1.noalias() += -_Jacobian1.transpose()*Mat_Tmp.ldlt().solve(MatrixXd::Identity(6,6))*_Jacobian1;
+        mP2 = MatrixXd::Identity(16, 16);
+        Mat_Tmp.noalias() = _Jacobian2*_Jacobian2.transpose();
+        mP2.noalias() += -_Jacobian2.transpose()*Mat_Tmp.ldlt().solve(MatrixXd::Identity(6,6))*_Jacobian2;
 
         mBlockpInvJacobian.setZero(m_DoF, 6*m_NumChain);
-        mBlockpInvJacobian.block(0,0,16,6) = (_Jacobian1*P2).completeOrthogonalDecomposition().pseudoInverse();
-        mBlockpInvJacobian.block(0,6,16,6) = (_Jacobian2*P1).completeOrthogonalDecomposition().pseudoInverse();
+        mBlockpInvJacobian.block(0,0,16,6) = (_Jacobian1*mP2).completeOrthogonalDecomposition().pseudoInverse();
+        mBlockpInvJacobian.block(0,6,16,6) = (_Jacobian2*mP1).completeOrthogonalDecomposition().pseudoInverse();
     }
 
     void PoEKinematics::GetBlockpInvJacobian(MatrixXd &_BlockpInvJacobian)
@@ -356,85 +360,76 @@ namespace HYUMotionKinematics {
         r1_left = _rdot.segment(9,3);   //translation error for left-arm
 
         // analytic jacobian devided into left-arm jacobian & right-arm jacobian
-        MatrixXd J_left1, J_right1;
-        J_right1 = mAnalyticJacobian.block(0,0,6,16);
-        J_left1 = mAnalyticJacobian.block(6,0,6,16);
+        mJ_right1 = mAnalyticJacobian.block(0,0,6,16);
+        mJ_left1 = mAnalyticJacobian.block(6,0,6,16);
 
-        MatrixXd P1 = Matrix<double, 16, 16>::Identity();
-        P1.noalias() += -J_right1.transpose()*(J_right1*J_right1.transpose()).inverse()*J_right1;
-        MatrixXd P2 = Matrix<double, 16, 16>::Identity();
-        P2.noalias() += -J_left1.transpose()*(J_left1*J_left1.transpose()).inverse()*J_left1;
+        mP1 = MatrixXd::Identity(16, 16);
+        Mat_Tmp.noalias() = mJ_right1*mJ_right1.transpose();
+        mP1.noalias() += -mJ_right1.transpose()*Mat_Tmp.ldlt().solve(MatrixXd::Identity(6,6))*mJ_right1;
+        mP2 = MatrixXd::Identity(16, 16);
+        Mat_Tmp.noalias() = mJ_left1*mJ_left1.transpose();
+        mP2.noalias() += -mJ_left1.transpose()*Mat_Tmp.ldlt().solve(MatrixXd::Identity(6,6))*mJ_left1;
 
-        MatrixXd J_left, J_right;
-        J_right = J_right1*P2;
-        J_left = J_left1*P1;
+        mJ_right = mJ_right1*mP2;
+        mJ_left = mJ_left1*mP1;
 
         // 1st priority : Translation p 3x1, 2nd priority : Rotation r 3x1 for right-arm
-        MatrixXd J1, J2;
-        J1 = J_right.block(3,0,3,16);
-        J2 = J_right.block(0,0,3,16);
+        mJ1_right = mJ_right.block(3,0,3,16);
+        mJ2_right = mJ_right.block(0,0,3,16);
 
-        MatrixXd W = Matrix<double, 16, 16>::Zero();
-        W.noalias() += J1.transpose()*J1;
-        W.noalias() += J2.transpose()*J2;
-        W.noalias() += WpInv_epsilon_right*_WeightMat;
-        MatrixXd W_inv = W.inverse();
-        //MatrixXd W_inv = W.completeOrthogonalDecomposition().pseudoInverse();
+        mW_right = MatrixXd::Zero(16, 16);
+        mW_right.noalias() += mJ1_right.transpose()*mJ1_right;
+        mW_right.noalias() += mJ2_right.transpose()*mJ2_right;
+        mW_right.noalias() += WpInv_epsilon_right*_WeightMat;
+        mW_inv_right = mW_right.ldlt().solve(MatrixXd::Identity(16, 16));
 
-        MatrixXd Y = Matrix<double, 3, 3>::Zero();
-        Y.noalias() += J1*W_inv*J1.transpose();
-        MatrixXd Y_inv = Y.inverse();
-        //MatrixXd Y_inv = Y.completeOrthogonalDecomposition().pseudoInverse();
+        mY_right = MatrixXd::Zero(3, 3);
+        mY_right.noalias() += mJ1_right*mW_inv_right*mJ1_right.transpose();
+        mY_inv_right = mY_right.ldlt().solve(MatrixXd::Identity(3, 3));
 
-        MatrixXd Z11 = W_inv;
-        Z11.noalias() += -W_inv*(J1.transpose()*((Y_inv*J1)*W_inv));
-        MatrixXd Z12 = Matrix<double, 16, 3>::Zero();
-        Z12.noalias() += W_inv*(J1.transpose()*Y_inv);
-        MatrixXd Z21 = Matrix<double, 3, 16>::Zero();
-        Z21.noalias() += (Y_inv*J1)*W_inv;
-        MatrixXd Z22 = Matrix<double, 3, 3>::Identity();
-        Z22.noalias() += -Y_inv;
+        mZ11_right = mW_inv_right;
+        mZ11_right.noalias() += -mW_inv_right*(mJ1_right.transpose()*((mY_inv_right*mJ1_right)*mW_inv_right));
+        mZ12_right = MatrixXd::Zero(16, 3);
+        mZ12_right.noalias() += mW_inv_right*(mJ1_right.transpose()*mY_inv_right);
+        mZ21_right = MatrixXd::Zero(3, 16);
+        mZ21_right.noalias() += (mY_inv_right*mJ1_right)*mW_inv_right;
+        mZ22_right = MatrixXd::Identity(3, 3);
+        mZ22_right.noalias() += -mY_inv_right;
 
-        MatrixXd J_WpInv_right = Matrix<double,16,6>::Zero();
-        J_WpInv_right.block(0,0,16,3).noalias() += Z11*J2.transpose();
-        J_WpInv_right.block(0,3,16,3) = Z12;
-        lambda_right = -Z21*J2.transpose()*r2_right -Z22*r1_right;
-        //WpInv_epsilon_right = lambda_right.norm();
-        //WpInv_epsilon_right = tanh(lambda_right.norm());
-        mWeightDampedpInvJacobian.block(0,0,16,6) = J_WpInv_right;
+        mJ_WpInv_right = MatrixXd::Zero(16, 6);
+        mJ_WpInv_right.block(0,0,16,3).noalias() += mZ11_right*mJ2_right.transpose();
+        mJ_WpInv_right.block(0,3,16,3) = mZ12_right;
+        lambda_right = -mZ21_right*mJ2_right.transpose()*r2_right - mZ22_right*r1_right;
+        mWeightDampedpInvJacobian.block(0,0,16,6) = mJ_WpInv_right;
 
         // 1st priority : Translation p 3x1, 2nd priority : Rotation r 3x1 for left-arm
-        J1 = J_left.block(3,0,3,16);
-        J2 = J_left.block(0,0,3,16);
+        mJ1_left = mJ_left.block(3,0,3,16);
+        mJ2_left = mJ_left.block(0,0,3,16);
 
-        W.setZero(16,16);
-        W.noalias() += J1.transpose()*J1;
-        W.noalias() += J2.transpose()*J2;
-        W.noalias() += WpInv_epsilon_left*_WeightMat;
-        W_inv = W.inverse();
-        //W_inv = W.completeOrthogonalDecomposition().pseudoInverse();
+        mW_left = MatrixXd::Zero(16,16);
+        mW_left.noalias() += mJ1_left.transpose()*mJ1_left;
+        mW_left.noalias() += mJ2_left.transpose()*mJ2_left;
+        mW_left.noalias() += WpInv_epsilon_left*_WeightMat;
+        mW_inv_left = mW_left.ldlt().solve(MatrixXd::Identity(16, 16));
 
-        Y.setZero(3,3);
-        Y.noalias() += J1*W_inv*J1.transpose();
-        Y_inv = Y.inverse();
-        //Y_inv = Y.completeOrthogonalDecomposition().pseudoInverse();
+        mY_left = MatrixXd::Zero(3,3);
+        mY_left.noalias() += mJ1_left*mW_inv_left*mJ1_left.transpose();
+        mY_inv_left = mY_left.ldlt().solve(MatrixXd::Identity(3, 3));
 
-        Z11 = W_inv;
-        Z11.noalias() += -W_inv*(J1.transpose()*((Y_inv*J1)*W_inv));
-        Z12.setZero(16,3);
-        Z12.noalias() += W_inv*(J1.transpose()*Y_inv);
-        Z21.setZero(3,16);
-        Z21.noalias() += (Y_inv*J1)*W_inv;
-        Z22.setIdentity(3,3);
-        Z22.noalias() += -Y_inv;
+        mZ11_left = mW_inv_left;
+        mZ11_left.noalias() += -mW_inv_left*(mJ1_left.transpose()*((mY_inv_left*mJ1_left)*mW_inv_left));
+        mZ12_left = MatrixXd::Zero(16,3);
+        mZ12_left.noalias() += mW_inv_left*(mJ1_left.transpose()*mY_inv_left);
+        mZ21_left = MatrixXd::Zero(3,16);
+        mZ21_left.noalias() += (mY_inv_left*mJ1_left)*mW_inv_left;
+        mZ22_left = MatrixXd::Identity(3,3);
+        mZ22_left.noalias() += -mY_inv_left;
 
-        MatrixXd J_WpInv_left = Matrix<double,16,6>::Zero();
-        J_WpInv_left.block(0,0,16,3).noalias() += Z11*J2.transpose();
-        J_WpInv_left.block(0,3,16,3) = Z12;
-        lambda_left = -Z21*J2.transpose()*r2_left -Z22*r1_left;
-        //WpInv_epsilon_left = lambda_left.norm();
-        //WpInv_epsilon_left = tanh(lambda_left.norm());
-        mWeightDampedpInvJacobian.block(0,6,16,6) = J_WpInv_left;
+        mJ_WpInv_left = MatrixXd::Zero(16, 6);
+        mJ_WpInv_left.block(0,0,16,3).noalias() += mZ11_left*mJ2_left.transpose();
+        mJ_WpInv_left.block(0,3,16,3) = mZ12_left;
+        lambda_left = -mZ21_left*mJ2_left.transpose()*r2_left - mZ22_left*r1_left;
+        mWeightDampedpInvJacobian.block(0,6,16,6) = mJ_WpInv_left;
     }
 
     void PoEKinematics::GetWeightDampedpInvJacobian( const VectorXd &_rdot, const MatrixXd &_WeightMat, MatrixXd &_WDampedpInvJacobian )
@@ -458,85 +453,76 @@ namespace HYUMotionKinematics {
         r1_left = _rdot.segment(9,3);   //translation error for left-arm
 
         // analytic jacobian devided into left-arm jacobian & right-arm jacobian
-        MatrixXd J_left1, J_right1;
-        J_right1 = _TargetMat.block(0,0,6,16);
-        J_left1 = _TargetMat.block(6,0,6,16);
+        mJ_right1 = _TargetMat.block(0,0,6,16);
+        mJ_left1 = _TargetMat.block(6,0,6,16);
 
-        MatrixXd P1 = Matrix<double, 16, 16>::Identity();
-        P1.noalias() += -J_right1.transpose()*(J_right1*J_right1.transpose()).inverse()*J_right1;
-        MatrixXd P2 = Matrix<double, 16, 16>::Identity();
-        P2.noalias() += -J_left1.transpose()*(J_left1*J_left1.transpose()).inverse()*J_left1;
+        mP1 = MatrixXd::Identity(16, 16);
+        Mat_Tmp.noalias() = mJ_right1*mJ_right1.transpose();
+        mP1.noalias() += -mJ_right1.transpose()*Mat_Tmp.ldlt().solve(MatrixXd::Identity(6,6))*mJ_right1;
+        mP2 = MatrixXd::Identity(16, 16);
+        Mat_Tmp.noalias() = mJ_left1*mJ_left1.transpose();
+        mP2.noalias() += -mJ_left1.transpose()*Mat_Tmp.ldlt().solve(MatrixXd::Identity(6,6))*mJ_left1;
 
-        MatrixXd J_left, J_right;
-        J_right = J_right1*P2;
-        J_left = J_left1*P1;
+        mJ_right = mJ_right1*mP2;
+        mJ_left = mJ_left1*mP1;
 
         // 1st priority : Translation p 3x1, 2nd priority : Rotation r 3x1 for right-arm
-        MatrixXd J1, J2;
-        J1 = J_right.block(3,0,3,16);
-        J2 = J_right.block(0,0,3,16);
+        mJ1_right = mJ_right.block(3,0,3,16);
+        mJ2_right = mJ_right.block(0,0,3,16);
 
-        MatrixXd W = Matrix<double, 16, 16>::Zero();
-        W.noalias() += J1.transpose()*J1;
-        W.noalias() += J2.transpose()*J2;
-        W.noalias() += WpInv_epsilon_right*_WeightMat;
-        MatrixXd W_inv = W.inverse();
-        //MatrixXd W_inv = W.completeOrthogonalDecomposition().pseudoInverse();
+        mW_right = MatrixXd::Zero(16, 16);
+        mW_right.noalias() += mJ1_right.transpose()*mJ1_right;
+        mW_right.noalias() += mJ2_right.transpose()*mJ2_right;
+        mW_right.noalias() += WpInv_epsilon_right*_WeightMat;
+        mW_inv_right = mW_right.ldlt().solve(MatrixXd::Identity(16, 16));
 
-        MatrixXd Y = Matrix<double, 3, 3>::Zero();
-        Y.noalias() += J1*W_inv*J1.transpose();
-        MatrixXd Y_inv = Y.inverse();
-        //MatrixXd Y_inv = Y.completeOrthogonalDecomposition().pseudoInverse();
+        mY_right = MatrixXd::Zero(3, 3);
+        mY_right.noalias() += mJ1_right*mW_inv_right*mJ1_right.transpose();
+        mY_inv_right = mY_right.ldlt().solve(MatrixXd::Identity(3, 3));
 
-        MatrixXd Z11 = W_inv;
-        Z11.noalias() += -W_inv*(J1.transpose()*((Y_inv*J1)*W_inv));
-        MatrixXd Z12 = Matrix<double, 16, 3>::Zero();
-        Z12.noalias() += W_inv*(J1.transpose()*Y_inv);
-        MatrixXd Z21 = Matrix<double, 3, 16>::Zero();
-        Z21.noalias() += (Y_inv*J1)*W_inv;
-        MatrixXd Z22 = Matrix<double, 3, 3>::Identity();
-        Z22.noalias() += -Y_inv;
+        mZ11_right = mW_inv_right;
+        mZ11_right.noalias() += -mW_inv_right*(mJ1_right.transpose()*((mY_inv_right*mJ1_right)*mW_inv_right));
+        mZ12_right = MatrixXd::Zero(16, 3);
+        mZ12_right.noalias() += mW_inv_right*(mJ1_right.transpose()*mY_inv_right);
+        mZ21_right = MatrixXd::Zero(3, 16);
+        mZ21_right.noalias() += (mY_inv_right*mJ1_right)*mW_inv_right;
+        mZ22_right = MatrixXd::Identity(3, 3);
+        mZ22_right.noalias() += -mY_inv_right;
 
-        MatrixXd J_WpInv_right = Matrix<double,16,6>::Zero();
-        J_WpInv_right.block(0,0,16,3).noalias() += Z11*J2.transpose();
-        J_WpInv_right.block(0,3,16,3) = Z12;
-        lambda_right = -Z21*J2.transpose()*r2_right -Z22*r1_right;
-        //WpInv_epsilon_right = lambda_right.norm();
-        //WpInv_epsilon_right = tanh(lambda_right.norm());
-        mWeightDampedpInvJacobian.block(0,0,16,6) = J_WpInv_right;
+        mJ_WpInv_right = MatrixXd::Zero(16, 6);
+        mJ_WpInv_right.block(0,0,16,3).noalias() += mZ11_right*mJ2_right.transpose();
+        mJ_WpInv_right.block(0,3,16,3) = mZ12_right;
+        lambda_right = -mZ21_right*mJ2_right.transpose()*r2_right - mZ22_right*r1_right;
+        mWeightDampedpInvJacobian.block(0,0,16,6) = mJ_WpInv_right;
 
         // 1st priority : Translation p 3x1, 2nd priority : Rotation r 3x1 for left-arm
-        J1 = J_left.block(3,0,3,16);
-        J2 = J_left.block(0,0,3,16);
+        mJ1_left = mJ_left.block(3,0,3,16);
+        mJ2_left = mJ_left.block(0,0,3,16);
 
-        W.setZero(16,16);
-        W.noalias() += J1.transpose()*J1;
-        W.noalias() += J2.transpose()*J2;
-        W.noalias() += WpInv_epsilon_left*_WeightMat;
-        W_inv = W.inverse();
-        //W_inv = W.completeOrthogonalDecomposition().pseudoInverse();
+        mW_left = MatrixXd::Zero(16,16);
+        mW_left.noalias() += mJ1_left.transpose()*mJ1_left;
+        mW_left.noalias() += mJ2_left.transpose()*mJ2_left;
+        mW_left.noalias() += WpInv_epsilon_left*_WeightMat;
+        mW_inv_left = mW_left.ldlt().solve(MatrixXd::Identity(16, 16));
 
-        Y.setZero(3,3);
-        Y.noalias() += J1*W_inv*J1.transpose();
-        Y_inv = Y.inverse();
-        //Y_inv = Y.completeOrthogonalDecomposition().pseudoInverse();
+        mY_left = MatrixXd::Zero(3,3);
+        mY_left.noalias() += mJ1_left*mW_inv_left*mJ1_left.transpose();
+        mY_inv_left = mY_left.ldlt().solve(MatrixXd::Identity(3, 3));
 
-        Z11 = W_inv;
-        Z11.noalias() += -W_inv*(J1.transpose()*((Y_inv*J1)*W_inv));
-        Z12.setZero(16,3);
-        Z12.noalias() += W_inv*(J1.transpose()*Y_inv);
-        Z21.setZero(3,16);
-        Z21.noalias() += (Y_inv*J1)*W_inv;
-        Z22.setIdentity(3,3);
-        Z22.noalias() += -Y_inv;
+        mZ11_left = mW_inv_left;
+        mZ11_left.noalias() += -mW_inv_left*(mJ1_left.transpose()*((mY_inv_left*mJ1_left)*mW_inv_left));
+        mZ12_left = MatrixXd::Zero(16,3);
+        mZ12_left.noalias() += mW_inv_left*(mJ1_left.transpose()*mY_inv_left);
+        mZ21_left = MatrixXd::Zero(3,16);
+        mZ21_left.noalias() += (mY_inv_left*mJ1_left)*mW_inv_left;
+        mZ22_left = MatrixXd::Identity(3,3);
+        mZ22_left.noalias() += -mY_inv_left;
 
-        MatrixXd J_WpInv_left = Matrix<double,16,6>::Zero();
-        J_WpInv_left.block(0,0,16,3).noalias() += Z11*J2.transpose();
-        J_WpInv_left.block(0,3,16,3) = Z12;
-        lambda_left = -Z21*J2.transpose()*r2_left -Z22*r1_left;
-        //WpInv_epsilon_left = lambda_left.norm();
-        //WpInv_epsilon_left = tanh(lambda_left.norm());
-        mWeightDampedpInvJacobian.block(0,6,16,6) = J_WpInv_left;
+        mJ_WpInv_left = MatrixXd::Zero(16, 6);
+        mJ_WpInv_left.block(0,0,16,3).noalias() += mZ11_left*mJ2_left.transpose();
+        mJ_WpInv_left.block(0,3,16,3) = mZ12_left;
+        lambda_left = -mZ21_left*mJ2_left.transpose()*r2_left - mZ22_left*r1_left;
+        mWeightDampedpInvJacobian.block(0,6,16,6) = mJ_WpInv_left;
     }
 
     void PoEKinematics::GetWeightDampedpInvJacobian( const VectorXd &_rdot, const MatrixXd &_WeightMat, MatrixXd &_TargetMat, MatrixXd &_WDampedpInvJacobian )
@@ -853,7 +839,7 @@ namespace HYUMotionKinematics {
     {
         q = _RotMat;
 
-        _Orientation(0) = atan2(2.0*(q.x()*q.w()+q.y()*q.z()) , 1.0-2.0*(pow(q.x(),2) + pow(q.y(),2)) );
+        _Orientation(0) = atan2(2.0*(q.x()*q.w()+q.y()*q.z()) , 1.0-2.0*(q.x()*q.x() + q.y()*q.y()) );
 
         double sinp = 2.0*( q.w()*q.y() - q.z()*q.x() );
         if(abs(sinp) >= 1)
@@ -861,7 +847,7 @@ namespace HYUMotionKinematics {
         else
             _Orientation(1) = asin(sinp);
 
-        _Orientation(2) = atan2( 2.0*(q.w()*q.z() + q.x()*q.y()) , 1.0-2.0*( pow(q.y(),2) + pow(q.z(),2) ) );
+        _Orientation(2) = atan2( 2.0*(q.w()*q.z() + q.x()*q.y()) , 1.0-2.0*( q.y()*q.y() + q.z()*q.z() ) );
     }
 
 

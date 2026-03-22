@@ -21,3 +21,11 @@ target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
 # Eigen3
 find_package(Eigen3 3.0 REQUIRED NO_MODULE)
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
+
+# Build Optimizations for Real-Time Performance
+target_compile_options(${PROJECT_NAME} PRIVATE 
+    -O3 
+    -march=native 
+    -funroll-loops 
+    # -ffast-math # Uncomment after verifying it doesn't break Lie group precision (e.g., LogSO3)
+)

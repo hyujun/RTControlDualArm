@@ -102,7 +102,8 @@ namespace HYUMotionDynamics{
         this->Gamma_mat.setZero();
         for (int i = 1; i < this->m_DoF; ++i)
         {
-            this->Gamma_mat.block<6, 6>(6 * i, 6 * (i - 1)).noalias() += LieOperator::AdjointMatrix(GetTMat(i+1, i));
+            LieOperator::AdjointMatrix(GetTMat(i+1, i), adj_tmp);
+            this->Gamma_mat.block<6, 6>(6 * i, 6 * (i - 1)).noalias() += adj_tmp;
         }
         return;
     }
@@ -163,7 +164,8 @@ namespace HYUMotionDynamics{
                         {
                             if(!(k>0 && ChainMatrix(k-1,j) == 1))
                             {
-                                L_mat.block(6*j, 6*i, 6, 6).noalias() += LieOperator::AdjointMatrix(GetTMat(j+1,i+1));
+                                LieOperator::AdjointMatrix(GetTMat(j+1,i+1), adj_tmp);
+                                L_mat.block(6*j, 6*i, 6, 6).noalias() += adj_tmp;
                             }
                         }
                     }
@@ -249,23 +251,16 @@ namespace HYUMotionDynamics{
 
     void Liedynamics::M_Matrix( MatrixXd &_M )
     {
-        _M.setZero();
-
-        Matrix<double,1,1> tmp;
-        for(int i=0; i<m_DoF; i++)
+        _M.setZero(m_DoF, m_DoF);
+        mM_Tmp.setZero(6*m_DoF, m_DoF); // Re-use member variable
+        
+        for(int k=0; k<m_DoF; k++)
         {
-            for(int j=i; j<m_DoF; j++)
-            {
-                tmp.setZero();
-                for(int k=i; k<m_DoF; k++)
-                {
-                    tmp.noalias() += LA_mat.block(6*k,i,6,1).transpose()*GIner[k]*LA_mat.block(6*k,j,6,1);
-                }
-                _M(i,j) = tmp(0,0);
-                if(i != j)
-                    _M(j,i) = _M(i,j);
-            }
+            mM_Tmp.block(6*k, 0, 6, m_DoF).noalias() = GIner[k] * LA_mat.block(6*k, 0, 6, m_DoF);
         }
+        
+        _M.triangularView<Eigen::Upper>() = LA_mat.transpose() * mM_Tmp;
+        _M.triangularView<Eigen::StrictlyLower>() = _M.transpose();
     }
 
     void Liedynamics::C_Matrix( MatrixXd &_C )

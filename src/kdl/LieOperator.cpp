@@ -79,7 +79,8 @@ namespace HYUMotionBase {
         AdjointRes.setZero();
         AdjointRes.block<3,3>(0,0) = _SE3.block(0, 0, 3, 3);
         AdjointRes.block<3,3>(3,3) = _SE3.block(0, 0, 3, 3);
-        AdjointRes.block<3,3>(3,0).noalias() += SkewMatrix(_SE3.block(0, 3, 3, 1))*_SE3.block(0, 0, 3, 3);
+        SkewMatrix(_SE3.block(0, 3, 3, 1), Mat3dRes);
+        AdjointRes.block<3,3>(3,0).noalias() += Mat3dRes*_SE3.block(0, 0, 3, 3);
         return AdjointRes;
     }
 
@@ -88,7 +89,8 @@ namespace HYUMotionBase {
         _TargetAdjoint.setZero();
         _TargetAdjoint.block<3, 3>(0, 0) = _SE3.block(0, 0, 3, 3);
         _TargetAdjoint.block<3, 3>(3, 3) = _SE3.block(0, 0, 3, 3);
-        _TargetAdjoint.block<3, 3>(3, 0).noalias() += SkewMatrix(_SE3.block(0, 3, 3, 1))*_SE3.block(0, 0, 3, 3);
+        SkewMatrix(_SE3.block(0, 3, 3, 1), Mat3dRes);
+        _TargetAdjoint.block<3, 3>(3, 0).noalias() += Mat3dRes*_SE3.block(0, 0, 3, 3);
 
         return;
     }
@@ -114,20 +116,22 @@ namespace HYUMotionBase {
     adjoint LieOperator::adjointMatrix( const se3 &_se3 )
     {
         adjointRes.setZero();
-
-        adjointRes.block(0, 0, 3, 3) = SkewMatrix(_se3.head(3));
-        adjointRes.block(3, 0, 3, 3) = SkewMatrix(_se3.tail(3));
-        adjointRes.block(3, 3, 3, 3) = SkewMatrix(_se3.head(3));
+        SkewMatrix(_se3.head(3), Mat3dRes);
+        adjointRes.block(0, 0, 3, 3) = Mat3dRes;
+        adjointRes.block(3, 3, 3, 3) = Mat3dRes;
+        SkewMatrix(_se3.tail(3), Mat3dRes);
+        adjointRes.block(3, 0, 3, 3) = Mat3dRes;
         return adjointRes;
     }
 
     void LieOperator::adjointMatrix( const se3 &_se3, adjoint &_Targetadjoint )
     {
         _Targetadjoint.setZero();
-
-        _Targetadjoint.block(0, 0, 3, 3) = SkewMatrix(_se3.head(3));
-        _Targetadjoint.block(3, 0, 3, 3) = SkewMatrix(_se3.tail(3));
-        _Targetadjoint.block(3, 3, 3, 3) = SkewMatrix(_se3.head(3));
+        SkewMatrix(_se3.head(3), Mat3dRes);
+        _Targetadjoint.block(0, 0, 3, 3) = Mat3dRes;
+        _Targetadjoint.block(3, 3, 3, 3) = Mat3dRes;
+        SkewMatrix(_se3.tail(3), Mat3dRes);
+        _Targetadjoint.block(3, 0, 3, 3) = Mat3dRes;
         return;
     }
 
@@ -224,36 +228,46 @@ namespace HYUMotionBase {
 
     SE3 LieOperator::SE3Matrix( const se3 &_Twist, const double &_q )
     {
-        Matrix3d i = Matrix3d::Identity();
         Mat4dRes.setZero();
-        Mat4dRes.block(0, 0, 3, 3) = i;
-        Mat4dRes.block(0, 0, 3, 3).noalias() += sin(_q)*SkewMatrix(_Twist.head(3));
+        Mat4dRes.block(0, 0, 3, 3).setIdentity();
+        SkewMatrix(_Twist.head(3), Mat3dRes);
+        Mat4dRes.block(0, 0, 3, 3).noalias() += sin(_q)*Mat3dRes;
         double cos_tmp = 1.0 - cos(_q);
         double sin_tmp = _q - sin(_q);
-        Mat4dRes.block(0, 0, 3, 3).noalias() += cos_tmp*SkewMatrixSquare(_Twist.head(3));
+        
         Matrix3d Mat3_tmp = Eigen::Matrix3d::Zero();
-        Mat3_tmp.noalias() += i*_q;
-        Mat3_tmp.noalias() += cos_tmp*SkewMatrix(_Twist.head(3));
-        Mat3_tmp.noalias() += sin_tmp*SkewMatrixSquare(_Twist.head(3));
-        Mat4dRes.block(0, 3, 3, 1).noalias() += Mat3_tmp*_Twist.tail(3);
+        SkewMatrixSquare(_Twist.head(3), Mat3_tmp);
+        Mat4dRes.block(0, 0, 3, 3).noalias() += cos_tmp*Mat3_tmp;
+        
+        Matrix3d Mat3_tmp2 = Eigen::Matrix3d::Identity();
+        Mat3_tmp2 *= _q;
+        Mat3_tmp2.noalias() += cos_tmp*Mat3dRes;
+        Mat3_tmp2.noalias() += sin_tmp*Mat3_tmp;
+        
+        Mat4dRes.block(0, 3, 3, 1).noalias() += Mat3_tmp2*_Twist.tail(3);
         Mat4dRes.block(3, 0, 1, 4) << 0, 0, 0, 1;
         return Mat4dRes;
     }
 
     void LieOperator::SE3Matrix( const se3 &_Twist, const double &_q, SE3 &_TargetSE3 )
     {
-        Matrix3d i = Matrix3d::Identity();
         _TargetSE3.setZero();
-        _TargetSE3.block(0, 0, 3, 3) = i;
-        _TargetSE3.block(0, 0, 3, 3).noalias() += sin(_q)*SkewMatrix(_Twist.head(3));
+        _TargetSE3.block(0, 0, 3, 3).setIdentity();
+        SkewMatrix(_Twist.head(3), Mat3dRes);
+        _TargetSE3.block(0, 0, 3, 3).noalias() += sin(_q)*Mat3dRes;
         double cos_tmp = 1.0 - cos(_q);
         double sin_tmp = _q - sin(_q);
-        _TargetSE3.block(0, 0, 3, 3).noalias() += cos_tmp*SkewMatrixSquare(_Twist.head(3));
+        
         Matrix3d Mat3_tmp = Eigen::Matrix3d::Zero();
-        Mat3_tmp.noalias() += i*_q;
-        Mat3_tmp.noalias() += cos_tmp*SkewMatrix(_Twist.head(3));
-        Mat3_tmp.noalias() += sin_tmp*SkewMatrixSquare(_Twist.head(3));
-        _TargetSE3.block(0, 3, 3, 1).noalias() += Mat3_tmp*_Twist.tail(3);
+        SkewMatrixSquare(_Twist.head(3), Mat3_tmp);
+        _TargetSE3.block(0, 0, 3, 3).noalias() += cos_tmp*Mat3_tmp;
+        
+        Matrix3d Mat3_tmp2 = Eigen::Matrix3d::Identity();
+        Mat3_tmp2 *= _q;
+        Mat3_tmp2.noalias() += cos_tmp*Mat3dRes;
+        Mat3_tmp2.noalias() += sin_tmp*Mat3_tmp;
+        
+        _TargetSE3.block(0, 3, 3, 1).noalias() += Mat3_tmp2*_Twist.tail(3);
         _TargetSE3.block(3, 0, 1, 4) << 0, 0, 0, 1;
     }
 

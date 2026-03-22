@@ -157,6 +157,7 @@ namespace HYUMotionDynamics{
         VectorXd VdotBase;
 
         MatrixXd mM_Tmp;
+        Adjoint adj_tmp;
         MatrixXd mG;
 
         MatrixXi ChainMatrix;

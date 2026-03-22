@@ -23,6 +23,7 @@ namespace HYUMotionKinematics {
  * @version 1.2.0
  */
     class PoEKinematics : public HYUMotionBase::LieOperator {
+    // - [/] Phase 1: PoEKinematics Dynamic Memory Allocation & Inverse Optimizationr
     public:
         /**
          * @brief PoEKinematics class constructor
@@ -225,6 +226,7 @@ namespace HYUMotionKinematics {
 
         SE3 SE3_Tmp;
         se3 se3_Tmp;
+        Adjoint adj_tmp;
 
         VectorXi Arr[2];
 
@@ -245,6 +247,18 @@ namespace HYUMotionKinematics {
 
         MatrixXd Mat_Tmp;
         VectorXd Vec_Tmp;
+
+        // Pre-allocated variables for WeightpInvJacobian to avoid dynamic allocation
+        MatrixXd mJ_right1, mJ_left1;
+        MatrixXd mP1, mP2;
+        MatrixXd mJ_left, mJ_right;
+        MatrixXd mJ1_right, mJ2_right, mW_right, mW_inv_right, mY_right, mY_inv_right;
+        MatrixXd mZ11_right, mZ12_right, mZ21_right, mZ22_right, mJ_WpInv_right;
+        MatrixXd mJ1_left, mJ2_left, mW_left, mW_inv_left, mY_left, mY_inv_left;
+        MatrixXd mZ11_left, mZ12_left, mZ21_left, mZ22_left, mJ_WpInv_left;
+
+        // Pre-allocated JacobiSVD for pseudo-inverse
+        Eigen::JacobiSVD<MatrixXd> mpInvSVD;
 
         Quaterniond q;
 
