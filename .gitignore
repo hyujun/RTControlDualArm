@@ -34,3 +34,23 @@
 
 # AI assistant context (local only)
 CLAUDE.md
+
+# Build and Install Directories
+/build/
+/install/
+/bin/
+/lib/
+/log/
+/script/build/
+
+# IDE and Editor Files
+.vscode/
+compile_commands.json
+
+# Scratch Files
+patch_main.py
+patch_main.sh
+
+# AI and Tools
+.gemini/
+.cache/

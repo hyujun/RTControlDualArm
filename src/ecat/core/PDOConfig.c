@@ -1,4 +1,4 @@
-#include "ecat/PDOConfig.h"
+#include "ecat/core/PDOConfig.h"
 
 ec_pdo_entry_info_t Elmo_pdo_entries[] = {
 	    //{0x607a, 0x00, 32}, 	    /* Target position */
@@ -134,5 +134,42 @@ ec_sync_info_t KistSensor_syncs[5] = {
     {0xff}
 };
 
+// ---------------------------------------------------------------------------
+// Maxon EPOS4-EtherCAT 50/15 (CiA 402)
+//
+// PDO map (10 entries):
+//   RxPDO (SM2): [0] TargetPos 607A, [1] TargetVel 60FF,
+//                [2] TargetTorque 6071, [3] Controlword 6040,
+//                [4] ModesOfOp 6060
+//   TxPDO (SM3): [5] PositionActual 6064, [6] VelocityActual 606C,
+//                [7] TorqueActual 6077, [8] Statusword 6041,
+//                [9] ModesOfOpDisplay 6061
+// ---------------------------------------------------------------------------
 
+ec_pdo_entry_info_t Maxon_pdo_entries[] = {
+    {0x607A, 0x00, 32},  /* Target position */
+    {0x60FF, 0x00, 32},  /* Target velocity */
+    {0x6071, 0x00, 16},  /* Target torque */
+    {0x6040, 0x00, 16},  /* Controlword */
+    {0x6060, 0x00,  8},  /* Modes of operation */
+
+    {0x6064, 0x00, 32},  /* Position actual value */
+    {0x606C, 0x00, 32},  /* Velocity actual value */
+    {0x6077, 0x00, 16},  /* Torque actual value */
+    {0x6041, 0x00, 16},  /* Statusword */
+    {0x6061, 0x00,  8},  /* Modes of operation display */
+};
+
+ec_pdo_info_t Maxon_pdos[] = {
+    {0x1600, 5, Maxon_pdo_entries + 0},  /* RxPDO 1 */
+    {0x1A00, 5, Maxon_pdo_entries + 5},  /* TxPDO 1 */
+};
+
+ec_sync_info_t Maxon_syncs[5] = {
+    {0, EC_DIR_OUTPUT, 0, NULL,           EC_WD_DISABLE},
+    {1, EC_DIR_INPUT,  0, NULL,           EC_WD_DISABLE},
+    {2, EC_DIR_OUTPUT, 1, Maxon_pdos + 0, EC_WD_ENABLE},
+    {3, EC_DIR_INPUT,  1, Maxon_pdos + 1, EC_WD_DISABLE},
+    {0xff}
+};
 

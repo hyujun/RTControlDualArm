@@ -32,3 +32,15 @@ extern ec_sync_info_t 		KistHand_syncs[5];
 extern ec_pdo_entry_info_t 	KistSensor_pdo_entries[];
 extern ec_pdo_info_t 		KistSensor_pdos[];
 extern ec_sync_info_t 		KistSensor_syncs[5];
+
+
+// ---------------------------------------------------------------------------
+// Maxon EPOS4-EtherCAT 50/15 (CiA 402)
+// ---------------------------------------------------------------------------
+
+#define Maxon_VenderID    0x000000FB
+#define Maxon_ProductCode 0x60500000
+
+extern ec_pdo_entry_info_t 	Maxon_pdo_entries[];
+extern ec_pdo_info_t		Maxon_pdos[];
+extern ec_sync_info_t		Maxon_syncs[5];

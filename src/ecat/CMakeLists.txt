@@ -3,7 +3,7 @@ project(EcatSystem LANGUAGES C CXX)
 
 set(CMAKE_DEBUG_POSTFIX "d")
 
-file(GLOB SOURCE_FILES "*.cpp" "*.c")
+file(GLOB_RECURSE SOURCE_FILES "*.cpp" "*.c")
 
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 add_library(sub::ECAT ALIAS ${PROJECT_NAME})

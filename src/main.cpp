@@ -6,6 +6,9 @@
 
 #include "RTClient.h"
 #include <array>
+#include <thread>
+#include <rtdm/ipc.h>
+#include <sys/socket.h>
 
 //Modify this number to indicate the actual number of motor on the network
 inline constexpr int ELMO_TOTAL = 16;
@@ -45,10 +48,10 @@ std::array<INT16,  DUAL_ARM_DOF> TargetTor{};		//100.0 persentage
 // Xenomai RT tasks
 RT_TASK RTArm_task;
 RT_TASK print_task;
-RT_TASK tcpip_task;
+std::thread tcpip_thread;
 RT_TASK event_task;
 
-RT_QUEUE msg_tcpip;
+
 RT_QUEUE msg_event;
 
 void signal_handler(int signum);
@@ -176,9 +179,23 @@ void RTRArm_run( void *arg )
     void *msg;
 
     TCP_Packet_Task packet_task;
-    if (auto err = rt_queue_bind(&msg_tcpip, "tcp_queue", TM_NONBLOCK); err != 0)
-    {
-        rt_printf("Failed to queue bind, code %d\n", err);
+    rt_task_set_mode(0, T_WARNSW, nullptr);
+
+    int xddp_s = socket(AF_RTIPC, SOCK_DGRAM, IPCPROTO_XDDP);
+    if (xddp_s < 0) {
+        rt_printf("Failed to create XDDP socket\n");
+    } else {
+        size_t poolsz = 16384;
+        setsockopt(xddp_s, SOL_RTIPC, XDDP_POOLSZ, &poolsz, sizeof(poolsz));
+        struct timeval tv = {0, 0};
+        setsockopt(xddp_s, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+        struct sockaddr_ipc saddr;
+        memset(&saddr, 0, sizeof(saddr));
+        saddr.sipc_family = AF_RTIPC;
+        saddr.sipc_port = 0; // /dev/rtp0
+        if (bind(xddp_s, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
+            rt_printf("Failed to bind XDDP\n");
+        }
     }
 
 	/* Arguments: &task (NULL=self),
@@ -217,16 +234,16 @@ void RTRArm_run( void *arg )
 			DualArm->pKin->GetForwardKinematics( ForwardPos.data(), ForwardOri.data(), NumChain );
 
 
-            if(auto len = rt_queue_receive(&msg_tcpip, &msg, TM_NONBLOCK); len > 0)
-            {
-                memcpy(&packet_task.data, msg, sizeof(TCP_Packet_Task));
-                rt_printf("received message> len=%d bytes, ptr=%p, index1=0x%02X, index2=0x%02X, subindex=0x%02X\n",
-                       len, msg, packet_task.info.index1, packet_task.info.index2, packet_task.info.subindex);
-                ControlIndex1 = packet_task.info.index1;
-                ControlIndex2 = packet_task.info.index2;
-                ControlSubIndex = packet_task.info.subindex;
-                JointState = ControlSubIndex;
-                rt_queue_free(&msg_tcpip, msg);
+            if(xddp_s >= 0) {
+                ssize_t len = recvfrom(xddp_s, &packet_task.data, sizeof(TCP_Packet_Task), MSG_DONTWAIT, NULL, 0);
+                if(len > 0) {
+                    rt_printf("received message> len=%d bytes, index1=0x%02X, index2=0x%02X, subindex=0x%02X\n",
+                           (int)len, packet_task.info.index1, packet_task.info.index2, packet_task.info.subindex);
+                    ControlIndex1 = packet_task.info.index1;
+                    ControlIndex2 = packet_task.info.index2;
+                    ControlSubIndex = packet_task.info.subindex;
+                    JointState = ControlSubIndex;
+                }
             }
 
 			if( ControlIndex1 == CTRLMODE_FRICTIONID )
@@ -331,10 +348,10 @@ void RTRArm_run( void *arg )
 			start = rt_timer_read();
 		}
 	}
-    rt_queue_unbind(&msg_tcpip);
+    if(xddp_s >= 0) close(xddp_s);
 }
 
-void tcpip_run(void *arg)
+void tcpip_run()
 {
     RTIME p1, p2, p3;
 
@@ -347,17 +364,18 @@ void tcpip_run(void *arg)
 
     TCP_Packet_Task packet_task;
     TCP_Packet_Task packet_task_send;
-    void *msg;
 
-    RTIME tcp_cycle_ns = 8000e3;
-    rt_task_set_periodic(nullptr, TM_NOW, tcp_cycle_ns); //ms
+    int nrt_fd = open("/dev/rtp0", O_RDWR);
+    if(nrt_fd < 0) {
+        printf("Failed to open NRT /dev/rtp0\n");
+    }
     while(true)
     {
-        rt_task_wait_period(nullptr);
+        std::this_thread::sleep_for(std::chrono::milliseconds(8));
         if(break_flag)
             break;
 
-        p1 = rt_timer_read();
+        //p1 = rt_timer_read();
         Poco::Net::Socket::SocketList readList(connectedSockList.begin(), connectedSockList.end());
         Poco::Net::Socket::SocketList writeList(connectedSockList.begin(), connectedSockList.end());
         Poco::Net::Socket::SocketList exceptList(connectedSockList.begin(), connectedSockList.end());
@@ -381,11 +399,9 @@ void tcpip_run(void *arg)
                     if (n > 0)
                     {
                         packet_task_send = packet_task;
-                        msg = rt_queue_alloc(&msg_tcpip, sizeof(TCP_Packet_Task));
-                        if(msg == nullptr)
-                            rt_printf("rt_queue_alloc Failed to allocate\n");
-                        memcpy(msg, &packet_task.data, sizeof(TCP_Packet_Task));
-                        rt_queue_send(&msg_tcpip, msg, sizeof(TCP_Packet_Task), Q_NORMAL);
+                        if(nrt_fd >= 0) {
+                            write(nrt_fd, &packet_task.data, sizeof(TCP_Packet_Task));
+                        }
 
                         ((Poco::Net::StreamSocket*)&readSock)->sendBytes(packet_task_send.data, sizeof(TCP_Packet_Task));
                     }
@@ -553,7 +569,7 @@ void event_run(void *arg)
     rt_task_set_periodic(nullptr, TM_NOW, 1000e3); //us
     while(true)
     {
-        rt_task_wait_period(nullptr);
+        std::this_thread::sleep_for(std::chrono::milliseconds(8));
         if(break_flag)
             break;
 
@@ -579,7 +595,11 @@ void event_run(void *arg)
 /****************************************************************************/
 void signal_handler(int signum)
 {
-	rt_printf("\nSignal Interrupt: %d", signum);
+	    if (signum == SIGXCPU) {
+        rt_printf("\n[WARNING] Mode switch detected! (SIGXCPU)\n");
+        return;
+    }
+rt_printf("\nSignal Interrupt: %d", signum);
     break_flag=true;
 
 #if defined(_KEYBOARD_ON_)
@@ -590,7 +610,7 @@ void signal_handler(int signum)
 
 #if defined(_TCPIP_ON_)
     rt_printf("\nTCPIP RTTask Closing....");
-    rt_task_delete(&tcpip_task);
+    if(tcpip_thread.joinable()) tcpip_thread.join();
     rt_printf("\nTCPIP RTTask Closing Success....");
 #endif
 
@@ -617,6 +637,7 @@ int main(int argc, char **argv)
     signal(SIGIOT, signal_handler);
     signal(SIGFPE, signal_handler);
     signal(SIGKILL, signal_handler);
+    signal(SIGXCPU, signal_handler);
     signal(SIGSEGV, signal_handler);
 	signal(SIGTERM, signal_handler);
 
@@ -643,10 +664,8 @@ int main(int argc, char **argv)
 	// RTArm_task: create and start
 	rt_printf("\n-- Now running rt tasks ...\n");
 
-    rt_queue_create(&msg_tcpip, "tcp_queue", sizeof(TCP_Packet_Task)*5, 40, Q_FIFO|Q_SHARED);
 #if defined(_TCPIP_ON_)
-    rt_task_create(&tcpip_task, "TCPIP_proc", 0, 30, 0);
-    rt_task_start(&tcpip_task, &tcpip_run, nullptr);
+    tcpip_thread = std::thread(tcpip_run);
 #endif
 
 #if defined(_PRINT_ON_)

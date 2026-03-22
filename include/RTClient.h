@@ -34,10 +34,10 @@
 #include <rtdm/can.h>
 /****************************************************************************/
 
-#include "ecat/Ecat_Master.h"
-#include "ecat/Ecat_Elmo.h"
-#include "ecat/Ecat_KistFinger.h"
-#include "ecat/Ecat_KistSensor.h"
+#include "ecat/core/Ecat_Master.h"
+#include "ecat/slaves/Ecat_Elmo.h"
+#include "ecat/slaves/Ecat_KistFinger.h"
+#include "ecat/slaves/Ecat_KistSensor.h"
 #include "control/Controller.h"
 #include "control/Motion.h"
 #include "control/KistHand.h"
