@@ -88,6 +88,14 @@ public:
      */
     virtual void updateTx() {}
 
+    /**
+     * @brief Setup initial SDO configuration.
+     * 
+     * Called once by Master::addSlave() during pre-operational state.
+     * Derived classes can override this to call ecrt_slave_config_sdo* functions.
+     */
+    virtual void setupSDOs(ec_slave_config_t* config) {}
+
     // ================================================================
     //  Advanced stable-1.6 features  (non-RT)
     // ================================================================
@@ -197,6 +205,14 @@ public:
     void setSlavePosition(int position) noexcept { slave_position = position; }
     int  getSlaveAlias   () const noexcept       { return slave_alias;    }
     int  getSlavePosition() const noexcept       { return slave_position; }
+
+    // ================================================================
+    //  Distributed Clock (DC) configuration
+    // ================================================================
+
+    bool     dc_enabled_         = false;
+    uint16_t dc_assign_activate_ = 0x0000;
+    uint32_t dc_sync0_shift_     = 0;
 
     // ================================================================
     //  Public identifiers

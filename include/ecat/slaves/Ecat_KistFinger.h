@@ -30,7 +30,11 @@ namespace hyuEcat {
 class EcatKistFinger : public Slave
 {
 public:
-    EcatKistFinger() : Slave(KistHand_VendorID, KistHand_ProductCode) {}
+    EcatKistFinger() : Slave(KistHand_VendorID, KistHand_ProductCode) {
+        dc_enabled_         = true;
+        dc_assign_activate_ = 0x0300;
+        dc_sync0_shift_     = 400000;
+    }
     ~EcatKistFinger() override = default;
 
     bool initialized() const noexcept { return initialized_; }

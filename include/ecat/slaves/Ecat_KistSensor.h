@@ -20,7 +20,11 @@ namespace hyuEcat {
 class EcatKistSensor : public Slave
 {
 public:
-    EcatKistSensor() : Slave(KistSensor_VendorID, KistSensor_ProductCode) {}
+    EcatKistSensor() : Slave(KistSensor_VendorID, KistSensor_ProductCode) {
+        dc_enabled_         = true;
+        dc_assign_activate_ = 0x0300;
+        dc_sync0_shift_     = 400000;
+    }
     ~EcatKistSensor() override = default;
 
     bool initialized()      const noexcept { return initialized_; }

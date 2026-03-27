@@ -74,11 +74,6 @@ public:
     void addSlave(uint16_t alias, uint16_t position, Slave* slave);
 
     /**
-     * @brief Add EtherCAT Elmo slaves with homing to EtherCAT master
-     */
-    void addSlaveWithHoming(uint16_t alias, uint16_t position, EcatElmo* slave);
-
-    /**
      * @brief Activate the master (no Distributed Clock).
      *  After ecrt_domain_data() is obtained, calls slave->syncDomainMap()
      *  for each registered slave so the RT hot-path uses direct pointers.

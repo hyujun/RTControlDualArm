@@ -118,69 +118,7 @@ void Master::addSlave(uint16_t alias, uint16_t position, Slave* slave)
 	// Allows popEmergency() to be called after activate.
 	ecrt_slave_config_emerg_size(slave_info.config, 8);
 
-	Slave::DomainMap domain_map;
-	slave->domains(domain_map);
-	for (auto& [domain_index, channels] : domain_map) {
-		DomainInfo*& domain_info = m_domain_info[domain_index];
-		if (domain_info == nullptr) {
-			domain_info = new DomainInfo(p_master);
-		}
-		registerPDOInDomain(alias, position, channels, domain_info, slave);
-	}
-}
-
-void Master::addSlaveWithHoming(uint16_t alias, uint16_t position, EcatElmo* slave)
-{
-	slave->setSlaveAlias(alias);
-	slave->setSlavePosition(position);
-
-	SlaveInfo slave_info;
-	slave_info.slave  = slave;
-	slave_info.alias  = alias;
-	slave_info.config = ecrt_master_slave_config(p_master, alias, position,
-	                                              slave->m_vendor_id,
-	                                              slave->m_product_id);
-	if (slave_info.config == nullptr) {
-		printWarning("addSlaveWithHoming: failed to get slave configuration.");
-		return;
-	}
-	m_slave_info.push_back(slave_info);
-
-	if (slave->isHomingEnable()) {
-		fprintf(stdout, "\n-- Homing param setup -> alias:%u position:%u", alias, position);
-
-		// Use stack buffers – no heap allocation needed here
-		uint8_t s32_buf[4];
-		EC_WRITE_S32(s32_buf, slave->getHomingOffset());
-		SDOwrite(position, INDEX_HOMING_OFFSET, 0, s32_buf, sizeof(s32_buf));
-
-		uint8_t h1_buf = static_cast<uint8_t>(slave->getHomingMethod());
-		SDOwrite(position, INDEX_HOMING_METHOD, 0, &h1_buf, sizeof(h1_buf));
-
-		uint8_t u32_buf[4];
-		EC_WRITE_U32(u32_buf, slave->getHomingSpeed());
-		SDOwrite(position, INDEX_HOMING_SPEED, SUBINDEX_HOMING_LOWSPEED,
-		         u32_buf, sizeof(u32_buf));
-
-		uint8_t u16_buf[2];
-		EC_WRITE_U16(u16_buf, slave->getHomingCurrentLimit());
-		SDOwrite(position, INDEX_HOMING_CURRENT_LIMIT, 1,
-		         u16_buf, sizeof(u16_buf));
-	}
-
-	// Enable CoE Emergency ring
-	ecrt_slave_config_emerg_size(slave_info.config, 8);
-
-	const size_t num_syncs = slave->syncSize();
-	if (num_syncs > 0) {
-		if (ecrt_slave_config_pdos(slave_info.config, EC_END, slave->syncs())) {
-			printWarning("addSlaveWithHoming: failed to configure PDOs.");
-			return;
-		}
-	} else {
-		fprintf(stderr, "WARNING. Master. addSlaveWithHoming: sync size is zero for %u:%u\n",
-		        alias, position);
-	}
+	slave->setupSDOs(slave_info.config);
 
 	Slave::DomainMap domain_map;
 	slave->domains(domain_map);
@@ -192,6 +130,7 @@ void Master::addSlaveWithHoming(uint16_t alias, uint16_t position, EcatElmo* sla
 		registerPDOInDomain(alias, position, channels, domain_info, slave);
 	}
 }
+
 
 void Master::registerPDOInDomain(uint16_t alias, uint16_t position,
                                   std::vector<unsigned int>& channel_indices,
@@ -304,9 +243,11 @@ void Master::activateWithDC(uint8_t RefPosition, uint32_t SyncCycleNano)
 		}
 	}
 
-	// sync0_shift chosen as 400 µs (roughly 40% of 1 ms cycle)
+	// Configure Distributed Clock per-slave
 	for (SlaveInfo& si : m_slave_info) {
-		ecrt_slave_config_dc(si.config, 0x0300, SyncCycleNano, 400000, 0, 0);
+		if (si.slave->dc_enabled_) {
+			ecrt_slave_config_dc(si.config, si.slave->dc_assign_activate_, SyncCycleNano, si.slave->dc_sync0_shift_, 0, 0);
+		}
 	}
 	fprintf(stdout, "\n-- activateWithDC: DC config done");
 
