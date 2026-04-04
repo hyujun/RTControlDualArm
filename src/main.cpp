@@ -9,6 +9,9 @@
 #include <thread>
 #include <rtdm/ipc.h>
 #include <sys/socket.h>
+#include <functional>
+
+#include "util/SPSCQueue.h"
 
 //Modify this number to indicate the actual number of motor on the network
 inline constexpr int ELMO_TOTAL = 16;
@@ -49,8 +52,10 @@ std::array<INT16,  DUAL_ARM_DOF> TargetTor{};		//100.0 persentage
 RT_TASK RTArm_task;
 RT_TASK print_task;
 std::thread tcpip_thread;
-RT_TASK event_task;
+std::thread event_thread;
 
+// Global Lock-Free Queue for NRT-RT IPC
+SPSCQueue<TCP_Packet_Task> task_queue(1024);
 
 RT_QUEUE msg_event;
 
@@ -176,27 +181,55 @@ void RTRArm_run( void *arg )
     Control->SetImpedanceGain(KpTask, KdTask, KpNull, KdNull, des_mass);
 
 	DualArm->UpdateManipulatorParam();
-    void *msg;
 
     TCP_Packet_Task packet_task;
     rt_task_set_mode(0, T_WARNSW, nullptr);
 
-    int xddp_s = socket(AF_RTIPC, SOCK_DGRAM, IPCPROTO_XDDP);
-    if (xddp_s < 0) {
-        rt_printf("Failed to create XDDP socket\n");
-    } else {
-        size_t poolsz = 16384;
-        setsockopt(xddp_s, SOL_RTIPC, XDDP_POOLSZ, &poolsz, sizeof(poolsz));
-        struct timeval tv = {0, 0};
-        setsockopt(xddp_s, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-        struct sockaddr_ipc saddr;
-        memset(&saddr, 0, sizeof(saddr));
-        saddr.sipc_family = AF_RTIPC;
-        saddr.sipc_port = 0; // /dev/rtp0
-        if (bind(xddp_s, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
-            rt_printf("Failed to bind XDDP\n");
-        }
+    // Control Loop Dispatch Table (To minimize Branch Prediction Miss penalties)
+    std::array<std::function<void()>, 256> controlModes;
+    
+    // Set default mode for all indices
+    for(size_t i = 0; i < 256; ++i) {
+        controlModes[i] = [&]() {
+            motion->JointMotion( TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, finPos, ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
+            Control->InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_dt );
+        };
     }
+    
+    controlModes[CTRLMODE_FRICTIONID] = [&]() {
+        Control->FrictionIdentification( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_gt );
+    };
+    
+    controlModes[CTRLMODE_CLIK] = [&]() {
+        if( ControlIndex2 == 7 ) {
+            DualArm->pKin->GetForwardKinematicsWithRelative(ActualPos_Task);
+        } else {
+            DualArm->pKin->GetForwardKinematics(ActualPos_Task);
+        }
+        motion->TaskMotion( TargetPos_Task, TargetVel_Task, TargetAcc_Task, findPos_Task, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
+        Control->CLIKTaskController( ActualPos_Rad, ActualVel_Rad, TargetPos_Task, TargetVel_Task,TargetToq, double_dt, ControlIndex2 );
+    };
+    
+    controlModes[CTRLMODE_TASK] = [&]() {
+        DualArm->pKin->GetForwardKinematics(ActualPos_Task);
+        motion->TaskMotion( TargetPos_Task, TargetVel_Task, TargetAcc_Task, findPos_Task, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
+        Control->TaskInvDynController(TargetPos_Task, TargetVel_Task, TargetAcc_Task, ActualPos_Rad, ActualVel_Rad, TargetToq, double_dt, ControlIndex2 );
+        Control->GetControllerStates(TargetPos_Rad, TargetVel_Rad, ErrorPos_Task );
+    };
+    
+    controlModes[CTRLMODE_IMPEDANCE_TASK] = [&]() {
+        if( ControlIndex2 == 3 ) {
+            DualArm->pKin->GetForwardKinematicsWithRelative(ActualPos_Task);
+        } else {
+            DualArm->pKin->GetForwardKinematics(ActualPos_Task);
+        }
+        motion->TaskMotion(TargetPos_Task, TargetVel_Task, TargetAcc_Task, findPos_Task, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
+        Control->TaskImpedanceController(ActualPos_Rad, ActualVel_Rad, TargetPos_Task, TargetVel_Task, TargetAcc_Task, ExternalForce, TargetToq, ControlIndex2 );
+        Control->GetControllerStates(TargetPos_Rad, TargetVel_Rad, ErrorPos_Task );
+    };
+
+    // Pre-faulting dynamic Eigen heaps to prevent Page Fault delays on loop start
+    controlModes[CTRLMODE_IDY_JOINT]();
 
 	/* Arguments: &task (NULL=self),
 	 *            start time,
@@ -234,62 +267,20 @@ void RTRArm_run( void *arg )
 			DualArm->pKin->GetForwardKinematics( ForwardPos.data(), ForwardOri.data(), NumChain );
 
 
-            if(xddp_s >= 0) {
-                ssize_t len = recvfrom(xddp_s, &packet_task.data, sizeof(TCP_Packet_Task), MSG_DONTWAIT, NULL, 0);
-                if(len > 0) {
-                    rt_printf("received message> len=%d bytes, index1=0x%02X, index2=0x%02X, subindex=0x%02X\n",
-                           (int)len, packet_task.info.index1, packet_task.info.index2, packet_task.info.subindex);
-                    ControlIndex1 = packet_task.info.index1;
-                    ControlIndex2 = packet_task.info.index2;
-                    ControlSubIndex = packet_task.info.subindex;
-                    JointState = ControlSubIndex;
-                }
+			if(task_queue.pop(packet_task)) {
+                rt_printf("received message> index1=0x%02X, index2=0x%02X, subindex=0x%02X\n",
+                       packet_task.info.index1, packet_task.info.index2, packet_task.info.subindex);
+                ControlIndex1 = packet_task.info.index1;
+                ControlIndex2 = packet_task.info.index2;
+                ControlSubIndex = packet_task.info.subindex;
+                JointState = ControlSubIndex;
             }
 
-			if( ControlIndex1 == CTRLMODE_FRICTIONID )
-            {
-                Control->FrictionIdentification( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_gt );
+            if(ControlIndex1 < 256) {
+                controlModes[ControlIndex1]();
+            } else {
+                controlModes[CTRLMODE_IDY_JOINT]();
             }
-			else if( ControlIndex1 == CTRLMODE_CLIK )
-            {
-                if( ControlIndex2 == 7 )
-                {
-                    DualArm->pKin->GetForwardKinematicsWithRelative(ActualPos_Task);
-                }
-                else
-                {
-                    DualArm->pKin->GetForwardKinematics(ActualPos_Task);
-                }
-                motion->TaskMotion( TargetPos_Task, TargetVel_Task, TargetAcc_Task, findPos_Task, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
-                Control->CLIKTaskController( ActualPos_Rad, ActualVel_Rad, TargetPos_Task, TargetVel_Task,TargetToq, double_dt, ControlIndex2 );
-            }
-			else if( ControlIndex1 == CTRLMODE_TASK )
-            {
-                DualArm->pKin->GetForwardKinematics(ActualPos_Task);
-                motion->TaskMotion( TargetPos_Task, TargetVel_Task, TargetAcc_Task, findPos_Task, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
-			    Control->TaskInvDynController(TargetPos_Task, TargetVel_Task, TargetAcc_Task, ActualPos_Rad, ActualVel_Rad, TargetToq, double_dt, ControlIndex2 );
-                Control->GetControllerStates(TargetPos_Rad, TargetVel_Rad, ErrorPos_Task );
-
-            }
-			else if( ControlIndex1 == CTRLMODE_IMPEDANCE_TASK )
-            {
-			    if( ControlIndex2 == 3 )
-                {
-                    DualArm->pKin->GetForwardKinematicsWithRelative(ActualPos_Task);
-                }
-			    else
-                {
-                    DualArm->pKin->GetForwardKinematics(ActualPos_Task);
-                }
-			    motion->TaskMotion(TargetPos_Task, TargetVel_Task, TargetAcc_Task, findPos_Task, ActualPos_Task, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
-			    Control->TaskImpedanceController(ActualPos_Rad, ActualVel_Rad, TargetPos_Task, TargetVel_Task, TargetAcc_Task, ExternalForce, TargetToq, ControlIndex2 );
-			    Control->GetControllerStates(TargetPos_Rad, TargetVel_Rad, ErrorPos_Task );
-            }
-			else
-			{
-                motion->JointMotion( TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, finPos, ActualPos_Rad, ActualVel_Rad, double_gt, JointState, ControlSubIndex );
-				Control->InvDynController( ActualPos_Rad, ActualVel_Rad, TargetPos_Rad, TargetVel_Rad, TargetAcc_Rad, TargetToq, double_dt );
-			}
 
 			DualArm->TorqueConvert(TargetToq, TargetTor.data(), MaxTor);
 
@@ -348,7 +339,7 @@ void RTRArm_run( void *arg )
 			start = rt_timer_read();
 		}
 	}
-    if(xddp_s >= 0) close(xddp_s);
+	}
 }
 
 void tcpip_run()
@@ -365,10 +356,6 @@ void tcpip_run()
     TCP_Packet_Task packet_task;
     TCP_Packet_Task packet_task_send;
 
-    int nrt_fd = open("/dev/rtp0", O_RDWR);
-    if(nrt_fd < 0) {
-        printf("Failed to open NRT /dev/rtp0\n");
-    }
     while(true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(8));
@@ -399,9 +386,7 @@ void tcpip_run()
                     if (n > 0)
                     {
                         packet_task_send = packet_task;
-                        if(nrt_fd >= 0) {
-                            write(nrt_fd, &packet_task.data, sizeof(TCP_Packet_Task));
-                        }
+                        task_queue.push(packet_task);
 
                         ((Poco::Net::StreamSocket*)&readSock)->sendBytes(packet_task_send.data, sizeof(TCP_Packet_Task));
                     }
@@ -566,7 +551,6 @@ void event_run(void *arg)
 {
     int key_event=0;
 
-    rt_task_set_periodic(nullptr, TM_NOW, 1000e3); //us
     while(true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(8));
@@ -603,9 +587,9 @@ rt_printf("\nSignal Interrupt: %d", signum);
     break_flag=true;
 
 #if defined(_KEYBOARD_ON_)
-    rt_printf("\nEvent RTTask Closing....");
-    rt_task_delete(&event_task);
-    rt_printf("\nEvent RTTask Closing Success....");
+    rt_printf("\nEvent Thread Closing....");
+    if(event_thread.joinable()) event_thread.join();
+    rt_printf("\nEvent Thread Closing Success....");
 #endif
 
 #if defined(_TCPIP_ON_)
@@ -674,11 +658,17 @@ int main(int argc, char **argv)
 #endif
 
 	rt_task_create(&RTArm_task, "Control_proc", 1024*1024*4, 99, 0); // MUST SET at least 4MB stack-size (MAXIMUM Stack-size ; 8192 kbytes)
+	
+    // Pin RT Task to Core 2 to isolate from Linux kernel threads
+    cpu_set_t cpu_set;
+    CPU_ZERO(&cpu_set);
+    CPU_SET(2, &cpu_set);
+    rt_task_set_affinity(&RTArm_task, &cpu_set);
+
 	rt_task_start(&RTArm_task, &RTRArm_run, nullptr);
 
 #if defined(_KEYBOARD_ON_)
-    rt_task_create(&event_task, "Event_proc", 0, 80, 0);
-    rt_task_start(&event_task, &event_run, nullptr);
+    event_thread = std::thread(event_run, nullptr);
 #endif
 	// Must pause here
 	pause();
