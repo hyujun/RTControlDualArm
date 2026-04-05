@@ -225,6 +225,7 @@ namespace HYUMotionKinematics {
         int JointEndNum[2];
 
         SE3 SE3_Tmp;
+        SE3 SE3_Tmp2;
         se3 se3_Tmp;
         Adjoint adj_tmp;
 
@@ -247,6 +248,8 @@ namespace HYUMotionKinematics {
 
         MatrixXd Mat_Tmp;
         VectorXd Vec_Tmp;
+        VectorXd msvInv;
+        MatrixXd mIdentity_6N;
 
         // Pre-allocated variables for WeightpInvJacobian to avoid dynamic allocation
         MatrixXd mJ_right1, mJ_left1;

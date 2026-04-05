@@ -25,6 +25,17 @@ namespace HYUMotionDynamics{
         this->V.setZero(6*this->m_DoF);
         this->VdotBase.setZero(6*this->m_DoF);
 
+        this->mC_Temp1.setZero(6*this->m_DoF, 6*this->m_DoF);
+        this->mC_Temp2.setZero(6*this->m_DoF, 6*this->m_DoF);
+        this->mC_Temp3.setZero(6*this->m_DoF, 6*this->m_DoF);
+        this->mC_Temp4.setZero(6*this->m_DoF, 6*this->m_DoF);
+        this->mC_Temp5.setZero(6*this->m_DoF, this->m_DoF);
+        this->mC_VecTemp1.setZero(6*this->m_DoF);
+        this->mC_VecTemp2.setZero(6*this->m_DoF);
+        this->mC_VecTemp3.setZero(6*this->m_DoF);
+        this->mTask_M.setZero(this->m_DoF, this->m_DoF);
+        this->mTask_G.setZero(this->m_DoF);
+
         grav.setZero(6);
         grav << 0, 0, 0, 0, 0, 9.8;
     }
@@ -63,6 +74,17 @@ namespace HYUMotionDynamics{
 
         V.setZero(6*this->m_DoF);
         VdotBase.setZero(6*this->m_DoF);
+
+        mC_Temp1.setZero(6*this->m_DoF, 6*this->m_DoF);
+        mC_Temp2.setZero(6*this->m_DoF, 6*this->m_DoF);
+        mC_Temp3.setZero(6*this->m_DoF, 6*this->m_DoF);
+        mC_Temp4.setZero(6*this->m_DoF, 6*this->m_DoF);
+        mC_Temp5.setZero(6*this->m_DoF, this->m_DoF);
+        mC_VecTemp1.setZero(6*this->m_DoF);
+        mC_VecTemp2.setZero(6*this->m_DoF);
+        mC_VecTemp3.setZero(6*this->m_DoF);
+        mTask_M.setZero(this->m_DoF, this->m_DoF);
+        mTask_G.setZero(this->m_DoF);
 
         grav.setZero(6);
         grav << 0, 0, 0, 0, 0, 9.8;
@@ -266,20 +288,37 @@ namespace HYUMotionDynamics{
     void Liedynamics::C_Matrix( MatrixXd &_C )
     {
         _C.setZero(this->m_DoF, this->m_DoF);
-        _C = -LA_mat.transpose()*(Iner_mat*L_mat*ad_Aqd*Gamma_mat - ad_V.transpose()*Iner_mat)*LA_mat;
+        mC_Temp1.noalias() = Iner_mat * L_mat;
+        mC_Temp2.noalias() = mC_Temp1 * ad_Aqd;
+        mC_Temp3.noalias() = mC_Temp2 * Gamma_mat;
+        mC_Temp4.noalias() = ad_V.transpose() * Iner_mat;
+        mC_Temp3.noalias() -= mC_Temp4;
+        mC_Temp5.noalias() = mC_Temp3 * LA_mat;
+        _C.noalias() = -LA_mat.transpose() * mC_Temp5;
     }
 
     void Liedynamics::C_Vector( VectorXd &_C, const VectorXd &_qdot )
     {
         _C.setZero(this->m_DoF);
-        _C.noalias() += (-LA_mat.transpose()*((Iner_mat*L_mat*ad_Aqd*Gamma_mat - ad_V.transpose()*Iner_mat)*(LA_mat*_qdot)));
+        mC_VecTemp1.noalias() = LA_mat * _qdot;
+        mC_VecTemp2.noalias() = Gamma_mat * mC_VecTemp1;
+        mC_VecTemp3.noalias() = ad_Aqd * mC_VecTemp2;
+        mC_VecTemp2.noalias() = L_mat * mC_VecTemp3;
+        mC_VecTemp3.noalias() = Iner_mat * mC_VecTemp2;
+
+        mC_VecTemp2.noalias() = Iner_mat * mC_VecTemp1;
+        mC_VecTemp1.noalias() = ad_V.transpose() * mC_VecTemp2;
+
+        mC_VecTemp2.noalias() = mC_VecTemp3 - mC_VecTemp1;
+        _C.noalias() += -LA_mat.transpose() * mC_VecTemp2;
     }
 
     void Liedynamics::G_Matrix( VectorXd &_G )
     {
         _G.setZero();
-
-        _G.noalias() += (LA_mat.transpose()*(Iner_mat*(L_mat*VdotBase)));
+        mC_VecTemp1.noalias() = L_mat * VdotBase;
+        mC_VecTemp2.noalias() = Iner_mat * mC_VecTemp1;
+        _G.noalias() += LA_mat.transpose() * mC_VecTemp2;
     }
 
     void Liedynamics::MG_Mat_Joint( MatrixXd &_M, VectorXd&_G )
@@ -290,33 +329,39 @@ namespace HYUMotionDynamics{
 
     void Liedynamics::M_Mat_Task(MatrixXd &_Mx, MatrixXd &_pInv)
     {
-        MatrixXd M;
-        M_Matrix(M);
+        M_Matrix(this->mTask_M);
         _Mx.setZero(6*this->m_NumChain, 6*this->m_NumChain);
-        _Mx.noalias() += _pInv.transpose()*M*_pInv;
+        _Mx.noalias() += _pInv.transpose() * this->mTask_M * _pInv;
     }
 
     void Liedynamics::MG_Mat_Task(MatrixXd &_Mx, VectorXd &_Gx)
     {
-        MatrixXd M;
-        VectorXd G;
-        M_Matrix(M);
-        G_Matrix(G);
+        M_Matrix(this->mTask_M);
+        G_Matrix(this->mTask_G);
         GetAnalyticJacobian(this->Jacobian_mat);
         GetpinvJacobian(this->pinvJacobian_mat);
 
         _Mx.setZero(6*this->m_NumChain, 6*this->m_NumChain);
-        _Mx.noalias() += pinvJacobian_mat.transpose()*M*pinvJacobian_mat;
+        _Mx.noalias() += pinvJacobian_mat.transpose() * this->mTask_M * pinvJacobian_mat;
 
         _Gx.setZero(6*this->m_NumChain);
-        _Gx.noalias() += pinvJacobian_mat.transpose()*G;
+        _Gx.noalias() += pinvJacobian_mat.transpose() * this->mTask_G;
     }
 
     void Liedynamics::Mdot_Matrix( MatrixXd &_Mdot )
     {
         _Mdot.setZero(m_DoF, m_DoF);
-        _Mdot.noalias() += -LA_mat.transpose()*Gamma_mat.transpose()*ad_Aqd.transpose()*L_mat.transpose()*Iner_mat*LA_mat;
-        _Mdot.noalias() += -LA_mat.transpose()*Iner_mat*L_mat*ad_Aqd*Gamma_mat*LA_mat;
+        mC_Temp5.noalias() = Iner_mat * LA_mat;
+        mC_Temp1.noalias() = L_mat.transpose() * mC_Temp5;
+        mC_Temp2.noalias() = ad_Aqd.transpose() * mC_Temp1;
+        mC_Temp3.noalias() = Gamma_mat.transpose() * mC_Temp2;
+        _Mdot.noalias() += -LA_mat.transpose() * mC_Temp3;
+
+        mC_Temp1.noalias() = Gamma_mat * LA_mat;
+        mC_Temp2.noalias() = ad_Aqd * mC_Temp1;
+        mC_Temp3.noalias() = L_mat * mC_Temp2;
+        mC_Temp4.noalias() = Iner_mat * mC_Temp3;
+        _Mdot.noalias() += -LA_mat.transpose() * mC_Temp4;
     }
 
 }

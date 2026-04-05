@@ -160,6 +160,17 @@ namespace HYUMotionDynamics{
         Adjoint adj_tmp;
         MatrixXd mG;
 
+        MatrixXd mC_Temp1;
+        MatrixXd mC_Temp2;
+        MatrixXd mC_Temp3;
+        MatrixXd mC_Temp4;
+        MatrixXd mC_Temp5;
+        VectorXd mC_VecTemp1;
+        VectorXd mC_VecTemp2;
+        VectorXd mC_VecTemp3;
+        MatrixXd mTask_M;
+        VectorXd mTask_G;
+
         MatrixXi ChainMatrix;
 
         MatrixXd Jacobian_mat;
